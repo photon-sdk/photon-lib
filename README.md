@@ -1,2 +1,2 @@
 # photon-lib
-A library for building bitcoin wallets in javascript
+A client library for building bitcoin wallets in javascript
