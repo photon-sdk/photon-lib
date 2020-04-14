@@ -1,0 +1,14 @@
+{
+  "name": "photon-lib",
+  "version": "0.0.1",
+  "description": "A client library for building bitcoin wallets in javascript",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/photon-sdk/photon-lib.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
