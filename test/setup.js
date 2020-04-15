@@ -11,3 +11,10 @@ jest.mock('react-native-quick-actions', () => {
     isSupported: jest.fn(),
   };
 });
+
+jest.mock('react-native-default-preference', () => {
+  return {
+    setName: jest.fn(),
+    set: jest.fn(),
+  };
+});
