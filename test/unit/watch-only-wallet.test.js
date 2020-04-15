@@ -1,4 +1,3 @@
-/* global it, describe */
 import { WatchOnlyWallet } from '../../class';
 let assert = require('assert');
 

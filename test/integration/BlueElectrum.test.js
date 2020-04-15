@@ -1,4 +1,3 @@
-/* global it, describe, afterAll, beforeAll, jasmine */
 global.net = require('net');
 global.tls = require('tls');
 let BlueElectrum = require('../../BlueElectrum');

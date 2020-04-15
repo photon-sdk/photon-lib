@@ -1,4 +1,3 @@
-/* global describe, it */
 const bitcoinjs = require('bitcoinjs-lib');
 let assert = require('assert');
 

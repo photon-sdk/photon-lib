@@ -1,4 +1,3 @@
-/* global it, jasmine, afterAll, beforeAll */
 import { HDSegwitP2SHWallet, HDLegacyBreadwalletWallet, HDLegacyP2PKHWallet } from '../../class';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
 const bitcoin = require('bitcoinjs-lib');
