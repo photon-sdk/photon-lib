@@ -1,0 +1,32 @@
+{
+  "parser": "babel-eslint",
+  "plugins": [
+      "react", "prettier", "react-hooks"
+  ],
+  "extends": ["standard", "standard-react", "prettier"],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    'prettier/prettier': [
+      'warn',
+      {
+        singleQuote: true,
+        printWidth: 140,
+        trailingComma: 'all'
+      }
+    ]
+  },
+  "env":{
+    "es6": true
+  },
+  "ignorePatterns": ["src/bip38"],
+  "globals": {
+    "fetch": false,
+    "jest": true,
+    "jasmine": true,
+    "describe": true,
+    "it": true,
+    "beforeAll": true,
+    "afterAll": true
+  }
+}
