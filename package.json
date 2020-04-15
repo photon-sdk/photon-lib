@@ -53,6 +53,7 @@
     "metro-react-native-babel-preset": "^0.58.0",
     "react": "16.11.0",
     "react-native": "0.62.2",
+    "react-native-default-preference": "^1.4.2",
     "react-native-quick-actions": "^0.3.13",
     "react-native-secure-key-store": "^2.0.5",
     "react-test-renderer": "16.11.0"
