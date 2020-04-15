@@ -1,4 +1,4 @@
-import { WatchOnlyWallet } from '../../class';
+import { WatchOnlyWallet } from '../../src/class';
 let assert = require('assert');
 
 describe('Watch only wallet', () => {

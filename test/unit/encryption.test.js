@@ -1,5 +1,5 @@
 let assert = require('assert');
-let c = require('../../encryption');
+let c = require('../../src/encryption');
 
 describe('unit - encryption', function() {
   it('encrypts and decrypts', function() {

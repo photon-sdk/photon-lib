@@ -1,6 +1,6 @@
 global.net = require('net');
 global.tls = require('tls');
-let BlueElectrum = require('../../BlueElectrum');
+let BlueElectrum = require('../../src/BlueElectrum');
 let assert = require('assert');
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
 

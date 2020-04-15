@@ -1,4 +1,4 @@
-import { SegwitP2SHWallet, AppStorage } from '../../class';
+import { SegwitP2SHWallet, AppStorage } from '../../src/class';
 import AsyncStorage from '@react-native-community/async-storage';
 global.crypto = require('crypto'); // shall be used by tests under nodejs CLI, but not in RN environment
 let assert = require('assert');
