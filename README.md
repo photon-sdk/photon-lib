@@ -3,7 +3,7 @@ A high level library for building bitcoin wallets with react native
 
 **Still very much under development and not yet recommended for production use.**
 
-## v1 Scope:
+## v1 Scope
 
 * hd wallets (bech32 and p2sh)
 * an electrum light client
