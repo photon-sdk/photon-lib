@@ -7,8 +7,11 @@ The goal of this library is to provide secure and easy-to-use high level apis fo
 
 * hd bech32 and p2sh wallets
 * an electrum light client
-* private key backup/sync (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
+* hardware backed key storage on iOS & Android (where available)
+* bip38 private key encryption
+* secure key backup/sync (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
 
 ## Credit
 
-The on-chain wallet and electrum client implementation is based on [BlueWallet](https://github.com/BlueWallet/BlueWallet).
+* The on-chain wallet and electrum client implementation is based on [BlueWallet](https://github.com/BlueWallet/BlueWallet).
+* Key storage relies on [react-native-keychain](https://github.com/oblador/react-native-keychain)
