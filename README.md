@@ -11,7 +11,7 @@ Provide an easy-to-use high level api for the following:
 * hardware backed key storage on iOS and Android (where available)
 * encrypted key backup on iCloud/GDrive + 2FA (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
 
-## Installation
+## Usage
 
 Install with peer dependencies:
 
@@ -23,6 +23,14 @@ Update cocoapods:
 
 ```
 cd ios && pod install && cd ..
+```
+
+## Development and testing
+
+Clone the git repo and then:
+
+```
+npm install && npm test
 ```
 
 ## Credit
