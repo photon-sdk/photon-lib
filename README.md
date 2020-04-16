@@ -1,21 +1,27 @@
 # photon-lib
-A high level library for building bitcoin wallets with react native
 
 **Still very much under development and not yet recommended for production use.**
 
-## v1 Scope
+## Scope
+
+Provide an easy-to-use high level api for the following:
 
 * hd wallets (bech32 and p2sh)
 * an electrum light client
 * hardware backed key storage on iOS and Android (where available)
-* Encrypted key backup on iCloud/GDrive + 2FA (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
+* encrypted key backup on iCloud/GDrive + 2FA (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
 
 ## Installation
 
+Install with peer dependencies:
+
 ```
-# install with peer dependencies
 npm install --save photon-lib react-native-randombytes react-native-secure-key-store
-# update cocoapods
+```
+
+Update cocoapods:
+
+```
 cd ios && pod install && cd ..
 ```
 
