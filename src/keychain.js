@@ -14,7 +14,7 @@ const USER = 'photonlib';
  * @return {Promise<undefined>}
  */
 export async function setItem(key, value) {
-  if (!key || !value) {
+  if (!key || typeof value === 'undefined') {
     throw new Error('Invalid args');
   }
   const options = {
