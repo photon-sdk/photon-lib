@@ -1,4 +1,4 @@
-# photon-lib
+# photon-lib [![Build Status](https://travis-ci.org/photon-sdk/photon-lib.svg?branch=master)](https://travis-ci.org/photon-sdk/photon-lib)
 
 **Still very much under development and not yet recommended for production use.**
 
