@@ -14,12 +14,6 @@ jest.mock('react-native-keychain', () => {
   };
 });
 
-jest.mock('react-native-secure-key-store', () => {
-  return {
-    setResetOnAppUninstallTo: jest.fn(),
-  };
-});
-
 jest.mock('react-native-quick-actions', () => {
   return {
     clearShortcutItems: jest.fn(),
