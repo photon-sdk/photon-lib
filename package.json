@@ -34,7 +34,8 @@
   "peerDependencies": {
     "react-native-keychain": "^6.0.0",
     "react-native-randombytes": "^3.5.3",
-    "react-native-secure-key-store": "^2.0.5"
+    "react-native-secure-key-store": "^2.0.5",
+    "react-native-tcp": "^3.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
