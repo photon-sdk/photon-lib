@@ -32,6 +32,7 @@
     "photon-electrum-client": "^1.1.1"
   },
   "peerDependencies": {
+    "react-native-keychain": "^6.0.0",
     "react-native-randombytes": "^3.5.3",
     "react-native-secure-key-store": "^2.0.5"
   },
@@ -58,6 +59,7 @@
     "react": "16.11.0",
     "react-native": "0.62.2",
     "react-native-default-preference": "^1.4.2",
+    "react-native-keychain": "^6.0.0",
     "react-native-quick-actions": "^0.3.13",
     "react-native-secure-key-store": "^2.0.5",
     "react-test-renderer": "16.11.0"
