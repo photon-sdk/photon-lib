@@ -1,12 +1,7 @@
 import { SegwitP2SHWallet, AppStorage } from '../../src/class';
-import * as RNKeychain from 'react-native-keychain';
 import * as keychain from '../../src/keychain';
 global.crypto = require('crypto'); // shall be used by tests under nodejs CLI, but not in RN environment
 let assert = require('assert');
-
-beforeAll(() => {
-  RNKeychain._nuke();
-});
 
 it('Appstorage - loadFromDisk works', async () => {
   /** @type {AppStorage} */

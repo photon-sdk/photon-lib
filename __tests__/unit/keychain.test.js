@@ -8,10 +8,6 @@ describe('Keychain unit test', () => {
     RNKeychain.getInternetCredentials.mockClear();
   });
 
-  afterAll(() => {
-    RNKeychain._nuke();
-  });
-
   describe('setItem', () => {
     it('should fail on invalid args', async () => {
       await expect(keychain.setItem()).rejects.toThrow(/Invalid/);
