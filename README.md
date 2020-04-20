@@ -16,7 +16,7 @@ Provide an easy-to-use high level api for the following:
 Install with peer dependencies:
 
 ```
-npm install --save photon-lib react-native-randombytes react-native-secure-key-store
+npm install --save photon-lib react-native-randombytes react-native-keychain react-native-tcp
 ```
 
 Update cocoapods:
@@ -37,4 +37,4 @@ npm install && npm test
 
 * The wallet and electrum client implementation is based on [BlueWallet](https://github.com/BlueWallet/BlueWallet).
 * [BitcoinJS](https://github.com/bitcoinjs/bitcoinjs-lib) is used for bips and low level primitives
-* Key storage is done via [react-native-secure-key-store](https://github.com/pradeep1991singh/react-native-secure-key-store)
+* Key storage is done via [react-native-keychain](https://github.com/oblador/react-native-keychain)
