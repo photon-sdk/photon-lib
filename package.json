@@ -9,9 +9,10 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "test": "npm run test:lint && npm run test:jest",
+    "test": "npm run test:lint && npm run test:unit && npm run test:integration",
     "test:lint": "eslint .",
-    "test:jest": "jest __tests__/**/*.test.js"
+    "test:unit": "jest __tests__/unit/*",
+    "test:integration": "jest __tests__/integration/*"
   },
   "dependencies": {
     "bech32": "^1.1.3",
