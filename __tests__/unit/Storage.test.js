@@ -1,7 +1,12 @@
 import { SegwitP2SHWallet, AppStorage } from '../../src/class';
-import AsyncStorage from '@react-native-community/async-storage';
+import * as RNKeychain from 'react-native-keychain';
+import * as keychain from '../../src/keychain';
 global.crypto = require('crypto'); // shall be used by tests under nodejs CLI, but not in RN environment
 let assert = require('assert');
+
+beforeAll(() => {
+  RNKeychain._nuke();
+});
 
 it('Appstorage - loadFromDisk works', async () => {
   /** @type {AppStorage} */
@@ -23,8 +28,8 @@ it('Appstorage - loadFromDisk works', async () => {
 
   // emulating encrypted storage (and testing flag)
 
-  await AsyncStorage.setItem('data', false);
-  await AsyncStorage.setItem(AppStorage.FLAG_ENCRYPTED, '1');
+  await keychain.setItem('data', false);
+  await keychain.setItem(AppStorage.FLAG_ENCRYPTED, '1');
   let Storage3 = new AppStorage();
   isEncrypted = await Storage3.storageIsEncrypted();
   assert.ok(isEncrypted);

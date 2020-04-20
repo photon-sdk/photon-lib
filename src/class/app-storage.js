@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store';
 import {
   HDLegacyBreadwalletWallet,
   HDSegwitP2SHWallet,
@@ -13,6 +12,7 @@ import {
   LightningCustodianWallet,
 } from './';
 import DeviceQuickActions from './quickActions';
+import * as keychain from '../keychain';
 const encryption = require('../encryption');
 
 export class AppStorage {
@@ -69,11 +69,7 @@ export class AppStorage {
    * @returns {Promise<any>|Promise<any> | Promise<void> | * | Promise | void}
    */
   setItem(key, value) {
-    if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-      return RNSecureKeyStore.set(key, value, { accessible: ACCESSIBLE.WHEN_UNLOCKED });
-    } else {
-      return AsyncStorage.setItem(key, value);
-    }
+    return keychain.setItem(key, value);
   }
 
   /**
@@ -84,20 +80,11 @@ export class AppStorage {
    * @returns {Promise<any>|*}
    */
   getItem(key) {
-    if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-      return RNSecureKeyStore.get(key);
-    } else {
-      return AsyncStorage.getItem(key);
-    }
+    return keychain.getItem(key);
   }
 
   async setResetOnAppUninstallTo(value) {
     await this.setItem(AppStorage.DELETE_WALLET_AFTER_UNINSTALL, value ? '1' : '');
-    try {
-      await RNSecureKeyStore.setResetOnAppUninstallTo(value);
-    } catch (Error) {
-      console.warn(Error);
-    }
   }
 
   async storageIsEncrypted() {
