@@ -1,15 +1,12 @@
-import AsyncStorage from '@react-native-community/async-storage';
 import {
   HDLegacyBreadwalletWallet,
   HDSegwitP2SHWallet,
   HDLegacyP2PKHWallet,
-  WatchOnlyWallet,
   LegacyWallet,
   SegwitP2SHWallet,
   SegwitBech32Wallet,
   HDSegwitBech32Wallet,
   PlaceholderWallet,
-  LightningCustodianWallet,
 } from './';
 import DeviceQuickActions from './quickActions';
 import * as keychain from '../keychain';
@@ -232,10 +229,6 @@ export class AppStorage {
             case SegwitP2SHWallet.type:
               unserializedWallet = SegwitP2SHWallet.fromJson(key);
               break;
-            case WatchOnlyWallet.type:
-              unserializedWallet = WatchOnlyWallet.fromJson(key);
-              unserializedWallet.init();
-              break;
             case HDLegacyP2PKHWallet.type:
               unserializedWallet = HDLegacyP2PKHWallet.fromJson(key);
               break;
@@ -247,28 +240,6 @@ export class AppStorage {
               break;
             case HDLegacyBreadwalletWallet.type:
               unserializedWallet = HDLegacyBreadwalletWallet.fromJson(key);
-              break;
-            case LightningCustodianWallet.type:
-              /** @type {LightningCustodianWallet} */
-              unserializedWallet = LightningCustodianWallet.fromJson(key);
-              let lndhub = false;
-              try {
-                lndhub = await AsyncStorage.getItem(AppStorage.LNDHUB);
-              } catch (Error) {
-                console.warn(Error);
-              }
-
-              if (unserializedWallet.baseURI) {
-                unserializedWallet.setBaseURI(unserializedWallet.baseURI); // not really necessary, just for the sake of readability
-                console.log('using saved uri for for ln wallet:', unserializedWallet.baseURI);
-              } else if (lndhub) {
-                console.log('using wallet-wide settings ', lndhub, 'for ln wallet');
-                unserializedWallet.setBaseURI(lndhub);
-              } else {
-                console.log('using default', LightningCustodianWallet.defaultBaseUri, 'for ln wallet');
-                unserializedWallet.setBaseURI(LightningCustodianWallet.defaultBaseUri);
-              }
-              unserializedWallet.init();
               break;
             case LegacyWallet.type:
             default:
