@@ -18,14 +18,6 @@ jest.mock('react-native-keychain', () => {
   };
 });
 
-jest.mock('react-native-quick-actions', () => {
-  return {
-    clearShortcutItems: jest.fn(),
-    setQuickActions: jest.fn(),
-    isSupported: jest.fn(),
-  };
-});
-
 jest.mock('react-native-default-preference', () => {
   return {
     setName: jest.fn(),
