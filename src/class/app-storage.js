@@ -10,23 +10,19 @@ import {
 } from './';
 import DeviceQuickActions from './quickActions';
 import * as keychain from '../keychain';
-const encryption = require('../encryption');
 
 export class AppStorage {
-  static FLAG_ENCRYPTED = 'data_encrypted';
   static EXCHANGE_RATES = 'currency';
   static ELECTRUM_HOST = 'electrum_host';
   static ELECTRUM_TCP_PORT = 'electrum_tcp_port';
   static ELECTRUM_SSL_PORT = 'electrum_ssl_port';
   static PREFERRED_CURRENCY = 'preferredCurrency';
   static ADVANCED_MODE_ENABLED = 'advancedmodeenabled';
-  static DELETE_WALLET_AFTER_UNINSTALL = 'deleteWalletAfterUninstall';
 
   constructor() {
     /** {Array.<AbstractWallet>} */
     this.wallets = [];
     this.tx_metadata = {};
-    this.cachedPassword = false;
   }
 
   /**
@@ -52,121 +48,6 @@ export class AppStorage {
     return keychain.getItem(key);
   }
 
-  async setResetOnAppUninstallTo(value) {
-    await this.setItem(AppStorage.DELETE_WALLET_AFTER_UNINSTALL, value ? '1' : '');
-  }
-
-  async storageIsEncrypted() {
-    let data;
-    try {
-      data = await this.getItem(AppStorage.FLAG_ENCRYPTED);
-    } catch (error) {
-      return false;
-    }
-
-    return !!data;
-  }
-
-  async isPasswordInUse(password) {
-    try {
-      let data = await this.getItem('data');
-      data = this.decryptData(data, password);
-      return !!data;
-    } catch (_e) {
-      return false;
-    }
-  }
-
-  /**
-   * Iterates through all values of `data` trying to
-   * decrypt each one, and returns first one successfully decrypted
-   *
-   * @param data {string} Serialized array
-   * @param password
-   * @returns {boolean|string} Either STRING of storage data (which is stringified JSON) or FALSE, which means failure
-   */
-  decryptData(data, password) {
-    data = JSON.parse(data);
-    let decrypted;
-    for (let value of data) {
-      try {
-        decrypted = encryption.decrypt(value, password);
-      } catch (e) {
-        console.log(e.message);
-      }
-
-      if (decrypted) {
-        return decrypted;
-      }
-    }
-
-    return false;
-  }
-
-  async decryptStorage(password) {
-    if (password === this.cachedPassword) {
-      this.cachedPassword = undefined;
-      await this.setResetOnAppUninstallTo(true);
-      await this.saveToDisk();
-      this.wallets = [];
-      this.tx_metadata = [];
-      return this.loadFromDisk();
-    } else {
-      throw new Error('Wrong password. Please, try again.');
-    }
-  }
-
-  async isDeleteWalletAfterUninstallEnabled() {
-    let deleteWalletsAfterUninstall;
-    try {
-      deleteWalletsAfterUninstall = await this.getItem(AppStorage.DELETE_WALLET_AFTER_UNINSTALL);
-    } catch (_e) {
-      deleteWalletsAfterUninstall = true;
-    }
-    return !!deleteWalletsAfterUninstall;
-  }
-
-  async encryptStorage(password) {
-    // assuming the storage is not yet encrypted
-    await this.saveToDisk();
-    let data = await this.getItem('data');
-    // TODO: refactor ^^^ (should not save & load to fetch data)
-
-    let encrypted = encryption.encrypt(data, password);
-    data = [];
-    data.push(encrypted); // putting in array as we might have many buckets with storages
-    data = JSON.stringify(data);
-    this.cachedPassword = password;
-    await this.setItem('data', data);
-    await this.setItem(AppStorage.FLAG_ENCRYPTED, '1');
-    DeviceQuickActions.clearShortcutItems();
-    DeviceQuickActions.removeAllWallets();
-  }
-
-  /**
-   * Cleans up all current application data (wallets, tx metadata etc)
-   * Encrypts the bucket and saves it storage
-   *
-   * @returns {Promise.<boolean>} Success or failure
-   */
-  async createFakeStorage(fakePassword) {
-    this.wallets = [];
-    this.tx_metadata = {};
-
-    let data = {
-      wallets: [],
-      tx_metadata: {},
-    };
-
-    let buckets = await this.getItem('data');
-    buckets = JSON.parse(buckets);
-    buckets.push(encryption.encrypt(JSON.stringify(data), fakePassword));
-    this.cachedPassword = fakePassword;
-    const bucketsString = JSON.stringify(buckets);
-    await this.setItem('data', bucketsString);
-    return (await this.getItem('data')) === bucketsString;
-  }
-
   /**
    * Loads from storage all wallets and
    * maps them to `this.wallets`
@@ -174,16 +55,9 @@ export class AppStorage {
    * @param password If present means storage must be decrypted before usage
    * @returns {Promise.<boolean>}
    */
-  async loadFromDisk(password) {
+  async loadFromDisk() {
     try {
       let data = await this.getItem('data');
-      if (password) {
-        data = this.decryptData(data, password);
-        if (data) {
-          // password is good, cache it
-          this.cachedPassword = password;
-        }
-      }
       if (data !== null) {
         data = JSON.parse(data);
         if (!data.wallets) return false;
@@ -225,14 +99,8 @@ export class AppStorage {
           }
         }
 
-        const isStorageEncrypted = await this.storageIsEncrypted();
-        if (isStorageEncrypted) {
-          DeviceQuickActions.clearShortcutItems();
-          DeviceQuickActions.removeAllWallets();
-        } else {
-          DeviceQuickActions.setWallets(this.wallets);
-          DeviceQuickActions.setQuickActions();
-        }
+        DeviceQuickActions.setWallets(this.wallets);
+        DeviceQuickActions.setQuickActions();
         return true;
       } else {
         return false; // failed loading data or loading/decryptin data
@@ -283,28 +151,6 @@ export class AppStorage {
       wallets: walletsToSave,
       tx_metadata: this.tx_metadata,
     };
-
-    if (this.cachedPassword) {
-      // should find the correct bucket, encrypt and then save
-      let buckets = await this.getItem('data');
-      buckets = JSON.parse(buckets);
-      let newData = [];
-      for (let bucket of buckets) {
-        let decrypted = encryption.decrypt(bucket, this.cachedPassword);
-        if (!decrypted) {
-          // no luck decrypting, its not our bucket
-          newData.push(bucket);
-        } else {
-          // decrypted ok, this is our bucket
-          // we serialize our object's data, encrypt it, and add it to buckets
-          newData.push(encryption.encrypt(JSON.stringify(data), this.cachedPassword));
-          await this.setItem(AppStorage.FLAG_ENCRYPTED, '1');
-        }
-      }
-      data = newData;
-    } else {
-      await this.setItem(AppStorage.FLAG_ENCRYPTED, ''); // drop the flag
-    }
     DeviceQuickActions.setWallets(this.wallets);
     DeviceQuickActions.setQuickActions();
     return this.setItem('data', JSON.stringify(data));
