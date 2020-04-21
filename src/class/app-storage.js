@@ -8,7 +8,6 @@ import {
   HDSegwitBech32Wallet,
   PlaceholderWallet,
 } from './';
-import DeviceQuickActions from './quickActions';
 import * as keychain from '../keychain';
 
 export class AppStorage {
@@ -93,9 +92,6 @@ export class AppStorage {
             this.tx_metadata = data.tx_metadata;
           }
         }
-
-        DeviceQuickActions.setWallets(this.wallets);
-        DeviceQuickActions.setQuickActions();
         return true;
       } else {
         return false; // failed loading data or loading/decryptin data
@@ -144,8 +140,6 @@ export class AppStorage {
       wallets: walletsToSave,
       tx_metadata: this.tx_metadata,
     };
-    DeviceQuickActions.setWallets(this.wallets);
-    DeviceQuickActions.setQuickActions();
     return this.setItem('data', JSON.stringify(data));
   }
 
