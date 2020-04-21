@@ -7,6 +7,7 @@
     "type": "git",
     "url": "git+https://github.com/photon-sdk/photon-lib.git"
   },
+  "type": "module",
   "main": "src/index.js",
   "scripts": {
     "test": "npm run test:lint && npm run test:unit && npm run test:integration",
