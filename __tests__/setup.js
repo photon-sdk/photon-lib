@@ -17,10 +17,3 @@ jest.mock('react-native-keychain', () => {
     },
   };
 });
-
-jest.mock('react-native-default-preference', () => {
-  return {
-    setName: jest.fn(),
-    set: jest.fn(),
-  };
-});
