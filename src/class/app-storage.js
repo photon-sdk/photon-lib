@@ -17,7 +17,6 @@ export class AppStorage {
   static ELECTRUM_TCP_PORT = 'electrum_tcp_port';
   static ELECTRUM_SSL_PORT = 'electrum_ssl_port';
   static PREFERRED_CURRENCY = 'preferredCurrency';
-  static ADVANCED_MODE_ENABLED = 'advancedmodeenabled';
 
   constructor() {
     this.wallets = [];
@@ -271,26 +270,5 @@ export class AppStorage {
       finalBalance += wal.getBalance();
     }
     return finalBalance;
-  }
-
-  async isAdancedModeEnabled() {
-    try {
-      return !!(await this.getItem(AppStorage.ADVANCED_MODE_ENABLED));
-    } catch (_) {}
-    return false;
-  }
-
-  async setIsAdancedModeEnabled(value) {
-    await this.setItem(AppStorage.ADVANCED_MODE_ENABLED, value ? '1' : '');
-  }
-
-  /**
-   * Simple async sleeper function
-   *
-   * @param ms {number} Milliseconds to sleep
-   * @returns {Promise<Promise<*> | Promise<*>>}
-   */
-  async sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
