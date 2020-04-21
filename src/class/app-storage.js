@@ -20,14 +20,12 @@ export class AppStorage {
   static ADVANCED_MODE_ENABLED = 'advancedmodeenabled';
 
   constructor() {
-    /** {Array.<AbstractWallet>} */
     this.wallets = [];
     this.tx_metadata = {};
   }
 
   /**
-   * Wrapper for storage call. Secure store works only in RN environment. AsyncStorage is
-   * used for cli/tests
+   * Wrapper for storage call.
    *
    * @param key
    * @param value
@@ -38,8 +36,7 @@ export class AppStorage {
   }
 
   /**
-   * Wrapper for storage call. Secure store works only in RN environment. AsyncStorage is
-   * used for cli/tests
+   * Wrapper for storage call.
    *
    * @param key
    * @returns {Promise<any>|*}
@@ -52,7 +49,6 @@ export class AppStorage {
    * Loads from storage all wallets and
    * maps them to `this.wallets`
    *
-   * @param password If present means storage must be decrypted before usage
    * @returns {Promise.<boolean>}
    */
   async loadFromDisk() {
@@ -135,8 +131,6 @@ export class AppStorage {
 
   /**
    * Serializes and saves to storage object data.
-   * If cached password is saved - finds the correct bucket
-   * to save to, encrypts and then saves.
    *
    * @returns {Promise} Result of storage save
    */
