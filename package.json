@@ -1,7 +1,7 @@
 {
   "name": "photon-lib",
   "version": "0.0.1",
-  "description": "A client library for building bitcoin wallets in javascript",
+  "description": "A high level library for building bitcoin wallets with react native",
   "license": "MIT",
   "repository": {
     "type": "git",
