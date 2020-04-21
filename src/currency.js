@@ -2,7 +2,6 @@ import Frisbee from 'frisbee';
 import AsyncStorage from '@react-native-community/async-storage';
 import { AppStorage } from './class';
 import { FiatUnit } from './models/fiatUnit';
-import DefaultPreference from 'react-native-default-preference';
 let BigNumber = require('bignumber.js');
 let preferredFiatCurrency = FiatUnit.USD;
 let exchangeRates = {};
@@ -20,16 +19,10 @@ const STRUCT = {
  */
 async function setPrefferedCurrency(item) {
   await AsyncStorage.setItem(AppStorage.PREFERRED_CURRENCY, JSON.stringify(item));
-  await DefaultPreference.setName('group.io.bluewallet.bluewallet');
-  await DefaultPreference.set('preferredCurrency', item.endPointKey);
-  await DefaultPreference.set('preferredCurrencyLocale', item.locale.replace('-', '_'));
 }
 
 async function getPreferredCurrency() {
-  let preferredCurrency = await JSON.parse(await AsyncStorage.getItem(AppStorage.PREFERRED_CURRENCY));
-  await DefaultPreference.set('preferredCurrency', preferredCurrency.endPointKey);
-  await DefaultPreference.set('preferredCurrencyLocale', preferredCurrency.locale.replace('-', '_'));
-  return preferredCurrency;
+  return JSON.parse(await AsyncStorage.getItem(AppStorage.PREFERRED_CURRENCY));
 }
 
 async function updateExchangeRate() {
