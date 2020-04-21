@@ -58,8 +58,7 @@
     "metro-react-native-babel-preset": "^0.58.0",
     "react": "16.11.0",
     "react-native": "0.62.2",
-    "react-native-keychain": "^6.0.0",
-    "react-test-renderer": "16.11.0"
+    "react-native-keychain": "^6.0.0"
   },
   "jest": {
     "preset": "react-native",
