@@ -1,5 +1,6 @@
-let BlueElectrum = require('../../src/BlueElectrum');
-let assert = require('assert');
+import BlueElectrum from '../../src/BlueElectrum';
+import assert from 'assert';
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
 
 afterAll(() => {

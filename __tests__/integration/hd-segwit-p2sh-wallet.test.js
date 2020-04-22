@@ -1,8 +1,9 @@
 import { HDSegwitP2SHWallet, HDLegacyBreadwalletWallet, HDLegacyP2PKHWallet } from '../../src/class';
 import { BitcoinUnit } from '../../src/models/bitcoinUnits';
 import * as bitcoin from 'bitcoinjs-lib';
-let assert = require('assert');
-let BlueElectrum = require('../../src/BlueElectrum'); // so it connects ASAP
+import assert from 'assert';
+import BlueElectrum from '../../src/BlueElectrum';
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 300 * 1000;
 
 afterAll(() => {

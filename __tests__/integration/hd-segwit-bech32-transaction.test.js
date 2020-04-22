@@ -1,7 +1,8 @@
 import { HDSegwitBech32Wallet, SegwitP2SHWallet, HDSegwitBech32Transaction, SegwitBech32Wallet } from '../../src/class';
 import * as bitcoin from 'bitcoinjs-lib';
-let assert = require('assert');
-let BlueElectrum = require('../../src/BlueElectrum');
+import assert from 'assert';
+import BlueElectrum from '../../src/BlueElectrum';
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
 
 afterAll(async () => {

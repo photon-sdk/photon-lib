@@ -1,13 +1,14 @@
 import { AppStorage } from '../../src/class';
 import { FiatUnit } from '../../src/models/fiatUnit';
 import AsyncStorage from '@react-native-community/async-storage';
-let assert = require('assert');
+import assert from 'assert';
+import currency from '../../src/currency';
+
 jest.useFakeTimers();
 
 describe('currency', () => {
   it('fetches exchange rate and saves to AsyncStorage', async () => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
-    let currency = require('../../src/currency');
     await currency.startUpdater();
     let cur = await AsyncStorage.getItem(AppStorage.EXCHANGE_RATES);
     cur = JSON.parse(cur);

@@ -1,6 +1,6 @@
 import { LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet } from '../../src/class';
-let assert = require('assert');
-let BlueElectrum = require('../../src/BlueElectrum'); // so it connects ASAP
+import assert from 'assert';
+import BlueElectrum from '../../src/BlueElectrum';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
