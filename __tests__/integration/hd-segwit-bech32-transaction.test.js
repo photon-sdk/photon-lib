@@ -1,8 +1,6 @@
 import { HDSegwitBech32Wallet, SegwitP2SHWallet, HDSegwitBech32Transaction, SegwitBech32Wallet } from '../../src/class';
 import * as bitcoin from 'bitcoinjs-lib';
 let assert = require('assert');
-global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
-global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
 let BlueElectrum = require('../../src/BlueElectrum');
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
 

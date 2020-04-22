@@ -1,6 +1,4 @@
 import * as bitcoin from 'bitcoinjs-lib';
-global.net = require('net');
-global.tls = require('tls');
 
 let assert = require('assert');
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
