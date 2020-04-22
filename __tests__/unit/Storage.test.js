@@ -1,5 +1,4 @@
 import { SegwitP2SHWallet, AppStorage } from '../../src/class';
-global.crypto = require('crypto'); // shall be used by tests under nodejs CLI, but not in RN environment
 let assert = require('assert');
 
 it('Appstorage - loadFromDisk works', async () => {

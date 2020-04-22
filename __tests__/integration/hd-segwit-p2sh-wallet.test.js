@@ -1,7 +1,6 @@
 import { HDSegwitP2SHWallet, HDLegacyBreadwalletWallet, HDLegacyP2PKHWallet } from '../../src/class';
 import { BitcoinUnit } from '../../src/models/bitcoinUnits';
 import * as bitcoin from 'bitcoinjs-lib';
-global.crypto = require('crypto'); // shall be used by tests under nodejs CLI, but not in RN environment
 let assert = require('assert');
 global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
 global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
