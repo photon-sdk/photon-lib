@@ -1,10 +1,10 @@
-const bitcoinjs = require('bitcoinjs-lib');
-let assert = require('assert');
+import * as bitcoinjs from 'bitcoinjs-lib';
+import assert from 'assert';
+import signer from '../../src/models/signer';
 
 describe('unit - signer', function() {
   describe('createSegwitTransaction()', function() {
     it('should return valid tx hex for segwit transactions', function(done) {
-      let signer = require('../../src/models/signer');
       let utxos = [
         {
           txid: '1e1a8cced5580eecd0ac15845fc3adfafbb0f5944a54950e4a16b8f6d1e9b715',
@@ -34,7 +34,6 @@ describe('unit - signer', function() {
     });
 
     it('should return valid tx hex for RBF-able segwit transactions', function(done) {
-      let signer = require('../../src/models/signer');
       let utxos = [
         {
           txid: '1e1a8cced5580eecd0ac15845fc3adfafbb0f5944a54950e4a16b8f6d1e9b715',
@@ -74,7 +73,6 @@ describe('unit - signer', function() {
     it('should create Replace-By-Fee tx, given txhex', () => {
       let txhex =
         '0100000000010115b7e9d1f6b8164a0e95544a94f5b0fbfaadc35f8415acd0ec0e58d5ce8c1a1e0100000017160014f90e5bca5635b84bd828064586bd7eb117fee9a90000000002905f0100000000001976a914f7c6c1f9f6142107ed293c8fbf85fbc49eb5f1b988ace00f97000000000017a9146fbf1cee74734503297e46a0db3e3fbb06f2e9d38702483045022100bd687693e57161282a80affb82f18386cbf319bca72ca2c16320b0f3b087bee802205e22a9a16b86628ea08eab83aebec1348c476e9d0c90cd41aa73c47f50d86aab0121039425479ea581ebc7f55959da8c2e1a1063491768860386335dd4630b5eeacfc500000000';
-      let signer = require('../../src/models/signer');
       let dummyUtxodata = {
         '1e1a8cced5580eecd0ac15845fc3adfafbb0f5944a54950e4a16b8f6d1e9b715': {
           // txid we use output from
@@ -104,7 +102,6 @@ describe('unit - signer', function() {
     });
 
     it('should return valid tx hex for segwit transactions with multiple inputs', function(done) {
-      let signer = require('../../src/models/signer');
       let utxos = [
         {
           txid: '4e2a536aaf6b0b8a4f439d0343436cd321b8bac9840a24d13b8eed484a257b0b',
@@ -146,7 +143,6 @@ describe('unit - signer', function() {
     });
 
     it('should return valid tx hex for segwit transactions with change address', function(done) {
-      let signer = require('../../src/models/signer');
       let utxos = [
         {
           txid: '160559030484800a77f9b38717bb0217e87bfeb47b92e2e5bad6316ad9d8d360',
@@ -177,7 +173,6 @@ describe('unit - signer', function() {
 
     it('should return valid tx hex for segwit transactions if change is too small so it causes @dust error', function(done) {
       // checking that change amount is at least 3x of fee, otherwise screw the change, just add it to fee
-      let signer = require('../../src/models/signer');
       let utxos = [
         {
           txid: '160559030484800a77f9b38717bb0217e87bfeb47b92e2e5bad6316ad9d8d360',
@@ -210,7 +205,6 @@ describe('unit - signer', function() {
 
   describe('WIF2address()', function() {
     it('should convert WIF to segwit P2SH address', function(done) {
-      let signer = require('../../src/models/signer');
       let address = signer.WIF2segwitAddress('L55uHs7pyz7rP18K38kB7kqDVNJaeYFzJtZyC3ZjD2c684dzXQWs');
       assert.strictEqual('3FSL9x8P8cQ74iW2HLP6JPGPRgc4K2FnsU', address);
       done();
@@ -219,7 +213,6 @@ describe('unit - signer', function() {
 
   describe('generateNewAddress()', function() {
     it('should generate new address', function(done) {
-      let signer = require('../../src/models/signer');
       let address = signer.generateNewSegwitAddress();
       assert.ok(address.WIF);
       assert.ok(address.address);
@@ -230,7 +223,6 @@ describe('unit - signer', function() {
 
   describe('URI()', function() {
     it('should form correct payment url', function(done) {
-      let signer = require('../../src/models/signer');
       let url = signer.URI({
         address: '3Bsssbs4ANCGNETvGLJ3Fvri6SiVnH1fbi',
         message: 'For goods & services',
@@ -250,7 +242,6 @@ describe('unit - signer', function() {
   });
 
   describe('createTransaction()', () => {
-    const signer = require('../../src/models/signer');
     it('should return valid TX hex for legacy transactions', () => {
       let utxos = [
         {
