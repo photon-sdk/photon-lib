@@ -3,8 +3,8 @@ import { Platform } from 'react-native';
 import { AppStorage, LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
 import * as bitcoin from 'bitcoinjs-lib';
 import ElectrumClient from '@photon-sdk/rn-electrum-client';
-let reverse = require('buffer-reverse');
-let BigNumber = require('bignumber.js');
+import reverse from 'buffer-reverse';
+import BigNumber from 'bignumber.js';
 
 const storageKey = 'ELECTRUM_PEERS';
 const defaultPeer = { host: 'electrum1.bluewallet.io', ssl: '443' };
