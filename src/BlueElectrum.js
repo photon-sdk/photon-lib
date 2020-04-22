@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { Platform } from 'react-native';
 import { AppStorage, LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
 import * as bitcoin from 'bitcoinjs-lib';
-const ElectrumClient = require('photon-electrum-client');
+const ElectrumClient = require('@photon-sdk/rn-electrum-client');
 let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 
