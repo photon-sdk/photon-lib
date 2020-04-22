@@ -6,12 +6,12 @@
  * https://github.com/Overtorment/Cashier-BTC
  *
  **/
-const bitcoinjs = require('bitcoinjs-lib');
+import * as bitcoinjs from 'bitcoinjs-lib';
 const _p2wpkh = bitcoinjs.payments.p2wpkh;
 const _p2sh = bitcoinjs.payments.p2sh;
 const toSatoshi = num => parseInt((num * 100000000).toFixed(0));
 
-exports.createHDTransaction = function(utxos, toAddress, amount, fixedFee, changeAddress) {
+export const createHDTransaction = function(utxos, toAddress, amount, fixedFee, changeAddress) {
   let feeInSatoshis = parseInt((fixedFee * 100000000).toFixed(0));
   let amountToOutputSatoshi = parseInt(((amount - fixedFee) * 100000000).toFixed(0)); // how much payee should get
   let txb = new bitcoinjs.TransactionBuilder();
@@ -64,7 +64,7 @@ exports.createHDTransaction = function(utxos, toAddress, amount, fixedFee, chang
   return tx.toHex();
 };
 
-exports.createHDSegwitTransaction = function(utxos, toAddress, amount, fixedFee, changeAddress) {
+export const createHDSegwitTransaction = function(utxos, toAddress, amount, fixedFee, changeAddress) {
   let feeInSatoshis = parseInt((fixedFee * 100000000).toFixed(0));
   let amountToOutputSatoshi = parseInt(((amount - fixedFee) * 100000000).toFixed(0)); // how much payee should get
   let psbt = new bitcoinjs.Psbt();
@@ -137,8 +137,8 @@ exports.createHDSegwitTransaction = function(utxos, toAddress, amount, fixedFee,
   return tx.toHex();
 };
 
-exports.createSegwitTransaction = function(utxos, toAddress, amount, fixedFee, WIF, changeAddress, sequence) {
-  changeAddress = changeAddress || exports.WIF2segwitAddress(WIF);
+export const createSegwitTransaction = function(utxos, toAddress, amount, fixedFee, WIF, changeAddress, sequence) {
+  changeAddress = changeAddress || WIF2segwitAddress(WIF);
   if (sequence === undefined) {
     sequence = bitcoinjs.Transaction.DEFAULT_SEQUENCE;
   }
@@ -199,7 +199,7 @@ exports.createSegwitTransaction = function(utxos, toAddress, amount, fixedFee, W
   return tx.toHex();
 };
 
-exports.createRBFSegwitTransaction = function(txhex, addressReplaceMap, feeDelta, WIF, utxodata) {
+export const createRBFSegwitTransaction = function(txhex, addressReplaceMap, feeDelta, WIF, utxodata) {
   if (feeDelta < 0) {
     throw Error('replace-by-fee requires increased fee, not decreased');
   }
@@ -270,7 +270,7 @@ exports.createRBFSegwitTransaction = function(txhex, addressReplaceMap, feeDelta
   return newTx.toHex();
 };
 
-exports.generateNewSegwitAddress = function() {
+export const generateNewSegwitAddress = function() {
   let keyPair = bitcoinjs.ECPair.makeRandom();
   let address = bitcoinjs.payments.p2sh({
     redeem: bitcoinjs.payments.p2wpkh({
@@ -284,7 +284,7 @@ exports.generateNewSegwitAddress = function() {
   };
 };
 
-exports.URI = function(paymentInfo) {
+export const URI = function(paymentInfo) {
   let uri = 'bitcoin:';
   uri += paymentInfo.address;
   uri += '?amount=';
@@ -299,7 +299,7 @@ exports.URI = function(paymentInfo) {
   return uri;
 };
 
-exports.WIF2segwitAddress = function(WIF) {
+export const WIF2segwitAddress = function(WIF) {
   let keyPair = bitcoinjs.ECPair.fromWIF(WIF);
   return bitcoinjs.payments.p2sh({
     redeem: bitcoinjs.payments.p2wpkh({
@@ -308,7 +308,7 @@ exports.WIF2segwitAddress = function(WIF) {
   }).address;
 };
 
-exports.createTransaction = function(utxos, toAddress, _amount, _fixedFee, WIF, fromAddress) {
+export const createTransaction = function(utxos, toAddress, _amount, _fixedFee, WIF, fromAddress) {
   let fixedFee = toSatoshi(_fixedFee);
   let amountToOutput = toSatoshi(_amount - _fixedFee);
   let pk = bitcoinjs.ECPair.fromWIF(WIF); // eslint-disable-line new-cap
