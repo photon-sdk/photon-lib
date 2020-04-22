@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 let preferredFiatCurrency = FiatUnit.USD;
 let exchangeRates = {};
 
-const STRUCT = {
+export const STRUCT = {
   LAST_UPDATED: 'LAST_UPDATED',
 };
 
@@ -18,15 +18,15 @@ const STRUCT = {
  * @param item {Object} one of the values in `./models/fiatUnit`
  * @returns {Promise<void>}
  */
-async function setPrefferedCurrency(item) {
+export async function setPrefferedCurrency(item) {
   await AsyncStorage.setItem(AppStorage.PREFERRED_CURRENCY, JSON.stringify(item));
 }
 
-async function getPreferredCurrency() {
+export async function getPreferredCurrency() {
   return JSON.parse(await AsyncStorage.getItem(AppStorage.PREFERRED_CURRENCY));
 }
 
-async function updateExchangeRate() {
+export async function updateExchangeRate() {
   if (+new Date() - exchangeRates[STRUCT.LAST_UPDATED] <= 30 * 60 * 1000) {
     // not updating too often
     return;
@@ -61,7 +61,7 @@ async function updateExchangeRate() {
 }
 
 let interval = false;
-async function startUpdater() {
+export async function startUpdater() {
   if (interval) {
     clearInterval(interval);
     exchangeRates[STRUCT.LAST_UPDATED] = 0;
@@ -71,7 +71,7 @@ async function startUpdater() {
   return updateExchangeRate();
 }
 
-function satoshiToLocalCurrency(satoshi) {
+export function satoshiToLocalCurrency(satoshi) {
   if (!exchangeRates['BTC_' + preferredFiatCurrency.endPointKey]) {
     startUpdater();
     return '...';
@@ -105,24 +105,15 @@ function satoshiToLocalCurrency(satoshi) {
   return formatter.format(b);
 }
 
-function BTCToLocalCurrency(bitcoin) {
+export function BTCToLocalCurrency(bitcoin) {
   let sat = new BigNumber(bitcoin);
   sat = sat.multipliedBy(100000000).toNumber();
 
   return satoshiToLocalCurrency(sat);
 }
 
-function satoshiToBTC(satoshi) {
+export function satoshiToBTC(satoshi) {
   let b = new BigNumber(satoshi);
   b = b.dividedBy(100000000);
   return b.toString(10);
 }
-
-module.exports.updateExchangeRate = updateExchangeRate;
-module.exports.startUpdater = startUpdater;
-module.exports.STRUCT = STRUCT;
-module.exports.satoshiToLocalCurrency = satoshiToLocalCurrency;
-module.exports.satoshiToBTC = satoshiToBTC;
-module.exports.BTCToLocalCurrency = BTCToLocalCurrency;
-module.exports.setPrefferedCurrency = setPrefferedCurrency;
-module.exports.getPreferredCurrency = getPreferredCurrency;
