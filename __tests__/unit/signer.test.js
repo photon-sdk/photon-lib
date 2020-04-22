@@ -1,6 +1,6 @@
 import * as bitcoinjs from 'bitcoinjs-lib';
 import assert from 'assert';
-import signer from '../../src/models/signer';
+import { Signer } from '../../';
 
 describe('unit - signer', function() {
   describe('createSegwitTransaction()', function() {
@@ -19,7 +19,7 @@ describe('unit - signer', function() {
           safe: true,
         },
       ];
-      let tx = signer.createSegwitTransaction(
+      let tx = Signer.createSegwitTransaction(
         utxos,
         '1Pb81K1xJnMjUfFgKUbva6gr1HCHXxHVnr',
         0.001,
@@ -48,7 +48,7 @@ describe('unit - signer', function() {
           safe: true,
         },
       ];
-      let txhex = signer.createSegwitTransaction(
+      let txhex = Signer.createSegwitTransaction(
         utxos,
         '1Pb81K1xJnMjUfFgKUbva6gr1HCHXxHVnr',
         0.001,
@@ -79,7 +79,7 @@ describe('unit - signer', function() {
           1: 10000000, // output index and it's value in satoshi
         },
       };
-      let newhex = signer.createRBFSegwitTransaction(
+      let newhex = Signer.createRBFSegwitTransaction(
         txhex,
         { '1Pb81K1xJnMjUfFgKUbva6gr1HCHXxHVnr': '3BDsBDxDimYgNZzsqszNZobqQq3yeUoJf2' },
         0.0001,
@@ -128,7 +128,7 @@ describe('unit - signer', function() {
           safe: true,
         },
       ];
-      let tx = signer.createSegwitTransaction(
+      let tx = Signer.createSegwitTransaction(
         utxos,
         '1Pb81K1xJnMjUfFgKUbva6gr1HCHXxHVnr',
         0.0028,
@@ -157,7 +157,7 @@ describe('unit - signer', function() {
           safe: true,
         },
       ];
-      let tx = signer.createSegwitTransaction(
+      let tx = Signer.createSegwitTransaction(
         utxos,
         '1Pb81K1xJnMjUfFgKUbva6gr1HCHXxHVnr',
         0.002,
@@ -187,7 +187,7 @@ describe('unit - signer', function() {
           safe: true,
         },
       ];
-      let txhex = signer.createSegwitTransaction(
+      let txhex = Signer.createSegwitTransaction(
         utxos,
         '1Pb81K1xJnMjUfFgKUbva6gr1HCHXxHVnr',
         0.003998,
@@ -205,7 +205,7 @@ describe('unit - signer', function() {
 
   describe('WIF2address()', function() {
     it('should convert WIF to segwit P2SH address', function(done) {
-      let address = signer.WIF2segwitAddress('L55uHs7pyz7rP18K38kB7kqDVNJaeYFzJtZyC3ZjD2c684dzXQWs');
+      let address = Signer.WIF2segwitAddress('L55uHs7pyz7rP18K38kB7kqDVNJaeYFzJtZyC3ZjD2c684dzXQWs');
       assert.strictEqual('3FSL9x8P8cQ74iW2HLP6JPGPRgc4K2FnsU', address);
       done();
     });
@@ -213,17 +213,17 @@ describe('unit - signer', function() {
 
   describe('generateNewAddress()', function() {
     it('should generate new address', function(done) {
-      let address = signer.generateNewSegwitAddress();
+      let address = Signer.generateNewSegwitAddress();
       assert.ok(address.WIF);
       assert.ok(address.address);
-      assert.strictEqual(address.address, signer.WIF2segwitAddress(address.WIF));
+      assert.strictEqual(address.address, Signer.WIF2segwitAddress(address.WIF));
       done();
     });
   });
 
   describe('URI()', function() {
     it('should form correct payment url', function(done) {
-      let url = signer.URI({
+      let url = Signer.URI({
         address: '3Bsssbs4ANCGNETvGLJ3Fvri6SiVnH1fbi',
         message: 'For goods & services',
         label: 'nolabel',
@@ -231,7 +231,7 @@ describe('unit - signer', function() {
       });
       assert.strictEqual(url, 'bitcoin:3Bsssbs4ANCGNETvGLJ3Fvri6SiVnH1fbi?amount=0.01&message=For%20goods%20%26%20services&label=nolabel');
 
-      url = signer.URI({
+      url = Signer.URI({
         address: '1DzJepHCRD2C9vpFjk11eXJi97juEZ3ftv',
         message: 'wheres the money lebowski',
         amount: 400000,
@@ -262,7 +262,7 @@ describe('unit - signer', function() {
       let fee = 0.0001;
       let WIF = 'KzbTHhzzZyVhkTYpuReMBkE7zUvvDEZtavq1DJV85MtBZyHK1TTF';
       let fromAddr = '179JSjDc9Dh9pWWq9qv35sZsXQAV6VdE1E';
-      let txHex = signer.createTransaction(utxos, toAddr, amount, fee, WIF, fromAddr);
+      let txHex = Signer.createTransaction(utxos, toAddr, amount, fee, WIF, fromAddr);
       assert.strictEqual(
         txHex,
         '01000000017f514cf57cd451e30c981c8e14e6b455535197ff3b477ddb7227fa16f05c442f010000006b483045022100c5d6b024db144aa1f0cb6d6212c326c9753f4144fd69947c1f38657944b92022022039214118b745afe6e031f96f3e98e705979f2b9f9cbbc6a91e11c89c811a3292012103f5438d524ad1cc288963466d6ef1a27d83183f7e9b7fe30879ecdae887692a31ffffffff02905f0100000000001976a914aa381cd428a4e91327fd4434aa0a08ff131f1a5a88aca0bb0d00000000001976a9144362a4c0dbf5102238164d1ec97f3b518bb651cd88ac00000000',

@@ -1,5 +1,5 @@
-import { SegwitP2SHWallet, AppStorage } from '../../src/class';
 import assert from 'assert';
+import { SegwitP2SHWallet, AppStorage } from '../../';
 
 it('Appstorage - loadFromDisk works', async () => {
   /** @type {AppStorage} */

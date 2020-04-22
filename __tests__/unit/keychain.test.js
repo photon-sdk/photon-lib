@@ -1,5 +1,5 @@
 import * as RNKeychain from 'react-native-keychain';
-import * as keychain from '../../src/keychain';
+import { Keychain } from '../../';
 
 describe('Keychain unit test', () => {
   beforeEach(() => {
@@ -10,17 +10,17 @@ describe('Keychain unit test', () => {
 
   describe('setItem', () => {
     it('should fail on invalid args', async () => {
-      await expect(keychain.setItem()).rejects.toThrow(/Invalid/);
+      await expect(Keychain.setItem()).rejects.toThrow(/Invalid/);
     });
 
     it('should fail on api error', async () => {
       RNKeychain.setInternetCredentials.mockRejectedValueOnce(new Error('boom'));
-      await expect(keychain.setItem('some-key', 'some-value')).rejects.toThrow('boom');
+      await expect(Keychain.setItem('some-key', 'some-value')).rejects.toThrow('boom');
     });
 
     it('should store item and fetch correctly', async () => {
-      await keychain.setItem('some-key', 'some-value');
-      const val = await keychain.getItem('some-key');
+      await Keychain.setItem('some-key', 'some-value');
+      const val = await Keychain.getItem('some-key');
       expect(val).toBe('some-value');
       expect(RNKeychain.setInternetCredentials).toHaveBeenCalledWith('0_some-key', 'photonlib', 'some-value', { accessible: 'wutdo' });
       expect(RNKeychain.getInternetCredentials).toHaveBeenCalledWith('0_some-key');
@@ -29,16 +29,16 @@ describe('Keychain unit test', () => {
 
   describe('getItem', () => {
     it('should fail on invalid args', async () => {
-      await expect(keychain.getItem()).rejects.toThrow(/Invalid/);
+      await expect(Keychain.getItem()).rejects.toThrow(/Invalid/);
     });
 
     it('should fail on api error', async () => {
       RNKeychain.getInternetCredentials.mockRejectedValueOnce(new Error('boom'));
-      await expect(keychain.getItem('some-key')).rejects.toThrow('boom');
+      await expect(Keychain.getItem('some-key')).rejects.toThrow('boom');
     });
 
     it('should return null if not found', async () => {
-      const val = await keychain.getItem('some-key');
+      const val = await Keychain.getItem('some-key');
       expect(val).toBe(null);
     });
   });

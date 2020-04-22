@@ -1,5 +1,5 @@
-import { HDSegwitBech32Wallet } from '../../src/class';
 import assert from 'assert';
+import { HDSegwitBech32Wallet } from '../../';
 
 describe('Bech32 Segwit HD (BIP84)', () => {
   it('can create', async function() {

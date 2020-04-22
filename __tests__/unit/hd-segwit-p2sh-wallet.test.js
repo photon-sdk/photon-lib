@@ -1,5 +1,5 @@
-import { SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitP2SHWallet, HDLegacyP2PKHWallet, LegacyWallet } from '../../src/class';
 import assert from 'assert';
+import { SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitP2SHWallet, HDLegacyP2PKHWallet, LegacyWallet } from '../../';
 
 it('can create a Segwit HD (BIP49)', async function() {
   let mnemonic =
