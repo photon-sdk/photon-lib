@@ -1,8 +1,8 @@
-// import * as currency from './currency';
-// import * as keychain from './keychain';
+import * as Currency from './currency';
+import * as Keychain from './keychain';
 import * as ElectrumClient from './BlueElectrum';
 
-export { ElectrumClient };
+export { Currency, Keychain, ElectrumClient };
 
 export * from './class';
-// export * from './models';
+export * from './models';
