@@ -1,8 +1,8 @@
 import { HDSegwitBech32Wallet, SegwitBech32Wallet } from './';
 import * as bitcoin from 'bitcoinjs-lib';
-const BlueElectrum = require('../BlueElectrum');
-const reverse = require('buffer-reverse');
-const BigNumber = require('bignumber.js');
+import * as BlueElectrum from '../BlueElectrum';
+import reverse from 'buffer-reverse';
+import BigNumber from 'bignumber.js';
 
 /**
  * Represents transaction of a BIP84 wallet.

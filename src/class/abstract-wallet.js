@@ -1,5 +1,5 @@
 import { BitcoinUnit, Chain } from '../models/bitcoinUnits';
-const createHash = require('create-hash');
+import createHash from 'create-hash';
 
 export class AbstractWallet {
   static type = 'abstract';

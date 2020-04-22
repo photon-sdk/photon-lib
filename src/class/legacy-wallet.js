@@ -2,10 +2,11 @@ import { AbstractWallet } from './abstract-wallet';
 import { HDSegwitBech32Wallet } from './';
 import { NativeModules } from 'react-native';
 import * as bitcoin from 'bitcoinjs-lib';
+import BigNumber from 'bignumber.js';
+import { Signer } from '../models';
+import * as BlueElectrum from '../BlueElectrum';
+
 const { RNRandomBytes } = NativeModules;
-const BigNumber = require('bignumber.js');
-const signer = require('../models/signer');
-const BlueElectrum = require('../BlueElectrum');
 
 /**
  *  Has private key and single address like "1ABCD....."
@@ -262,7 +263,7 @@ export class LegacyWallet extends AbstractWallet {
     }
     // console.log('creating legacy tx ', amount, ' with fee ', fee, 'secret=', this.getSecret(), 'from address', this.getAddress());
     let amountPlusFee = parseFloat(new BigNumber(amount).plus(fee).toString(10));
-    return signer.createTransaction(utxos, toAddress, amountPlusFee, fee, this.getSecret(), this.getAddress());
+    return Signer.createTransaction(utxos, toAddress, amountPlusFee, fee, this.getSecret(), this.getAddress());
   }
 
   getLatestTransactionTime() {

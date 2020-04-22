@@ -1,7 +1,7 @@
 import { LegacyWallet } from './legacy-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
-const signer = require('../models/signer');
-const BigNumber = require('bignumber.js');
+import { Signer } from '../models';
+import BigNumber from 'bignumber.js';
 
 /**
  * Creates Segwit P2SH Bitcoin address
@@ -95,6 +95,6 @@ export class SegwitP2SHWallet extends LegacyWallet {
     // console.log('creating tx ', amount, ' with fee ', fee, 'secret=', this.getSecret(), 'from address', this.getAddress());
     let amountPlusFee = parseFloat(new BigNumber(amount).plus(fee).toString(10));
     // to compensate that module substracts fee from amount
-    return signer.createSegwitTransaction(utxos, address, amountPlusFee, fee, this.getSecret(), this.getAddress(), sequence);
+    return Signer.createSegwitTransaction(utxos, address, amountPlusFee, fee, this.getSecret(), this.getAddress(), sequence);
   }
 }

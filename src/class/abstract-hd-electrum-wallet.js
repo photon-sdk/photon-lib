@@ -4,11 +4,11 @@ import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
 import { AbstractHDWallet } from './abstract-hd-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
-const BlueElectrum = require('../BlueElectrum');
-const HDNode = require('bip32');
-const coinSelectAccumulative = require('coinselect/accumulative');
-const coinSelectSplit = require('coinselect/split');
-const reverse = require('buffer-reverse');
+import * as BlueElectrum from '../BlueElectrum';
+import * as HDNode from 'bip32';
+import coinSelectAccumulative from 'coinselect/accumulative';
+import coinSelectSplit from 'coinselect/split';
+import reverse from 'buffer-reverse';
 
 const { RNRandomBytes } = NativeModules;
 
