@@ -8,7 +8,7 @@ import BigNumber from 'bignumber.js';
 
 const storageKey = 'ELECTRUM_PEERS';
 const defaultPeer = { host: 'electrum1.bluewallet.io', ssl: '443' };
-const hardcodedPeers = [
+export const hardcodedPeers = [
   // { host: 'noveltybobble.coinjoined.com', tcp: '50001' }, // down
   // { host: 'electrum.be', tcp: '50001' },
   // { host: 'node.ispol.sk', tcp: '50001' }, // down
@@ -32,7 +32,7 @@ let disableBatching = false;
 
 let txhashHeightCache = {};
 
-async function connectMain() {
+export async function connectMain() {
   let usingPeer = await getRandomHardcodedPeer();
   let savedPeer = await getSavedPeer();
   if (savedPeer && savedPeer.host && (savedPeer.tcp || savedPeer.ssl)) {
@@ -78,8 +78,6 @@ async function connectMain() {
     setTimeout(connectMain, 500);
   }
 }
-
-connectMain();
 
 /**
  * Returns random hardcoded electrum server guaranteed to work
@@ -133,7 +131,7 @@ async function getRandomDynamicPeer() {
  * @param address {String}
  * @returns {Promise<Object>}
  */
-module.exports.getBalanceByAddress = async function(address) {
+export const getBalanceByAddress = async function(address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   let script = bitcoin.address.toOutputScript(address);
   let hash = bitcoin.crypto.sha256(script);
@@ -143,7 +141,7 @@ module.exports.getBalanceByAddress = async function(address) {
   return balance;
 };
 
-module.exports.getConfig = async function() {
+export const getConfig = async function() {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return {
     host: mainClient.host,
@@ -158,7 +156,7 @@ module.exports.getConfig = async function() {
  * @param address {String}
  * @returns {Promise<Array>}
  */
-module.exports.getTransactionsByAddress = async function(address) {
+export const getTransactionsByAddress = async function(address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   let script = bitcoin.address.toOutputScript(address);
   let hash = bitcoin.crypto.sha256(script);
@@ -168,7 +166,7 @@ module.exports.getTransactionsByAddress = async function(address) {
   return history;
 };
 
-module.exports.ping = async function() {
+export const ping = async function() {
   try {
     await mainClient.server_ping();
   } catch (_) {
@@ -178,7 +176,7 @@ module.exports.ping = async function() {
   return true;
 };
 
-module.exports.getTransactionsFullByAddress = async function(address) {
+export const getTransactionsFullByAddress = async function(address) {
   let txs = await this.getTransactionsByAddress(address);
   let ret = [];
   for (let tx of txs) {
@@ -217,7 +215,7 @@ module.exports.getTransactionsFullByAddress = async function(address) {
  * @param batchsize {Number}
  * @returns {Promise<{balance: number, unconfirmed_balance: number, addresses: object}>}
  */
-module.exports.multiGetBalanceByAddress = async function(addresses, batchsize) {
+export const multiGetBalanceByAddress = async function(addresses, batchsize) {
   batchsize = batchsize || 100;
   if (!mainClient) throw new Error('Electrum client is not connected');
   let ret = { balance: 0, unconfirmed_balance: 0, addresses: {} };
@@ -256,7 +254,7 @@ module.exports.multiGetBalanceByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-module.exports.multiGetUtxoByAddress = async function(addresses, batchsize) {
+export const multiGetUtxoByAddress = async function(addresses, batchsize) {
   batchsize = batchsize || 100;
   if (!mainClient) throw new Error('Electrum client is not connected');
   let ret = {};
@@ -297,7 +295,7 @@ module.exports.multiGetUtxoByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
+export const multiGetHistoryByAddress = async function(addresses, batchsize) {
   batchsize = batchsize || 100;
   if (!mainClient) throw new Error('Electrum client is not connected');
   let ret = {};
@@ -338,7 +336,7 @@ module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
+export const multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
   batchsize = batchsize || 61;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
@@ -390,7 +388,7 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
  *
  * @returns {Promise<Promise<*> | Promise<*>>}
  */
-module.exports.waitTillConnected = async function() {
+export const waitTillConnected = async function() {
   let waitTillConnectedInterval = false;
   let retriesCounter = 0;
   return new Promise(function(resolve, reject) {
@@ -414,7 +412,7 @@ module.exports.waitTillConnected = async function() {
   });
 };
 
-module.exports.estimateFees = async function() {
+export const estimateFees = async function() {
   if (!mainClient) throw new Error('Electrum client is not connected');
   const fast = await mainClient.blockchainEstimatefee(1);
   const medium = await mainClient.blockchainEstimatefee(5);
@@ -428,7 +426,7 @@ module.exports.estimateFees = async function() {
  * @param numberOfBlocks {number} The number of blocks to target for confirmation
  * @returns {Promise<number>} Satoshis per byte
  */
-module.exports.estimateFee = async function(numberOfBlocks) {
+export const estimateFee = async function(numberOfBlocks) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   numberOfBlocks = numberOfBlocks || 1;
   let coinUnitsPerKilobyte = await mainClient.blockchainEstimatefee(numberOfBlocks);
@@ -441,12 +439,12 @@ module.exports.estimateFee = async function(numberOfBlocks) {
   );
 };
 
-module.exports.serverFeatures = async function() {
+export const serverFeatures = async function() {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return mainClient.server_features();
 };
 
-module.exports.broadcast = async function(hex) {
+export const broadcast = async function(hex) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   try {
     const broadcast = await mainClient.blockchainTransaction_broadcast(hex);
@@ -456,12 +454,12 @@ module.exports.broadcast = async function(hex) {
   }
 };
 
-module.exports.broadcastV2 = async function(hex) {
+export const broadcastV2 = async function(hex) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return mainClient.blockchainTransaction_broadcast(hex);
 };
 
-module.exports.estimateCurrentBlockheight = function() {
+export const estimateCurrentBlockheight = function() {
   const baseTs = 1585837504347; // uS
   const baseHeight = 624083;
   return Math.floor(baseHeight + (+new Date() - baseTs) / 1000 / 60 / 10);
@@ -472,7 +470,7 @@ module.exports.estimateCurrentBlockheight = function() {
  * @param height
  * @returns {number} Timestamp in seconds
  */
-module.exports.calculateBlockTime = function(height) {
+export const calculateBlockTime = function(height) {
   const baseTs = 1585837504; // sec
   const baseHeight = 624083;
   return baseTs + (height - baseHeight) * 10 * 60;
@@ -485,7 +483,7 @@ module.exports.calculateBlockTime = function(height) {
  * @param sslPort
  * @returns {Promise<boolean>} Whether provided host:port is a valid electrum server
  */
-module.exports.testConnection = async function(host, tcpPort, sslPort) {
+export const testConnection = async function(host, tcpPort, sslPort) {
   let client = new ElectrumClient(sslPort || tcpPort, host, sslPort ? 'tls' : 'tcp');
   try {
     await client.connect();
@@ -498,11 +496,9 @@ module.exports.testConnection = async function(host, tcpPort, sslPort) {
   }
 };
 
-module.exports.forceDisconnect = () => {
+export const forceDisconnect = () => {
   mainClient.close();
 };
-
-module.exports.hardcodedPeers = hardcodedPeers;
 
 let splitIntoChunks = function(arr, chunkSize) {
   let groups = [];
