@@ -1,25 +1,21 @@
-import { HDSegwitP2SHWallet, HDLegacyBreadwalletWallet, HDLegacyP2PKHWallet } from '../../src/class';
-import { BitcoinUnit } from '../../src/models/bitcoinUnits';
 import * as bitcoin from 'bitcoinjs-lib';
 import assert from 'assert';
-import BlueElectrum from '../../src/BlueElectrum';
+import { ElectrumClient as BlueElectrum, HDSegwitP2SHWallet, HDLegacyBreadwalletWallet, HDLegacyP2PKHWallet, BitcoinUnit } from '../../';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 300 * 1000;
 
-afterAll(() => {
-  // after all tests we close socket so the test suite can actually terminate
-  BlueElectrum.forceDisconnect();
-});
-
 beforeAll(async () => {
-  // awaiting for Electrum to be connected. For RN Electrum would naturally connect
-  // while app starts up, but for tests we need to wait for it
   try {
+    await BlueElectrum.connectMain();
     await BlueElectrum.waitTillConnected();
   } catch (Err) {
     console.log('failed to connect to Electrum:', Err);
     process.exit(2);
   }
+});
+
+afterAll(() => {
+  BlueElectrum.forceDisconnect();
 });
 
 it('HD (BIP49) can work with a gap', async function() {

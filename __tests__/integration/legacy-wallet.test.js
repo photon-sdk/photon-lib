@@ -1,18 +1,15 @@
-import { LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet } from '../../src/class';
 import assert from 'assert';
-import BlueElectrum from '../../src/BlueElectrum';
+import { ElectrumClient as BlueElectrum, LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet } from '../../';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
-afterAll(async () => {
-  // after all tests we close socket so the test suite can actually terminate
-  BlueElectrum.forceDisconnect();
+beforeAll(async () => {
+  await BlueElectrum.connectMain();
+  await BlueElectrum.waitTillConnected();
 });
 
-beforeAll(async () => {
-  // awaiting for Electrum to be connected. For RN Electrum would naturally connect
-  // while app starts up, but for tests we need to wait for it
-  await BlueElectrum.waitTillConnected();
+afterAll(async () => {
+  BlueElectrum.forceDisconnect();
 });
 
 describe('LegacyWallet', function() {

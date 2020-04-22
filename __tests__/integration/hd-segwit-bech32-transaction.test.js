@@ -1,19 +1,22 @@
-import { HDSegwitBech32Wallet, SegwitP2SHWallet, HDSegwitBech32Transaction, SegwitBech32Wallet } from '../../src/class';
 import * as bitcoin from 'bitcoinjs-lib';
 import assert from 'assert';
-import BlueElectrum from '../../src/BlueElectrum';
+import {
+  ElectrumClient as BlueElectrum,
+  HDSegwitBech32Wallet,
+  SegwitP2SHWallet,
+  HDSegwitBech32Transaction,
+  SegwitBech32Wallet,
+} from '../../';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
 
-afterAll(async () => {
-  // after all tests we close socket so the test suite can actually terminate
-  BlueElectrum.forceDisconnect();
+beforeAll(async () => {
+  await BlueElectrum.connectMain();
+  await BlueElectrum.waitTillConnected();
 });
 
-beforeAll(async () => {
-  // awaiting for Electrum to be connected. For RN Electrum would naturally connect
-  // while app starts up, but for tests we need to wait for it
-  await BlueElectrum.waitTillConnected();
+afterAll(async () => {
+  BlueElectrum.forceDisconnect();
 });
 
 let _cachedHdWallet = false;

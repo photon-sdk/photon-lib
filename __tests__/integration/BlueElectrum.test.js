@@ -1,16 +1,9 @@
-import { ElectrumClient as BlueElectrum } from '../../';
 import assert from 'assert';
+import { ElectrumClient as BlueElectrum } from '../../';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
 
-afterAll(() => {
-  // after all tests we close socket so the test suite can actually terminate
-  BlueElectrum.forceDisconnect();
-});
-
 beforeAll(async () => {
-  // awaiting for Electrum to be connected. For RN Electrum would naturally connect
-  // while app starts up, but for tests we need to wait for it
   try {
     await BlueElectrum.connectMain();
     await BlueElectrum.waitTillConnected();
@@ -18,6 +11,10 @@ beforeAll(async () => {
     console.log('failed to connect to Electrum:', err);
     process.exit(1);
   }
+});
+
+afterAll(() => {
+  BlueElectrum.forceDisconnect();
 });
 
 describe('BlueElectrum', () => {
