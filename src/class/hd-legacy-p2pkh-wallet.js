@@ -2,7 +2,7 @@ import bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
 import signer from '../models/signer';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
-const bitcoin = require('bitcoinjs-lib');
+import * as bitcoin from 'bitcoinjs-lib';
 const HDNode = require('bip32');
 
 /**

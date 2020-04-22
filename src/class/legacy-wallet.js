@@ -1,7 +1,7 @@
 import { AbstractWallet } from './abstract-wallet';
 import { HDSegwitBech32Wallet } from './';
 import { NativeModules } from 'react-native';
-const bitcoin = require('bitcoinjs-lib');
+import * as bitcoin from 'bitcoinjs-lib';
 const { RNRandomBytes } = NativeModules;
 const BigNumber = require('bignumber.js');
 const signer = require('../models/signer');

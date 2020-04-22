@@ -1,6 +1,6 @@
 import { LegacyWallet } from './legacy-wallet';
 import Frisbee from 'frisbee';
-const bitcoin = require('bitcoinjs-lib');
+import * as bitcoin from 'bitcoinjs-lib';
 const bip39 = require('bip39');
 const BlueElectrum = require('../BlueElectrum');
 

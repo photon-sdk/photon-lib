@@ -3,7 +3,7 @@ import bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
 import { AbstractHDWallet } from './abstract-hd-wallet';
-const bitcoin = require('bitcoinjs-lib');
+import * as bitcoin from 'bitcoinjs-lib';
 const BlueElectrum = require('../BlueElectrum');
 const HDNode = require('bip32');
 const coinSelectAccumulative = require('coinselect/accumulative');

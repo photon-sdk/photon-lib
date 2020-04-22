@@ -1,4 +1,4 @@
-const bitcoin = require('bitcoinjs-lib');
+import * as bitcoin from 'bitcoinjs-lib';
 global.net = require('net');
 global.tls = require('tls');
 

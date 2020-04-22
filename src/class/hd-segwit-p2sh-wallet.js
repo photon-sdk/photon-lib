@@ -4,7 +4,7 @@ import b58 from 'bs58check';
 import signer from '../models/signer';
 import { BitcoinUnit } from '../models/bitcoinUnits';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
-const bitcoin = require('bitcoinjs-lib');
+import * as bitcoin from 'bitcoinjs-lib';
 const HDNode = require('bip32');
 
 /**
