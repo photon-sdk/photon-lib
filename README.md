@@ -16,7 +16,7 @@ Provide an easy-to-use high level api for the following:
 Install with peer dependencies:
 
 ```
-npm install --save photon-lib react-native-randombytes react-native-keychain react-native-tcp
+npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-tcp
 ```
 
 Update cocoapods:
