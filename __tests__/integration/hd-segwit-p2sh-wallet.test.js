@@ -180,6 +180,7 @@ it('can create a Legacy HD (BIP44)', async function() {
   assert.ok(hd._lastTxFetch > 0);
   assert.strictEqual(hd.getTransactions().length, 4);
   assert.strictEqual(hd.next_free_address_index, 1);
+  assert.strictEqual(hd.getNextFreeAddressIndex(), 1);
   assert.strictEqual(hd.next_free_change_address_index, 1);
 
   for (let tx of hd.getTransactions()) {
@@ -189,6 +190,7 @@ it('can create a Legacy HD (BIP44)', async function() {
   // checking that internal pointer and async address getter return the same address
   let freeAddress = await hd.getAddressAsync();
   assert.strictEqual(hd._getExternalAddressByIndex(hd.next_free_address_index), freeAddress);
+  assert.strictEqual(hd._getExternalAddressByIndex(hd.getNextFreeAddressIndex()), freeAddress);
 });
 
 it('Legacy HD (BIP44) can create TX', async () => {
@@ -250,9 +252,11 @@ it('HD breadwallet works', async function() {
   assert.strictEqual(hdBread.getBalance(), 123456);
 
   assert.strictEqual(hdBread.next_free_address_index, 11);
+  assert.strictEqual(hdBread.getNextFreeAddressIndex(), 11);
   assert.strictEqual(hdBread.next_free_change_address_index, 118);
 
   // checking that internal pointer and async address getter return the same address
   let freeAddress = await hdBread.getAddressAsync();
   assert.strictEqual(hdBread._getExternalAddressByIndex(hdBread.next_free_address_index), freeAddress);
+  assert.strictEqual(hdBread._getExternalAddressByIndex(hdBread.getNextFreeAddressIndex()), freeAddress);
 });
