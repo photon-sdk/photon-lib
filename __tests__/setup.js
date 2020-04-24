@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import { promisify } from 'util';
 import mockAsyncStorage from '@react-native-community/async-storage/jest/async-storage-mock';
 
 jest.mock('@react-native-community/async-storage', () => mockAsyncStorage);
@@ -17,3 +19,7 @@ jest.mock('react-native-keychain', () => {
     },
   };
 });
+
+jest.mock('../src/random', () => ({
+  randomBytes: jest.fn(size => promisify(crypto.randomBytes)(size)),
+}));

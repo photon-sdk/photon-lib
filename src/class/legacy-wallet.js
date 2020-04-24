@@ -1,12 +1,10 @@
 import { AbstractWallet } from './abstract-wallet';
 import { HDSegwitBech32Wallet } from './';
-import { NativeModules } from 'react-native';
 import * as bitcoin from 'bitcoinjs-lib';
 import BigNumber from 'bignumber.js';
+import { randomBytes } from '../random';
 import { Signer } from '../models';
 import * as BlueElectrum from '../BlueElectrum';
-
-const { RNRandomBytes } = NativeModules;
 
 /**
  *  Has private key and single address like "1ABCD....."
@@ -45,33 +43,8 @@ export class LegacyWallet extends AbstractWallet {
   }
 
   async generate() {
-    let that = this;
-    return new Promise(function(resolve) {
-      if (typeof RNRandomBytes === 'undefined') {
-        // CLI/CI environment
-        return require('crypto').randomBytes(32, (err, buf) => { // eslint-disable-line
-          if (err) throw err;
-          that.secret = bitcoin.ECPair.makeRandom({
-            rng: function(length) {
-              return buf;
-            },
-          }).toWIF();
-          resolve();
-        });
-      }
-
-      // RN environment
-      RNRandomBytes.randomBytes(32, (err, bytes) => {
-        if (err) throw new Error(err);
-        that.secret = bitcoin.ECPair.makeRandom({
-          rng: function(length) {
-            let b = Buffer.from(bytes, 'base64');
-            return b;
-          },
-        }).toWIF();
-        resolve();
-      });
-    });
+    const buf = await randomBytes(32);
+    this.secret = bitcoin.ECPair.makeRandom({ rng: () => buf }).toWIF();
   }
 
   /**

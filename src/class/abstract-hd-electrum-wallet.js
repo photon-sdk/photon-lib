@@ -1,16 +1,14 @@
-import { NativeModules } from 'react-native';
 import bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
 import { AbstractHDWallet } from './abstract-hd-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as BlueElectrum from '../BlueElectrum';
+import { randomBytes } from '../random';
 import * as HDNode from 'bip32';
 import coinSelectAccumulative from 'coinselect/accumulative';
 import coinSelectSplit from 'coinselect/split';
 import reverse from 'buffer-reverse';
-
-const { RNRandomBytes } = NativeModules;
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -68,25 +66,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   async generate() {
-    let that = this;
-    return new Promise(function(resolve) {
-      if (typeof RNRandomBytes === 'undefined') {
-        // CLI/CI environment
-        return require('crypto').randomBytes(32, (err, buf) => { // eslint-disable-line
-          if (err) throw err;
-          that.secret = bip39.entropyToMnemonic(buf.toString('hex'));
-          resolve();
-        });
-      }
-
-      // RN environment
-      RNRandomBytes.randomBytes(32, (err, bytes) => {
-        if (err) throw new Error(err);
-        let b = Buffer.from(bytes, 'base64').toString('hex');
-        that.secret = bip39.entropyToMnemonic(b);
-        resolve();
-      });
-    });
+    const buf = await randomBytes(32);
+    this.secret = bip39.entropyToMnemonic(buf.toString('hex'));
   }
 
   _getExternalWIFByIndex(index) {
