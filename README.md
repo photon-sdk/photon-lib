@@ -16,7 +16,7 @@ Provide an easy-to-use high level api for the following:
 Install with peer dependencies:
 
 ```
-npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-tcp
+npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain react-native-icloudstore @photon-sdk/react-native-tcp
 ```
 
 Update cocoapods:
@@ -24,6 +24,10 @@ Update cocoapods:
 ```
 cd ios && pod install && cd ..
 ```
+
+Configure Xcode project:
+
+In your target's "capabilities" tab in Xcode, make sure that iCloud is switched on as well as make sure that the "Key-value storage" option is checked.
 
 ## Development and testing
 
