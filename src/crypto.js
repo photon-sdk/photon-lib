@@ -30,7 +30,7 @@ export async function encrypt(plaintext, key) {
   const p = new Uint8Array(plaintext);
   const k = new Uint8Array(key);
   const i = new Uint8Array(iv);
-  const adata = new Uint8Array();
+  const adata = new Uint8Array(0);
   const ct = AES_GCM.encrypt(p, k, i, adata, TAG_LEN);
   return Buffer.concat([iv, Buffer.from(ct.buffer)]);
 }
@@ -49,7 +49,7 @@ export async function decrypt(ciphertext, key) {
   const i = new Uint8Array(ciphertext.slice(0, IV_LEN));
   const c = new Uint8Array(ciphertext.slice(IV_LEN));
   const k = new Uint8Array(key);
-  const adata = new Uint8Array();
+  const adata = new Uint8Array(0);
   const pt = AES_GCM.decrypt(c, k, i, adata, TAG_LEN);
   return Buffer.from(pt.buffer);
 }
