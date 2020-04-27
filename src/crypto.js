@@ -34,11 +34,9 @@ export async function decrypt(ciphertext, key) {
   if (!Buffer.isBuffer(ciphertext) || !Buffer.isBuffer(key) || key.length !== KEY_LEN) {
     throw new Error('Invalid args');
   }
-  const iv = ciphertext.slice(0, IV_LEN);
-  const ct = ciphertext.slice(IV_LEN);
-  const c = new Uint8Array(ct);
+  const i = new Uint8Array(ciphertext.slice(0, IV_LEN));
+  const c = new Uint8Array(ciphertext.slice(IV_LEN));
   const k = new Uint8Array(key);
-  const i = new Uint8Array(iv);
   const adata = new Uint8Array();
   const pt = AES_GCM.decrypt(c, k, i, adata, TAG_LEN);
   return Buffer.from(pt.buffer);
