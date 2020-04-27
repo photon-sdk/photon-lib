@@ -23,13 +23,10 @@
     "bip32": "^2.0.5",
     "bip39": "^2.5.0",
     "bitcoinjs-lib": "^5.1.7",
-    "browserify-aes": "^1.2.0",
     "bs58check": "^2.1.2",
     "buffer-reverse": "^1.0.1",
-    "buffer-xor": "^2.0.2",
     "coinselect": "^3.1.12",
     "create-hash": "^1.2.0",
-    "ecurve": "^1.0.6",
     "frisbee": "^3.1.2"
   },
   "peerDependencies": {
