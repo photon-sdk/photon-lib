@@ -6,6 +6,14 @@ const IV_LEN = Crypto.IV_LEN;
 const TAG_LEN = Crypto.TAG_LEN;
 
 describe('Crypto unit test', () => {
+  describe('generateKey', () => {
+    it('generate a random buffer', async () => {
+      const key = await Crypto.generateKey();
+      expect(key.length).toBe(32);
+      expect(key.toString('hex')).toBeDefined();
+    });
+  });
+
   describe('encrypt', () => {
     it('be decodable by node api', async () => {
       const key = await Crypto.generateKey();
