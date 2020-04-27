@@ -15,6 +15,12 @@ describe('Crypto unit test', () => {
   });
 
   describe('encrypt', () => {
+    it('fail on invalid key size', async () => {
+      const key = Buffer.from('too short', 'utf8');
+      const pt = Buffer.from('secret stuff', 'utf8');
+      await expect(Crypto.encrypt(pt, key)).rejects.toThrow(/Invalid/);
+    });
+
     it('be decodable by node api', async () => {
       const key = await Crypto.generateKey();
       const pt = Buffer.from('secret stuff', 'utf8');
@@ -25,6 +31,22 @@ describe('Crypto unit test', () => {
   });
 
   describe('decrypt', () => {
+    it('fail on invalid key size', async () => {
+      const key = await Crypto.generateKey();
+      const pt = Buffer.from('secret stuff', 'utf8');
+      const ct = await nodeEncrypt(pt, key);
+      const shortKey = Buffer.from('too short', 'utf8');
+      await expect(Crypto.decrypt(ct, shortKey)).rejects.toThrow(/Invalid/);
+    });
+
+    it('fail on wrong key', async () => {
+      const key = await Crypto.generateKey();
+      const pt = Buffer.from('secret stuff', 'utf8');
+      const ct = await nodeEncrypt(pt, key);
+      const wrongKey = await Crypto.generateKey();
+      await expect(Crypto.decrypt(ct, wrongKey)).rejects.toThrow(/integrity check/);
+    });
+
     it('decode node api ciphertext', async () => {
       const key = await Crypto.generateKey();
       const pt = Buffer.from('secret stuff', 'utf8');
