@@ -10,7 +10,11 @@ describe('Keychain unit test', () => {
 
   describe('setItem', () => {
     it('should fail on invalid args', async () => {
-      await expect(Keychain.setItem()).rejects.toThrow(/Invalid/);
+      await expect(Keychain.setItem('', 'some-value')).rejects.toThrow(/Invalid/);
+    });
+
+    it('should fail on invalid args', async () => {
+      await expect(Keychain.setItem('some-key', {})).rejects.toThrow(/Invalid/);
     });
 
     it('should fail on api error', async () => {
@@ -22,14 +26,14 @@ describe('Keychain unit test', () => {
       await Keychain.setItem('some-key', 'some-value');
       const val = await Keychain.getItem('some-key');
       expect(val).toBe('some-value');
-      expect(RNKeychain.setInternetCredentials).toHaveBeenCalledWith('0_some-key', 'photonlib', 'some-value', { accessible: 'wutdo' });
+      expect(RNKeychain.setInternetCredentials).toHaveBeenCalledWith('0_some-key', 'photon.user', 'some-value', { accessible: 'wutdo' });
       expect(RNKeychain.getInternetCredentials).toHaveBeenCalledWith('0_some-key');
     });
   });
 
   describe('getItem', () => {
     it('should fail on invalid args', async () => {
-      await expect(Keychain.getItem()).rejects.toThrow(/Invalid/);
+      await expect(Keychain.getItem('')).rejects.toThrow(/Invalid/);
     });
 
     it('should fail on api error', async () => {

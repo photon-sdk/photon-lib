@@ -3,9 +3,10 @@
  */
 
 import * as RNKeychain from 'react-native-keychain';
+import { isString } from './verify';
 
 const VERSION = '0';
-const USER = 'photonlib';
+const USER = 'photon.user';
 
 /**
  * Store an item in the keychain.
@@ -14,7 +15,7 @@ const USER = 'photonlib';
  * @return {Promise<undefined>}
  */
 export async function setItem(key, value) {
-  if (!key || typeof value === 'undefined') {
+  if (!isString(key) || !key || !isString(value)) {
     throw new Error('Invalid args');
   }
   const options = {
@@ -30,7 +31,7 @@ export async function setItem(key, value) {
  * @return {Promise<string>} The stored value
  */
 export async function getItem(key) {
-  if (!key) {
+  if (!isString(key) || !key) {
     throw new Error('Invalid args');
   }
   const vKey = `${VERSION}_${key}`;
