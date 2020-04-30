@@ -25,3 +25,14 @@ jest.mock('../src/random', () => {
     randomBytes: jest.fn(size => promisify(crypto.randomBytes)(size)),
   };
 });
+
+jest.mock('frisbee', () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      post: jest.fn(),
+      get: jest.fn(),
+      put: jest.fn(),
+      delete: jest.fn(),
+    };
+  });
+});
