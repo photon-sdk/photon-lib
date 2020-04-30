@@ -20,6 +20,8 @@ jest.mock('react-native-keychain', () => {
   };
 });
 
-jest.mock('../src/random', () => ({
-  randomBytes: jest.fn(size => promisify(crypto.randomBytes)(size)),
-}));
+jest.mock('../src/random', () => {
+  return {
+    randomBytes: jest.fn(size => promisify(crypto.randomBytes)(size)),
+  };
+});
