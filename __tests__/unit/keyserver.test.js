@@ -7,7 +7,8 @@ describe('Keychain unit test', () => {
   let api;
 
   beforeEach(() => {
-    api = KeyServer.init({ baseURI: 'http://localhost:8000' });
+    KeyServer.init({ baseURI: 'http://localhost:8000' });
+    api = KeyServer._api;
   });
 
   describe('createKey', () => {

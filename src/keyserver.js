@@ -4,12 +4,12 @@
 
 import Frisbee from 'frisbee';
 
-let _api;
+export let _api; // the frisbee client instance (for testing)
 
 /**
  * Initiate the client by setting the keyserver's base url.
  * @param  {string} baseURI  The keyserver base url
- * @return {Object}          The frisbee client instance (for testing)
+ * @return {undefined}
  */
 export function init({ baseURI }) {
   _api = new Frisbee({
@@ -19,7 +19,6 @@ export function init({ baseURI }) {
       'Content-Type': 'application/json',
     },
   });
-  return _api;
 }
 
 /**
