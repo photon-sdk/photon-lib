@@ -1,4 +1,4 @@
-import { KeyServer } from '../../';
+import * as KeyServer from '../../src/keyserver';
 
 describe('Keychain unit test', () => {
   const keyId = 'some-id';

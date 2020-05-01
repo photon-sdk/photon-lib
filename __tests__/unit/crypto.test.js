@@ -1,6 +1,6 @@
 import nodeCrypto from 'crypto';
 import { randomBytes } from '../../src/random';
-import { Crypto } from '../../';
+import * as Crypto from '../../src/crypto';
 
 const IV_LEN = Crypto.IV_LEN;
 const TAG_LEN = Crypto.TAG_LEN;
