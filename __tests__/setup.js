@@ -4,6 +4,8 @@ import mockAsyncStorage from '@react-native-community/async-storage/jest/async-s
 
 jest.mock('@react-native-community/async-storage', () => mockAsyncStorage);
 
+jest.mock('react-native-icloudstore', () => mockAsyncStorage);
+
 jest.mock('react-native-keychain', () => {
   let IN_MEMORY_STORE = {};
   return {
@@ -20,6 +22,19 @@ jest.mock('react-native-keychain', () => {
   };
 });
 
-jest.mock('../src/random', () => ({
-  randomBytes: jest.fn(size => promisify(crypto.randomBytes)(size)),
-}));
+jest.mock('../src/random', () => {
+  return {
+    randomBytes: jest.fn(size => promisify(crypto.randomBytes)(size)),
+  };
+});
+
+jest.mock('frisbee', () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      post: jest.fn(),
+      get: jest.fn(),
+      put: jest.fn(),
+      delete: jest.fn(),
+    };
+  });
+});

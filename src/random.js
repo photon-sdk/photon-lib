@@ -1,3 +1,7 @@
+/**
+ * @fileOverview wrap a secure native random number generator
+ */
+
 import { NativeModules } from 'react-native';
 
 const { RNRandomBytes } = NativeModules;

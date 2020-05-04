@@ -1,5 +1,10 @@
+/**
+ * @fileOverview a module to wrap symmetric encryption in a simple api.
+ */
+
 import { AES_GCM } from 'asmcrypto.js';
 import { randomBytes } from './random';
+import { isBuffer } from './verify';
 
 export const KEY_LEN = 32; // size of the key in bytes
 export const IV_LEN = 12; // size of the IV in bytes
@@ -23,7 +28,7 @@ export async function generateKey() {
  * @return {Promise<Buffer>}   The iv + encrypted ciphertext
  */
 export async function encrypt(plaintext, key) {
-  if (!Buffer.isBuffer(plaintext) || !Buffer.isBuffer(key) || key.length !== KEY_LEN) {
+  if (!isBuffer(plaintext) || !isBuffer(key) || key.length !== KEY_LEN) {
     throw new Error('Invalid args');
   }
   const iv = await randomBytes(IV_LEN);
@@ -43,7 +48,7 @@ export async function encrypt(plaintext, key) {
  * @return {Promise<Buffer>}    The decrypted plaintext
  */
 export async function decrypt(ciphertext, key) {
-  if (!Buffer.isBuffer(ciphertext) || !Buffer.isBuffer(key) || key.length !== KEY_LEN) {
+  if (!isBuffer(ciphertext) || !isBuffer(key) || key.length !== KEY_LEN) {
     throw new Error('Invalid args');
   }
   const i = new Uint8Array(ciphertext.slice(0, IV_LEN));
