@@ -10,8 +10,14 @@ import * as KeyServer from './keyserver';
 import * as CloudStore from './cloudstore';
 import { isPhone, isId, isCode, isObject } from './verify';
 
-const KEY_ID = 'photon.keyId';
+export const KEY_ID = 'photon.keyId';
 
+/**
+ * Initialize the key backup module by specifying the key server which is
+ * used to store the encryption key to the cloud backup.
+ * @param  {string} keyServerURI  The base url of the key server
+ * @return {undefined}
+ */
 export function init({ keyServerURI }) {
   KeyServer.init({ baseURI: keyServerURI });
 }
@@ -43,6 +49,11 @@ export async function checkForExistingBackup({ phone }) {
 // Workflow A
 //
 
+/**
+ * Register a new user. This generates a new encryption key in the keyserver.
+ * @param  {string} phone        The user's phone number
+ * @return {Promise<undefined>}
+ */
 export async function registerNewUser({ phone }) {
   if (!isPhone(phone)) {
     throw new Error('Invalid args');
@@ -51,6 +62,12 @@ export async function registerNewUser({ phone }) {
   await Keychain.setItem(KEY_ID, keyId);
 }
 
+/**
+ * Verifiy a new user using a verification code (sent via SMS).
+ * @param  {string} phone  The user's phone number
+ * @param  {string} code   The verification code sent via SMS
+ * @return {Promise<undefined>}
+ */
 export async function verifyNewUser({ phone, code }) {
   if (!isPhone(phone) || !isCode(code)) {
     throw new Error('Invalid args');
@@ -61,7 +78,8 @@ export async function verifyNewUser({ phone, code }) {
 }
 
 /**
- * Create an encrypted backup of an object on cloud storage.
+ * Create an encrypted backup of an object on cloud storage. This should be
+ * called after a new has been registered and verified.
  * @param  {Object} object       The data to be backed up
  * @return {Promise<undefined>}
  */
@@ -79,6 +97,13 @@ export async function createBackup(object) {
 // Workflow B
 //
 
+/**
+ * Register a new device. This is first step to restore a backup on a new
+ * device e.g. in case the first device was lost or stolen. A user could also
+ * chose to restore their wallet on another device for redunancy.
+ * @param  {string} phone        The user's phone number
+ * @return {Promise<undefined>}
+ */
 export async function registerDevice({ phone }) {
   if (!isPhone(phone)) {
     throw new Error('Invalid args');
@@ -87,6 +112,13 @@ export async function registerDevice({ phone }) {
   await KeyServer.fetchKey({ keyId, phone });
 }
 
+/**
+ * Verify phone number ownership for the new device by providing a verification
+ * code which is sent via SMS
+ * @param  {string} phone        The user's phone number
+ * @param  {string} code         The verification code sent via SMS
+ * @return {Promise<undefined>}
+ */
 export async function verifyDevice({ phone, code }) {
   if (!isPhone(phone) || !isCode(code)) {
     throw new Error('Invalid args');
@@ -98,7 +130,7 @@ export async function verifyDevice({ phone, code }) {
 
 /**
  * Restore a backed up encrypted object from cloud storage.
- * @return {PRomise<Object>}  The restored object
+ * @return {Promise<Object>}  The restored object
  */
 export async function restoreBackup() {
   const { keyId, phone, encryptionKey } = await fetchEncryptionKey();
