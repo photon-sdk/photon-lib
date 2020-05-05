@@ -61,8 +61,6 @@ export class AppStorage {
           let tempObj = JSON.parse(key);
           let unserializedWallet;
           switch (tempObj.type) {
-            case PlaceholderWallet.type:
-              continue;
             case SegwitBech32Wallet.type:
               unserializedWallet = SegwitBech32Wallet.fromJson(key);
               break;
@@ -132,7 +130,7 @@ export class AppStorage {
   async saveToDisk() {
     let walletsToSave = [];
     for (let key of this.wallets) {
-      if (typeof key === 'boolean' || key.type === PlaceholderWallet.type) continue;
+      if (typeof key === 'boolean') continue;
       if (key.prepareForSerialization) key.prepareForSerialization();
       walletsToSave.push(JSON.stringify({ ...key, type: key.type }));
     }
@@ -155,13 +153,13 @@ export class AppStorage {
     console.log('fetchWalletBalances for wallet#', index);
     if (index || index === 0) {
       let c = 0;
-      for (let wallet of this.wallets.filter(wallet => wallet.type !== PlaceholderWallet.type)) {
+      for (let wallet of this.wallets) {
         if (c++ === index) {
           await wallet.fetchBalance();
         }
       }
     } else {
-      for (let wallet of this.wallets.filter(wallet => wallet.type !== PlaceholderWallet.type)) {
+      for (let wallet of this.wallets) {
         await wallet.fetchBalance();
       }
     }
@@ -181,7 +179,7 @@ export class AppStorage {
     console.log('fetchWalletTransactions for wallet#', index);
     if (index || index === 0) {
       let c = 0;
-      for (let wallet of this.wallets.filter(wallet => wallet.type !== PlaceholderWallet.type)) {
+      for (let wallet of this.wallets) {
         if (c++ === index) {
           await wallet.fetchTransactions();
           if (wallet.fetchPendingTransactions) {

@@ -9,4 +9,3 @@ export * from './hd-legacy-p2pkh-wallet';
 export * from './abstract-hd-wallet';
 export * from './hd-segwit-bech32-wallet';
 export * from './hd-segwit-bech32-transaction';
-export * from './placeholder-wallet';
