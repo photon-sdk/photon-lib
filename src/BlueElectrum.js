@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import { Platform } from 'react-native';
-import { LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
+import { LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import ElectrumClient from '@photon-sdk/rn-electrum-client';
 import reverse from 'buffer-reverse';
