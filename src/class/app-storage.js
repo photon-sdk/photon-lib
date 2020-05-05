@@ -76,9 +76,6 @@ export class AppStorage {
             case HDSegwitBech32Wallet.type:
               unserializedWallet = HDSegwitBech32Wallet.fromJson(key);
               break;
-            case HDLegacyBreadwalletWallet.type:
-              unserializedWallet = HDLegacyBreadwalletWallet.fromJson(key);
-              break;
             case LegacyWallet.type:
             default:
               unserializedWallet = LegacyWallet.fromJson(key);

@@ -1,6 +1,6 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import assert from 'assert';
-import { ElectrumClient as BlueElectrum, HDSegwitP2SHWallet, HDLegacyBreadwalletWallet, HDLegacyP2PKHWallet, BitcoinUnit } from '../../';
+import { ElectrumClient as BlueElectrum, HDSegwitP2SHWallet, HDLegacyP2PKHWallet, BitcoinUnit } from '../../';
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 300 * 1000;
 
