@@ -2,9 +2,6 @@ import { HDSegwitP2SHWallet, LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet,
 import * as keychain from '../keychain';
 
 export class AppStorage {
-  static EXCHANGE_RATES = 'currency';
-  static PREFERRED_CURRENCY = 'preferredCurrency';
-
   constructor() {
     this.wallets = [];
     this.tx_metadata = {};

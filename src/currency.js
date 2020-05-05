@@ -1,8 +1,10 @@
 import Frisbee from 'frisbee';
 import AsyncStorage from '@react-native-community/async-storage';
-import { AppStorage } from './class';
 import { FiatUnit } from './models/fiatUnit';
 import BigNumber from 'bignumber.js';
+
+const EXCHANGE_RATES = 'currency';
+const PREFERRED_CURRENCY = 'preferredCurrency';
 
 let preferredFiatCurrency = FiatUnit.USD;
 let exchangeRates = {};
@@ -19,11 +21,11 @@ export const STRUCT = {
  * @returns {Promise<void>}
  */
 export async function setPrefferedCurrency(item) {
-  await AsyncStorage.setItem(AppStorage.PREFERRED_CURRENCY, JSON.stringify(item));
+  await AsyncStorage.setItem(PREFERRED_CURRENCY, JSON.stringify(item));
 }
 
 export async function getPreferredCurrency() {
-  return JSON.parse(await AsyncStorage.getItem(AppStorage.PREFERRED_CURRENCY));
+  return JSON.parse(await AsyncStorage.getItem(PREFERRED_CURRENCY));
 }
 
 export async function updateExchangeRate() {
@@ -33,7 +35,7 @@ export async function updateExchangeRate() {
   }
 
   try {
-    preferredFiatCurrency = JSON.parse(await AsyncStorage.getItem(AppStorage.PREFERRED_CURRENCY));
+    preferredFiatCurrency = JSON.parse(await AsyncStorage.getItem(PREFERRED_CURRENCY));
   } catch (_) {}
   preferredFiatCurrency = preferredFiatCurrency || FiatUnit.USD;
 
@@ -49,15 +51,15 @@ export async function updateExchangeRate() {
     }
   } catch (Err) {
     console.warn(Err);
-    const lastSavedExchangeRate = JSON.parse(await AsyncStorage.getItem(AppStorage.EXCHANGE_RATES));
+    const lastSavedExchangeRate = JSON.parse(await AsyncStorage.getItem(EXCHANGE_RATES));
     exchangeRates['BTC_' + preferredFiatCurrency.endPointKey] = lastSavedExchangeRate['BTC_' + preferredFiatCurrency.endPointKey] * 1;
     return;
   }
 
   exchangeRates[STRUCT.LAST_UPDATED] = +new Date();
   exchangeRates['BTC_' + preferredFiatCurrency.endPointKey] = json.bpi[preferredFiatCurrency.endPointKey].rate_float * 1;
-  await AsyncStorage.setItem(AppStorage.EXCHANGE_RATES, JSON.stringify(exchangeRates));
-  await AsyncStorage.setItem(AppStorage.PREFERRED_CURRENCY, JSON.stringify(preferredFiatCurrency));
+  await AsyncStorage.setItem(EXCHANGE_RATES, JSON.stringify(exchangeRates));
+  await AsyncStorage.setItem(PREFERRED_CURRENCY, JSON.stringify(preferredFiatCurrency));
 }
 
 let interval = false;
