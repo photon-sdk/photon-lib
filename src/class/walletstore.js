@@ -1,7 +1,7 @@
 import { HDSegwitP2SHWallet, LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitBech32Wallet } from './';
 import * as keychain from '../keychain';
 
-export class WalletStorage {
+export class WalletStore {
   constructor() {
     this.wallets = [];
     this.tx_metadata = {};
