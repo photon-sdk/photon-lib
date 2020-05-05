@@ -4,4 +4,4 @@ import * as ElectrumClient from './BlueElectrum';
 
 export { KeyBackup, ElectrumClient, Currency };
 export * from './wallet';
-export * from './models';
+export * from './model';

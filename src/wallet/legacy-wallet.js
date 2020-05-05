@@ -3,7 +3,7 @@ import { HDSegwitBech32Wallet } from './';
 import * as bitcoin from 'bitcoinjs-lib';
 import BigNumber from 'bignumber.js';
 import { randomBytes } from '../random';
-import { Signer } from '../models';
+import { Signer } from '../model';
 import * as BlueElectrum from '../BlueElectrum';
 
 /**

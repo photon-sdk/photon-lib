@@ -1,8 +1,8 @@
 import bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
-import signer from '../models/signer';
-import { BitcoinUnit } from '../models/bitcoinUnits';
+import signer from '../model/signer';
+import { BitcoinUnit } from '../model';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as HDNode from 'bip32';

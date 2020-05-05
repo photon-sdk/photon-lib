@@ -1,4 +1,4 @@
-import { BitcoinUnit, Chain } from '../models/bitcoinUnits';
+import { BitcoinUnit, Chain } from '../model';
 import createHash from 'create-hash';
 
 export class AbstractWallet {

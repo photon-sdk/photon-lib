@@ -1,6 +1,6 @@
 import Frisbee from 'frisbee';
 import AsyncStorage from '@react-native-community/async-storage';
-import { FiatUnit } from './models/fiatUnit';
+import { FiatUnit } from './model';
 import BigNumber from 'bignumber.js';
 
 export const EXCHANGE_RATES = 'currency';
@@ -15,9 +15,9 @@ export const STRUCT = {
 
 /**
  * Saves to storage preferred currency, whole object
- * from `./models/fiatUnit`
+ * from `./model/fiatUnit`
  *
- * @param item {Object} one of the values in `./models/fiatUnit`
+ * @param item {Object} one of the values in `./model/fiatUnit`
  * @returns {Promise<void>}
  */
 export async function setPrefferedCurrency(item) {

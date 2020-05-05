@@ -1,6 +1,6 @@
 import { LegacyWallet } from './legacy-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
-import { Signer } from '../models';
+import { Signer } from '../model';
 import BigNumber from 'bignumber.js';
 
 /**
