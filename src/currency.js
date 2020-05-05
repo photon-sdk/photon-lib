@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { FiatUnit } from './models/fiatUnit';
 import BigNumber from 'bignumber.js';
 
-const EXCHANGE_RATES = 'currency';
-const PREFERRED_CURRENCY = 'preferredCurrency';
+export const EXCHANGE_RATES = 'currency';
+export const PREFERRED_CURRENCY = 'preferredCurrency';
 
 let preferredFiatCurrency = FiatUnit.USD;
 let exchangeRates = {};
