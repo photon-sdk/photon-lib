@@ -1,9 +1,9 @@
 import assert from 'assert';
-import { SegwitP2SHWallet, AppStorage } from '../../';
+import { SegwitP2SHWallet, WalletStore } from '../../';
 
-it('Appstorage - loadFromDisk works', async () => {
-  /** @type {AppStorage} */
-  let Storage = new AppStorage();
+it('WalletStore - loadFromDisk works', async () => {
+  /** @type {WalletStore} */
+  let Storage = new WalletStore();
   let w = new SegwitP2SHWallet();
   w.setLabel('testlabel');
   await w.generate();
@@ -12,7 +12,7 @@ it('Appstorage - loadFromDisk works', async () => {
 
   // saved, now trying to load
 
-  let Storage2 = new AppStorage();
+  let Storage2 = new WalletStore();
   await Storage2.loadFromDisk();
   assert.strictEqual(Storage2.wallets.length, 1);
   assert.strictEqual(Storage2.wallets[0].getLabel(), 'testlabel');
