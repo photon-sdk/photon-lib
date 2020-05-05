@@ -3,9 +3,6 @@ import * as keychain from '../keychain';
 
 export class AppStorage {
   static EXCHANGE_RATES = 'currency';
-  static ELECTRUM_HOST = 'electrum_host';
-  static ELECTRUM_TCP_PORT = 'electrum_tcp_port';
-  static ELECTRUM_SSL_PORT = 'electrum_ssl_port';
   static PREFERRED_CURRENCY = 'preferredCurrency';
 
   constructor() {

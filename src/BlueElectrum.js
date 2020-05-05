@@ -1,10 +1,14 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import { Platform } from 'react-native';
-import { AppStorage, LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
+import { LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
 import * as bitcoin from 'bitcoinjs-lib';
 import ElectrumClient from '@photon-sdk/rn-electrum-client';
 import reverse from 'buffer-reverse';
 import BigNumber from 'bignumber.js';
+
+const ELECTRUM_HOST = 'electrum_host';
+const ELECTRUM_TCP_PORT = 'electrum_tcp_port';
+const ELECTRUM_SSL_PORT = 'electrum_ssl_port';
 
 const storageKey = 'ELECTRUM_PEERS';
 const defaultPeer = { host: 'electrum1.bluewallet.io', ssl: '443' };
@@ -90,9 +94,9 @@ async function getRandomHardcodedPeer() {
 }
 
 async function getSavedPeer() {
-  let host = await AsyncStorage.getItem(AppStorage.ELECTRUM_HOST);
-  let port = await AsyncStorage.getItem(AppStorage.ELECTRUM_TCP_PORT);
-  let sslPort = await AsyncStorage.getItem(AppStorage.ELECTRUM_SSL_PORT);
+  let host = await AsyncStorage.getItem(ELECTRUM_HOST);
+  let port = await AsyncStorage.getItem(ELECTRUM_TCP_PORT);
+  let sslPort = await AsyncStorage.getItem(ELECTRUM_SSL_PORT);
   return { host, tcp: port, ssl: sslPort };
 }
 
