@@ -4,7 +4,7 @@ import { Currency, AppStorage, FiatUnit } from '../../';
 
 jest.useFakeTimers();
 
-describe('currency', () => {
+describe.skip('currency', () => {
   it('fetches exchange rate and saves to AsyncStorage', async () => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
     await Currency.startUpdater();
