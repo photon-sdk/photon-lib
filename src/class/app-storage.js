@@ -1,13 +1,4 @@
-import {
-  HDLegacyBreadwalletWallet,
-  HDSegwitP2SHWallet,
-  HDLegacyP2PKHWallet,
-  LegacyWallet,
-  SegwitP2SHWallet,
-  SegwitBech32Wallet,
-  HDSegwitBech32Wallet,
-  PlaceholderWallet,
-} from './';
+import { HDSegwitP2SHWallet, LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitBech32Wallet } from './';
 import * as keychain from '../keychain';
 
 export class AppStorage {
@@ -66,9 +57,6 @@ export class AppStorage {
               break;
             case SegwitP2SHWallet.type:
               unserializedWallet = SegwitP2SHWallet.fromJson(key);
-              break;
-            case HDLegacyP2PKHWallet.type:
-              unserializedWallet = HDLegacyP2PKHWallet.fromJson(key);
               break;
             case HDSegwitP2SHWallet.type:
               unserializedWallet = HDSegwitP2SHWallet.fromJson(key);

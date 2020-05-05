@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitP2SHWallet, HDLegacyP2PKHWallet, LegacyWallet } from '../../';
+import { SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitP2SHWallet, LegacyWallet } from '../../';
 
 it('can create a Segwit HD (BIP49)', async function() {
   let mnemonic =
@@ -84,16 +84,6 @@ it('can work with malformed mnemonic', () => {
   let seed2 = hd.getMnemonicToSeedHex();
   assert.strictEqual(seed1, seed2);
   assert.ok(hd.validateMnemonic());
-});
-
-it('Legacy HD (BIP44) can generate addressess based on xpub', async function() {
-  let xpub = 'xpub6CQdfC3v9gU86eaSn7AhUFcBVxiGhdtYxdC5Cw2vLmFkfth2KXCMmYcPpvZviA89X6DXDs4PJDk5QVL2G2xaVjv7SM4roWHr1gR4xB3Z7Ps';
-  let hd = new HDLegacyP2PKHWallet();
-  hd._xpub = xpub;
-  assert.strictEqual(hd._getExternalAddressByIndex(0), '12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG');
-  assert.strictEqual(hd._getInternalAddressByIndex(0), '1KZjqYHm7a1DjhjcdcjfQvYfF2h6PqatjX');
-  assert.strictEqual(hd._getExternalAddressByIndex(1), '1QDCFcpnrZ4yrAQxmbvSgeUC9iZZ8ehcR5');
-  assert.strictEqual(hd._getInternalAddressByIndex(1), '13CW9WWBsWpDUvLtbFqYziWBWTYUoQb4nU');
 });
 
 it('can convert blockchain.info TX to blockcypher TX format', () => {
