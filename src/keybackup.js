@@ -4,7 +4,7 @@
  * transparently and does not need to be done by th api consumer explicitly.
  */
 
-import * as Crypto from './crypto';
+import * as gcm from './gcm';
 import * as Keychain from './keychain';
 import * as KeyServer from './keyserver';
 import * as CloudStore from './cloudstore';
@@ -89,7 +89,7 @@ export async function createBackup(object) {
   }
   const plaintext = Buffer.from(JSON.stringify(object), 'utf8');
   const { keyId, phone, encryptionKey } = await fetchEncryptionKey();
-  const ciphertext = await Crypto.encrypt(plaintext, encryptionKey);
+  const ciphertext = await gcm.encrypt(plaintext, encryptionKey);
   await CloudStore.put({ keyId, phone, ciphertext });
 }
 
@@ -139,7 +139,7 @@ export async function restoreBackup() {
     return null;
   }
   const { ciphertext } = backup;
-  const plaintext = await Crypto.decrypt(ciphertext, encryptionKey);
+  const plaintext = await gcm.decrypt(ciphertext, encryptionKey);
   return JSON.parse(plaintext.toString('utf8'));
 }
 

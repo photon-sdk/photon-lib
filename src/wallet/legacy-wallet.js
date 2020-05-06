@@ -1,8 +1,9 @@
+import crypto from 'crypto';
+import { promisify } from 'util';
 import { AbstractWallet } from './abstract-wallet';
 import { HDSegwitBech32Wallet } from './';
 import * as bitcoin from 'bitcoinjs-lib';
 import BigNumber from 'bignumber.js';
-import { randomBytes } from '../random';
 import { Signer } from '../model';
 import * as BlueElectrum from '../BlueElectrum';
 
@@ -43,7 +44,7 @@ export class LegacyWallet extends AbstractWallet {
   }
 
   async generate() {
-    const buf = await randomBytes(32);
+    const buf = await promisify(crypto.randomBytes)(32);
     this.secret = bitcoin.ECPair.makeRandom({ rng: () => buf }).toWIF();
   }
 
