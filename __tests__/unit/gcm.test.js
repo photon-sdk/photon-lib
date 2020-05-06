@@ -44,7 +44,7 @@ describe('GCM unit test', () => {
       const pt = Buffer.from('secret stuff', 'utf8');
       const ct = await nodeEncrypt(pt, key);
       const wrongKey = await gcm.generateKey();
-      await expect(gcm.decrypt(ct, wrongKey)).rejects.toThrow(/integrity check/);
+      await expect(gcm.decrypt(ct, wrongKey)).rejects.toThrow(/unable to authenticate/);
     });
 
     it('decode node api ciphertext', async () => {
