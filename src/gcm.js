@@ -52,6 +52,6 @@ export async function decrypt(ciphertext, key) {
   const ct = ciphertext.slice(IV_LEN);
   const de = createDecipheriv('aes-256-gcm', key, iv);
   de.setAAD(Buffer.alloc(0));
-  de.setAuthTag(ct.slice(ct.length - TAG_LEN, ct.length));
+  de.setAuthTag(ct.slice(ct.length - TAG_LEN));
   return Buffer.concat([de.update(ct.slice(0, ct.length - TAG_LEN)), de.final()]);
 }
