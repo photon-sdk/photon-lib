@@ -2,9 +2,11 @@
  * @fileOverview a module to wrap symmetric encryption in a simple api.
  */
 
+import crypto from 'crypto';
+import { promisify } from 'util';
 import { AES_GCM } from 'asmcrypto.js';
-import { randomBytes } from './random';
 import { isBuffer } from './verify';
+const randomBytes = promisify(crypto.randomBytes);
 
 export const KEY_LEN = 32; // size of the key in bytes
 export const IV_LEN = 12; // size of the IV in bytes

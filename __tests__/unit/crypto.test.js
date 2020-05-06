@@ -1,6 +1,7 @@
 import nodeCrypto from 'crypto';
-import { randomBytes } from '../../src/random';
+import { promisify } from 'util';
 import * as Crypto from '../../src/crypto';
+const randomBytes = promisify(nodeCrypto.randomBytes);
 
 const IV_LEN = Crypto.IV_LEN;
 const TAG_LEN = Crypto.TAG_LEN;
