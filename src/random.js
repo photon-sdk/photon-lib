@@ -1,24 +1,23 @@
 /**
- * @fileOverview wrap a secure native random number generator
+ * @fileOverview wraps a secure native random number generator.
+ * This module mimics the node crypto api.
  */
 
-import { NativeModules } from 'react-native';
-
+const { NativeModules } = require('react-native');
 const { RNRandomBytes } = NativeModules;
 
 /**
  * Generate cryptographically secure random bytes using native api.
- * @param  {number} size      The number of bytes of randomness
- * @return {Promise<Buffer>}  The random bytes
+ * @param  {number}   size      The number of bytes of randomness
+ * @param  {function} callback  The callback to return the bytes
+ * @return {Buffer}             The random bytes
  */
-export async function randomBytes(size) {
-  return new Promise((resolve, reject) => {
-    RNRandomBytes.randomBytes(size, (err, bytes) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(Buffer.from(bytes, 'base64'));
-      }
-    });
+exports.randomBytes = (size, callback) => {
+  RNRandomBytes.randomBytes(size, (err, bytes) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null, Buffer.from(bytes, 'base64'));
+    }
   });
-}
+};
