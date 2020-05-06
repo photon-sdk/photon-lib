@@ -62,7 +62,7 @@
     "react-native-keychain": "^6.0.0"
   },
   "react-native": {
-    "crypto": "./src/random"
+    "crypto": "./src/random.js"
   },
   "jest": {
     "preset": "react-native",
