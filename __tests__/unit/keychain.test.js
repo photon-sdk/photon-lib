@@ -1,5 +1,5 @@
 import * as RNKeychain from 'react-native-keychain';
-import { Keychain } from '../../';
+import * as Keychain from '../../src/keychain';
 
 describe('Keychain unit test', () => {
   beforeEach(() => {
