@@ -58,15 +58,18 @@ KeyBackup.init({
 Now let's do an encrypted backup of a user's mnemonic to their iCloud account. The encryption key will be stored on your app's key server. We'll use the user's phone number for authentication with the key server.
 
 ```js
-import { KeyBackup } from '@photon-sdk/photon-lib';
+import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
 
-const mnemonic = 'abandon ... about';            // the secret to backup
+const wallet = new HDSegwitBech32Wallet();
+await wallet.generate();                         // generate a new seed phrase
+const mnemonic = await wallet.getSecret();       // the seed prhase to backup
+
 const phone = '+4917512345678';                  // the user's number for 2FA
-
 await KeyBackup.registerNewUser({ phone });      // sends code via SMS
 
 const code = '000000'                            // received via SMS
 await KeyBackup.verifyNewUser({ phone, code });  // verify phone number
+
 await KeyBackup.createBackup({ mnemonic });      // create encrypted cloud backup
 ```
 
@@ -75,7 +78,7 @@ await KeyBackup.createBackup({ mnemonic });      // create encrypted cloud backu
 Now let's restore the user's the user's key on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key. The same phone number as for backup will be used to authenticate to the key server.
 
 ```js
-import { KeyBackup, Keychain } from '@photon-sdk/photon-lib';
+import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
 
 const exists = await KeyBackup.checkForExistingBackup({ phone });
 if (!exists) return;
@@ -86,8 +89,10 @@ const code = '000000'                                  // received via SMS
 await KeyBackup.verifyDevice({ phone, code });         // verify phone number
 
 const { mnemonic } = await KeyBackup.restoreBackup();  // fetch and decrypt user's seed
-await Keychain.setItem('my-seed', mnemonic)            // secure in device keychain
 
+const wallet = new HDSegwitBech32Wallet();
+wallet.setSecret(mnemonic);
+wallet.validateMnemonic();
 ```
 
 ## Sample app
