@@ -39,7 +39,7 @@ Follow the [usage instructions for node-libs-react-native](https://github.com/pa
 
 ### Init Key Server
 
-First we'll need to tell the key backup module which key server to use. See (photon-sdk/photon-keyserver)[https://github.com/photon-sdk/photon-keyserver] for how to deploy a key server instance for your app.
+First we'll need to tell the key backup module which key server to use. See [photon-sdk/photon-keyserver](https://github.com/photon-sdk/photon-keyserver) for how to deploy a key server instance for your app.
 
 ```js
 import { KeyBackup } from '@photon-sdk/photon-lib';
@@ -51,9 +51,11 @@ KeyBackup.init({
 
 ### Key Backup
 
-Now let's do an encrypted backup of a user's mnemonic to their iCloud. The encryption key will be stored on your app's key server. In this example we'll use the user's phone number for authentication with the key server.
+Now let's do an encrypted backup of a user's mnemonic to their iCloud account. The encryption key will be stored on your app's key server. We'll use the user's phone number for authentication with the key server.
 
 ```js
+import { KeyBackup } from '@photon-sdk/photon-lib';
+
 const mnemonic = 'abandon ... about';            // the secret to backup
 const phone = '+4917512345678';                  // the user's number for 2FA
 
@@ -69,6 +71,8 @@ await KeyBackup.createBackup({ mnemonic });      // create encrypted cloud backu
 Now let's restore the user's the user's key on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key. The same phone number as for backup will be used to authenticate to the key server.
 
 ```js
+import { KeyBackup, Keychain } from '@photon-sdk/photon-lib';
+
 const exists = await KeyBackup.checkForExistingBackup({ phone });
 if (!exists) return;
 
@@ -77,7 +81,9 @@ await KeyBackup.registerDevice({ phone });             // sends code via SMS
 const code = '000000'                                  // received via SMS
 await KeyBackup.verifyDevice({ phone, code });         // verify phone number
 
-const { mnemonic } = await KeyBackup.restoreBackup();  // restore key on user's device
+const { mnemonic } = await KeyBackup.restoreBackup();  // fetch and decrypt user's seed
+await Keychain.setItem('my-seed', mnemonic)            // secure in device keychain
+
 ```
 
 ## Sample app
