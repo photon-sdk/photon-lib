@@ -39,6 +39,12 @@ In your target's "capabilities" tab in Xcode, make sure that iCloud is switched 
 
 Follow the [usage instructions for node-libs-react-native](https://github.com/parshap/node-libs-react-native#usage).
 
+## Sample app
+
+An example app using photon-lib can be found here [photon-sdk/photon-app](https://github.com/photon-sdk/photon-app).
+
+[This PR shows what the diff should look](https://github.com/photon-sdk/photon-app/pull/1/files) like when installing photon-lib to your react-native app.
+
 ## Example
 
 ### Init Key Server
@@ -62,7 +68,7 @@ import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
 
 const wallet = new HDSegwitBech32Wallet();
 await wallet.generate();                         // generate a new seed phrase
-const mnemonic = await wallet.getSecret();       // the seed prhase to backup
+const mnemonic = await wallet.getSecret();       // the seed phrase to backup
 
 const phone = '+4917512345678';                  // the user's number for 2FA
 await KeyBackup.registerNewUser({ phone });      // sends code via SMS
@@ -91,13 +97,9 @@ await KeyBackup.verifyDevice({ phone, code });         // verify phone number
 const { mnemonic } = await KeyBackup.restoreBackup();  // fetch and decrypt user's seed
 
 const wallet = new HDSegwitBech32Wallet();
-wallet.setSecret(mnemonic);
+wallet.setSecret(mnemonic);                            // restore from the seed
 wallet.validateMnemonic();
 ```
-
-## Sample app
-
-To see a working version take a look at [photon-sdk/photon-app](https://github.com/photon-sdk/photon-app).
 
 ## Development and testing
 
