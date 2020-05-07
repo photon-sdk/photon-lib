@@ -63,7 +63,8 @@
     "react-native-keychain": "^6.0.0"
   },
   "react-native": {
-    "crypto": "@photon-sdk/photon-lib/src/crypto"
+    "crypto": "@photon-sdk/photon-lib/src/crypto",
+    "asmcrypto.js": "asmcrypto.js/dist_es8/aes/gcm"
   },
   "jest": {
     "preset": "react-native",
