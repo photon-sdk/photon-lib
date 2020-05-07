@@ -1,5 +1,7 @@
 # photon-lib [![Build Status](https://travis-ci.org/photon-sdk/photon-lib.svg?branch=master)](https://travis-ci.org/photon-sdk/photon-lib)
 
+A high level library for building bitcoin wallets with react native.
+
 **Still very much under development and not yet recommended for production use.**
 
 ## Scope
@@ -13,9 +15,11 @@ Provide an easy-to-use high level api for the following:
 
 ## Usage
 
+In your react-native app...
+
 ### Installing
 
-Make sure to install all peer dependencies.
+Make sure to install all peer dependencies:
 
 ```
 npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain react-native-icloudstore @react-native-community/async-storage @photon-sdk/react-native-tcp node-libs-react-native
