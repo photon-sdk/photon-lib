@@ -2,7 +2,7 @@
  * @fileOverview a module to wrap symmetric encryption in a simple api.
  */
 
-import { createCipheriv, createDecipheriv } from 'browserify-aes';
+import { AES_GCM } from 'asmcrypto.js';
 import { randomBytes } from './random';
 import { isBuffer } from './verify';
 
@@ -32,9 +32,12 @@ export async function encrypt(plaintext, key) {
     throw new Error('Invalid args');
   }
   const iv = await randomBytes(IV_LEN);
-  const en = createCipheriv('aes-256-gcm', key, iv);
-  en.setAAD(Buffer.alloc(0));
-  return Buffer.concat([iv, en.update(plaintext), en.final(), en.getAuthTag()]);
+  const p = new Uint8Array(plaintext);
+  const k = new Uint8Array(key);
+  const i = new Uint8Array(iv);
+  const adata = new Uint8Array(0);
+  const ct = AES_GCM.encrypt(p, k, i, adata, TAG_LEN);
+  return Buffer.concat([iv, Buffer.from(ct.buffer)]);
 }
 
 /**
@@ -48,10 +51,10 @@ export async function decrypt(ciphertext, key) {
   if (!isBuffer(ciphertext) || !isBuffer(key) || key.length !== KEY_LEN) {
     throw new Error('Invalid args');
   }
-  const iv = ciphertext.slice(0, IV_LEN);
-  const ct = ciphertext.slice(IV_LEN);
-  const de = createDecipheriv('aes-256-gcm', key, iv);
-  de.setAAD(Buffer.alloc(0));
-  de.setAuthTag(ct.slice(ct.length - TAG_LEN, ct.length));
-  return Buffer.concat([de.update(ct.slice(0, ct.length - TAG_LEN)), de.final()]);
+  const i = new Uint8Array(ciphertext.slice(0, IV_LEN));
+  const c = new Uint8Array(ciphertext.slice(IV_LEN));
+  const k = new Uint8Array(key);
+  const adata = new Uint8Array(0);
+  const pt = AES_GCM.decrypt(c, k, i, adata, TAG_LEN);
+  return Buffer.from(pt.buffer);
 }
