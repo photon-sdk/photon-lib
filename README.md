@@ -81,7 +81,7 @@ await KeyBackup.createBackup({ mnemonic });      // create encrypted cloud backu
 
 ### Key Restore
 
-Now let's restore the user's the user's key on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key. The same phone number as for backup will be used to authenticate to the key server.
+Now let's restore the user's key on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key. The same phone number as for backup will be used to authenticate to the key server.
 
 ```js
 import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
