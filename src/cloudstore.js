@@ -23,11 +23,11 @@ export async function put({ keyId, phone, ciphertext }) {
   if (!isId(keyId) || !isPhone(phone) || !isBuffer(ciphertext)) {
     throw new Error('Invalid args');
   }
-  const vKeyId = `${VERSION}_${keyId}`;
-  if (await Store.getItem(vKeyId)) {
+  const itemKey = getItemKey(keyId);
+  if (await Store.getItem(itemKey)) {
     throw new Error('Backup already present');
   }
-  await Store.setItem(vKeyId, stringify({ keyId, phone, ciphertext }));
+  await Store.setItem(itemKey, stringify({ keyId, phone, ciphertext }));
 }
 
 /**
@@ -41,8 +41,8 @@ export async function get({ phone }) {
   }
   const itemKeys = await Store.getAllKeys();
   const results = await Promise.all(
-    itemKeys.map(async vKeyId => {
-      const item = parse(await Store.getItem(vKeyId));
+    itemKeys.map(async itemKey => {
+      const item = parse(await Store.getItem(itemKey));
       return item && item.phone === phone ? item : null;
     }),
   );
@@ -58,13 +58,18 @@ export async function remove({ keyId }) {
   if (!isId(keyId)) {
     throw new Error('Invalid args');
   }
-  const vKeyId = `${VERSION}_${keyId}`;
-  await Store.removeItem(vKeyId);
+  const itemKey = getItemKey(keyId);
+  await Store.removeItem(itemKey);
 }
 
 //
 // Helper functions
 //
+
+function getItemKey(keyId) {
+  const shortId = keyId.replace(/-/g, '').slice(0, 10);
+  return `${VERSION}_${shortId}`;
+}
 
 function stringify({ keyId, phone, ciphertext }) {
   return JSON.stringify({

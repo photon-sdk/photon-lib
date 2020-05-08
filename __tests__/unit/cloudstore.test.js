@@ -28,7 +28,7 @@ describe('CloudStore unit test', () => {
 
     it('store item', async () => {
       await CloudStore.put({ keyId, phone, ciphertext });
-      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('0_8abe1a93-6a9c-490c-bbd5-d7f11a4a9c8f');
+      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('0_8abe1a936a');
       expect(mockAsyncStorage.setItem.mock.calls[0][1]).toMatch(/^{"keyId":.*"}$/);
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
     });
