@@ -1,5 +1,4 @@
-import nodeCrypto from 'crypto';
-import { randomBytes } from '../../src/random';
+import crypto from 'crypto';
 import * as gcm from '../../src/gcm';
 
 const IV_LEN = gcm.IV_LEN;
@@ -58,8 +57,8 @@ describe('GCM unit test', () => {
 });
 
 async function nodeEncrypt(pt, key) {
-  const iv = await randomBytes(IV_LEN);
-  const en = nodeCrypto.createCipheriv('aes-256-gcm', key, iv);
+  const iv = await crypto.randomBytes(IV_LEN);
+  const en = crypto.createCipheriv('aes-256-gcm', key, iv);
   en.setAAD(Buffer.alloc(0));
   return Buffer.concat([iv, en.update(pt), en.final(), en.getAuthTag()]);
 }
@@ -67,7 +66,7 @@ async function nodeEncrypt(pt, key) {
 async function nodeDecrypt(ciphertext, key) {
   const iv = ciphertext.slice(0, IV_LEN);
   const ct = ciphertext.slice(IV_LEN);
-  const de = nodeCrypto.createDecipheriv('aes-256-gcm', key, iv);
+  const de = crypto.createDecipheriv('aes-256-gcm', key, iv);
   de.setAAD(Buffer.alloc(0));
   de.setAuthTag(ct.slice(ct.length - TAG_LEN, ct.length));
   return Buffer.concat([de.update(ct.slice(0, ct.length - TAG_LEN)), de.final()]);
