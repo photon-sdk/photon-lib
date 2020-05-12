@@ -3,7 +3,7 @@
  */
 
 import { AES_GCM } from 'asmcrypto.js';
-import { randomBytes } from './random';
+import { randomBytes } from './wallet/rng';
 import { isBuffer } from './verify';
 
 export const KEY_LEN = 32; // size of the key in bytes

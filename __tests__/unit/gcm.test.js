@@ -1,5 +1,5 @@
 import nodeCrypto from 'crypto';
-import { randomBytes } from '../../src/random';
+import { randomBytes } from '../../src/wallet/rng';
 import * as gcm from '../../src/gcm';
 
 const IV_LEN = gcm.IV_LEN;
