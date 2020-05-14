@@ -101,12 +101,12 @@ wallet.setSecret(mnemonic);                            // restore from the seed
 wallet.validateMnemonic();                             // should return true
 ```
 
-### Wallet & Electrum Client
+### Init Electrum Client
 
-In this example we'll use the wallet and electrum client to generate a new wallet key, store it securely in the device keychain and fetch transactions and balances.
+First we'll need to init the electrum client by specifying the host and port of our full node.
 
 ```js
-import { ElectrumClient, HDSegwitBech32Wallet, WalletStore } from '@photon-sdk/photon-lib';
+import { ElectrumClient } from '@photon-sdk/photon-lib';
 
 const options = {
   host: 'electrum.example.com',
@@ -114,6 +114,14 @@ const options = {
 };
 await ElectrumClient.connectMain(options);       // connect to your full node
 await ElectrumClient.waitTillConnected();
+```
+
+### Wallet Balance & Transaction Data
+
+Now we'll generate a new wallet key, store it securely in the device keychain and fetch transactions and balances using the electrum client.
+
+```js
+import { HDSegwitBech32Wallet, WalletStore } from '@photon-sdk/photon-lib';
 
 const wallet = new HDSegwitBech32Wallet();
 await wallet.generate();                         // or use restored (see above)
