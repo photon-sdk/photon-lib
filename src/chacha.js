@@ -1,5 +1,6 @@
 /**
- * @fileOverview a module to wrap symmetric encryption in a simple api.
+ * @fileOverview a module to wrap symmetric encryption in a simple api. The used cipher
+ * is ChaCha20-Poly1305 (IETF version) with a 256 bit key a 96 bit iv.
  */
 
 import { createCipher, createDecipher } from 'chacha/browser';
@@ -20,7 +21,7 @@ export async function generateKey() {
 }
 
 /**
- * Encrypt a plaintext using Chacha20-Poly1305 (authenticated encryption). A random iv is
+ * Encrypt a plaintext using ChaCha20-Poly1305 (authenticated encryption). A random iv is
  * generated for every plaintext. The resulting buffer includes the iv and then the
  * encrypted ciphertext.
  * @param  {Buffer} plaintext  The plaintext bytes
@@ -38,7 +39,7 @@ export async function encrypt(plaintext, key) {
 }
 
 /**
- * Decrypt a ciphertext using Chacha20-Poly1305 (authenticated encryption). The iv is expected
+ * Decrypt a ciphertext using ChaCha20-Poly1305 (authenticated encryption). The iv is expected
  * in the first 12 bytes of the ciphertext input.
  * @param  {Buffer} ciphertext  The iv + ciphertext bytes
  * @param  {Buffer} key         The symmetric encryption key
