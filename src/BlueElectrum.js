@@ -36,11 +36,14 @@ let disableBatching = false;
 
 let txhashHeightCache = {};
 
-export async function connectMain() {
+export async function connectMain(options) {
   let usingPeer = await getRandomHardcodedPeer();
   let savedPeer = await getSavedPeer();
   if (savedPeer && savedPeer.host && (savedPeer.tcp || savedPeer.ssl)) {
     usingPeer = savedPeer;
+  }
+  if (options && options.host && (options.tcp || options.ssl)) {
+    usingPeer = options;
   }
 
   try {
