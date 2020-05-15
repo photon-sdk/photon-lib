@@ -25,6 +25,7 @@
     "bitcoinjs-lib": "^5.1.7",
     "bs58check": "^2.1.2",
     "buffer-reverse": "^1.0.1",
+    "chacha": "^2.1.0",
     "coinselect": "^3.1.12",
     "create-hash": "^1.2.0",
     "frisbee": "^3.1.2",
