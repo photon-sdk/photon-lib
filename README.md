@@ -10,7 +10,7 @@ Provide an easy-to-use high level api for the following:
 
 * hd wallets (bech32 and p2sh)
 * an electrum light client
-* Secure enclave backed key storage on iOS and Android (where available)
+* secure enclave backed key storage on iOS and Android (where available)
 * encrypted key backup on iCloud/GDrive + 2FA (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
 
 ![backup flow](https://github.com/photon-sdk/photon-lib/raw/af4377c79519ad827d04e6e81de8e49593cdcb4b/backup_flow_2x.gif)
