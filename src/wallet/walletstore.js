@@ -1,6 +1,8 @@
 import { HDSegwitP2SHWallet, LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet, HDSegwitBech32Wallet } from './';
 import * as keychain from '../keychain';
 
+const WALLETS = 'photon.wallets';
+
 export class WalletStore {
   constructor() {
     this.wallets = [];
@@ -36,7 +38,7 @@ export class WalletStore {
    */
   async loadFromDisk() {
     try {
-      let data = await this.getItem('data');
+      let data = await this.getItem(WALLETS);
       if (data !== null) {
         data = JSON.parse(data);
         if (!data.wallets) return false;
@@ -117,7 +119,7 @@ export class WalletStore {
       wallets: walletsToSave,
       tx_metadata: this.tx_metadata,
     };
-    return this.setItem('data', JSON.stringify(data));
+    return this.setItem(WALLETS, JSON.stringify(data));
   }
 
   /**
