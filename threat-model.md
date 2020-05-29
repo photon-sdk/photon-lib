@@ -57,12 +57,12 @@ Another option would be to set an [additional time delay](https://github.com/pho
 
 The general strategy for wallets should be to promote these additional features security in the wallet user interface once the deposited value reaches a certain threshold.
 
-### Threats that are out of scope
+## Threats that are out of scope
 
-#### Compromise of the Mobile OS
+### Compromise of the Mobile OS
 
 If the mobile operating system or hardware becomes compromised, the user’s wallet private key could also be stolen from the device. There isn’t much that can be done at the software level to mitigate this threat.
 
-#### Flaws in the encryption algorithm
+### Flaws in the encryption algorithm
 
 If there is a security vulnerability in the ChaCha20-Poly1305 algorithm this could also lead to compromise of the wallet private key e.g. if the iCloud/GDrive account is compromised. Users should be notified in this case, but these types of vulnerabilities are generally out of scope for the threat model.
