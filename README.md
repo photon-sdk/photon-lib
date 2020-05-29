@@ -17,6 +17,10 @@ Provide an easy-to-use high level api for the following:
 
 ![backup flow](https://github.com/photon-sdk/photon-lib/raw/af4377c79519ad827d04e6e81de8e49593cdcb4b/backup_flow_2x.gif)
 
+## Threat model
+
+Please see the [threat model doc](https://github.com/photon-sdk/photon-lib/blob/master/threat-model.md) for a discussion about attack vectors and mitigation strategies.
+
 ## Usage
 
 In your react-native app...
