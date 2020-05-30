@@ -39,7 +39,7 @@ In case the iCloud/GDrive account is compromised the wallet private key is prote
 
 ### Compromise of photon-keyserver database
 
-In case the keyserver is compromised the adversary would have access to all of the encryption keys, but not of users’ iCloud/GDrive accounts. Upon detection of the compromise the keyserver database. A public announcement should be made to ask users to re-register and rotate encryption keys.
+In case the keyserver is compromised the adversary would have access to all of the encryption keys, but not of users’ iCloud/GDrive accounts. Upon detection of the compromise of the keyserver database, a public announcement should be made to ask users to re-register and rotate encryption keys.
 
 ### SIMjacking a.k.a SIM swap attacks
 
@@ -55,7 +55,7 @@ To mitigate stealing of user funds an [additional PIN](https://github.com/photon
 
 Another option would be to set an [additional time delay](https://github.com/photon-sdk/photon-keyserver/issues/3) that the user would be required to wait to recover their wallet. This should be set long enough so that the user has enough time to notice the lost access to their phone number and recovery access from their mobile service provider.
 
-The general strategy for wallets should be to promote these additional features security in the wallet user interface once the deposited value reaches a certain threshold.
+The general strategy for wallets should be to promote these additional security features in the wallet user interface once the deposited value reaches a certain threshold.
 
 ## Threats that are out of scope
 
