@@ -25,7 +25,7 @@ If the user still has the SIM card, they can login into their iCloud/GDrive acco
 
 In case the user loses their SIM card together with their phone, they are still able to recovery their wallet after they’ve received a replacement SIM from their mobile service provider.
 
-In the case of a prepaid SIM card this might not be possible. For this case the user should be able to provide a fallback 2FA method such as Email and/or Google Authenticator.
+In the case of a prepaid SIM card this might not be possible. For this case the user should be able to provide a fallback 2FA method such as [Email](https://github.com/photon-sdk/photon-keyserver/issues/4), [Google Authenticator](https://github.com/photon-sdk/photon-keyserver/issues/7) or [FIDO U2F](https://github.com/photon-sdk/photon-keyserver/issues/8) physical security keys.
 
 ### Lost iCloud/GDrive account access
 
@@ -33,13 +33,19 @@ In case the user loses access to their iCloud or Gmail account or there is a dat
 
 While the possibility of the user losing their phone and losing access to their cloud account is possible. Users can mitigate this unlikely scenario by syncing the wallet to a second device before their primary phone is lost.
 
+Wallet developers should also implement regular [backup integrity checks](https://github.com/photon-sdk/photon-keyserver/issues/5) to "practice" a wallet restore and make sure all required assets are available.
+
 ### Compromise of iCloud/GDrive account
 
-In case the iCloud/GDrive account is compromised the wallet private key is protected using 256 bit encryption using the ChaCha20-Poly1305 algorithm. The attacker would required access to the user’s SIM card as well to recover the wallet and steal funds.
+In case the iCloud/GDrive account is compromised the wallet private key is protected using 256 bit encryption using the [ChaCha20](https://en.wikipedia.org/wiki/Salsa20)-[Poly1305](https://en.wikipedia.org/wiki/Poly1305) algorithm ([IETF variant](https://tools.ietf.org/html/rfc7539) with a 96 bit nonce). The attacker would required access to the user’s SIM card as well to recover the wallet and steal funds.
 
 ### Compromise of photon-keyserver database
 
 In case the keyserver is compromised the adversary would have access to all of the encryption keys, but not of users’ iCloud/GDrive accounts. Upon detection of the compromise of the keyserver database, a public announcement should be made to ask users to re-register and rotate encryption keys.
+
+To make targeting the users' iCloud/GDrive accounts more difficult in case of a database breach, user identifiers such as phone numbers and email addresses are hashed using the [scrypt](https://en.wikipedia.org/wiki/Scrypt) key derivation function. A random salt is used to mitigate [Rainbow table attacks](https://en.wikipedia.org/wiki/Rainbow_table).
+
+In addition the keyserver DynamoDB database is [encrypted at rest](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/EncryptionAtRest.html) using [HSM backed key management](https://aws.amazon.com/kms/).
 
 ### SIMjacking a.k.a SIM swap attacks
 
