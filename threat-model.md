@@ -17,9 +17,11 @@ These are the assets to protect or mitigate loss of:
 
 ### Lost or stolen phone
 
-In case the user loses their phone, the wallet private key is protected in the device keychain. On iOS this is secured by the secure enclave and full disk encryption. On newer Android devices like the Pixel 3a, a similar level of security is available through the Titan M security module. On older Android devices only software level encryption is available, which is more susceptible to brute force attacks.
+In case the user loses their phone, the wallet private key is protected in the device keychain. On iOS this is secured by the secure enclave and full disk encryption. On newer Android devices like the Pixel 3a, a similar level of security is available through the Titan M security module. On older Android devices only software level encryption is available, which is more susceptible to brute force attacks. In order to mitigate compromise of the old device's keychain, the wallet should recommend key rotation upon recovery.
 
-If the user still has the SIM card, they can login into their iCloud/GDrive account on their new device and recover their wallet via SMS verification. In order to protect against compromise of the old device's keychain, the wallet should recommend key rotation.
+### Damaged phone
+
+If the user's phone is damaged but they still have access to the SIM card, they can login into their iCloud/GDrive account on a new device and recover their wallet via SMS verification. In order to mitigate compromise of the old device's keychain, the wallet should recommend key rotation.
 
 ### Lost SIM card
 
