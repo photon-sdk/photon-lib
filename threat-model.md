@@ -45,7 +45,7 @@ In case the iCloud/GDrive account is compromised the wallet private key is prote
 
 In case the keyserver is compromised the adversary would have access to all of the encryption keys, but not of users’ iCloud/GDrive accounts. Upon detection of the compromise of the keyserver database, a public announcement should be made to ask users to re-register and rotate encryption keys.
 
-To make targeting the users' iCloud/GDrive accounts more difficult in case of a database breach, user identifiers such as phone numbers and email addresses are hashed using the [scrypt](https://en.wikipedia.org/wiki/Scrypt) key derivation function. A random salt is used to mitigate [Rainbow table attacks](https://en.wikipedia.org/wiki/Rainbow_table).
+To make targeting the users' iCloud/GDrive accounts more difficult in case of a database breach, user identifiers such as phone numbers and email addresses are hashed using the [scrypt](https://en.wikipedia.org/wiki/Scrypt) key derivation function. A random salt is used to mitigate [rainbow table attacks](https://en.wikipedia.org/wiki/Rainbow_table).
 
 In addition the keyserver DynamoDB database is [encrypted at rest](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/EncryptionAtRest.html) using [HSM backed key management](https://aws.amazon.com/kms/).
 
@@ -61,7 +61,7 @@ To mitigate stealing of user funds an [additional PIN](https://github.com/photon
 
 #### Mitigation: recovery time delay
 
-Another option would be to set an [additional time delay](https://github.com/photon-sdk/photon-keyserver/issues/3) that the user would be required to wait to recover their wallet. This should be set long enough so that the user has enough time to notice the lost access to their phone number and recovery access from their mobile service provider.
+Another option would be to set an [additional time delay](https://github.com/photon-sdk/photon-keyserver/issues/3) that the user would be required to wait to recover their wallet. This should be set long enough so that the user has enough time to notice the lost access to their phone number and recover access from their mobile service provider.
 
 The general strategy for wallets should be to promote these additional security features in the wallet user interface once the deposited value reaches a certain threshold.
 
