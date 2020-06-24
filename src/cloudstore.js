@@ -7,87 +7,74 @@ import { Platform } from 'react-native';
 import RNiCloudStorage from 'react-native-icloudstore';
 import AsyncStorage from '@react-native-community/async-storage';
 import { isPhone, isId, isBuffer } from './verify';
-
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : AsyncStorage;
-const VERSION = '0';
 
-/**
- * Store an item for backup. The item should already contain the encrypted
- * ciphertext.
- * @param  {string} keyId       The encryption key id
- * @param  {string} phone       The user's phone number
- * @param  {Buffer} ciphertext  The encrypted data
- * @return {Promise<undefined>}
- */
-export async function put({ keyId, phone, ciphertext }) {
-  if (!isId(keyId) || !isPhone(phone) || !isBuffer(ciphertext)) {
+const VERSION = '0';
+const ITEM_KEY = `${VERSION}_photon_key`;
+const USER_KEY = `${VERSION}_photon_uid`;
+
+export async function putKey({ keyId, ciphertext }) {
+  if (!isId(keyId) || !isBuffer(ciphertext)) {
     throw new Error('Invalid args');
   }
-  const itemKey = getItemKey(keyId);
-  if (await Store.getItem(itemKey)) {
+  if (await Store.getItem(ITEM_KEY)) {
     throw new Error('Backup already present');
   }
-  await Store.setItem(itemKey, stringify({ keyId, phone, ciphertext }));
+  await Store.setItem(ITEM_KEY, stringifyKey({ keyId, ciphertext }));
 }
 
-/**
- * Fetch a backup from cloud storage
- * @param  {string} phone  The user's phone number
- * @return {Object}        The stored object
- */
-export async function get({ phone }) {
-  if (!isPhone(phone)) {
-    throw new Error('Invalid args');
-  }
-  const itemKeys = await Store.getAllKeys();
-  const results = await Promise.all(
-    itemKeys.map(async itemKey => {
-      const item = parse(await Store.getItem(itemKey));
-      return item && item.phone === phone ? item : null;
-    }),
-  );
-  return results.find(r => r) || null;
+export async function getKey() {
+  const item = await Store.getItem(ITEM_KEY);
+  return item ? parseKey(item) : null;
 }
 
-/**
- * Delete a backup from cloud storage.
- * @param  {string} keyId  The encryption key id
- * @return {Object}        The stored object
- */
-export async function remove({ keyId }) {
-  if (!isId(keyId)) {
+export async function removeKey({ keyId }) {
+  const item = await getKey();
+  if (!item || item.keyId !== keyId) {
+    throw new Error('Backup not found');
+  }
+  await Store.removeItem(ITEM_KEY);
+}
+
+export async function putUser({ keyId, userId }) {
+  if (!isId(keyId) || !isPhone(userId)) {
     throw new Error('Invalid args');
   }
-  const itemKey = getItemKey(keyId);
-  await Store.removeItem(itemKey);
+  if (await Store.getItem(USER_KEY)) {
+    throw new Error('User already present');
+  }
+  await Store.setItem(USER_KEY, JSON.stringify({ keyId, userId }));
+}
+
+export async function getUser() {
+  const item = await Store.getItem(USER_KEY);
+  return item ? JSON.parse(item) : null;
+}
+
+export async function removeUser({ keyId }) {
+  const item = await getUser();
+  if (!item || item.keyId !== keyId) {
+    throw new Error('User not found');
+  }
+  await Store.removeItem(USER_KEY);
 }
 
 //
 // Helper functions
 //
 
-function getItemKey(keyId) {
-  const shortId = keyId.replace(/-/g, '').slice(0, 10);
-  return `${VERSION}_${shortId}`;
-}
-
-function stringify({ keyId, phone, ciphertext }) {
+function stringifyKey({ keyId, ciphertext }) {
   return JSON.stringify({
     keyId,
-    phone,
     ciphertext: ciphertext.toString('base64'),
     time: new Date().toISOString(),
   });
 }
 
-function parse(item) {
-  if (!item) {
-    return null;
-  }
-  const { keyId, phone, ciphertext, time } = JSON.parse(item);
+function parseKey(item) {
+  const { keyId, ciphertext, time } = JSON.parse(item);
   return {
     keyId,
-    phone,
     ciphertext: Buffer.from(ciphertext, 'base64'),
     time: new Date(time),
   };
