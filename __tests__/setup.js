@@ -23,6 +23,7 @@ jest.mock('react-native-keychain', () => {
 jest.mock('frisbee', () => {
   return jest.fn().mockImplementation(() => {
     return {
+      auth: jest.fn(),
       post: jest.fn(),
       get: jest.fn(),
       put: jest.fn(),
