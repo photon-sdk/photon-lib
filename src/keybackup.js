@@ -8,7 +8,7 @@ import * as chacha from './chacha';
 import * as Keychain from './keychain';
 import * as KeyServer from './keyserver';
 import * as CloudStore from './cloudstore';
-import { isPhone, isId, isCode, isObject } from './verify';
+import { isPhone, isId, isCode, isPin, isObject } from './verify';
 
 export const KEY_ID = 'photon.keyId';
 
@@ -22,119 +22,54 @@ export function init({ keyServerURI }) {
   KeyServer.init({ baseURI: keyServerURI });
 }
 
+//
+// Backup & Restore
+//
+
 /**
- * Check for an existing backup in cloud storage. There are two possible
- * workflows:
- *
- * Workflow A: If no backup exists, a new user should be registerd.
- *
- * Workflow B: If a backup for the phone number exists, the user has already
- * registered on another device and this device should initiate restore.
- *
- * @param  {string}  phone     The user's phone number
+ * Check for an existing backup in cloud storage.
  * @return {Promise<boolean>}  If a backup exists
  */
-export async function checkForExistingBackup({ phone }) {
-  if (!isPhone(phone)) {
-    throw new Error('Invalid args');
-  }
-  const backup = await CloudStore.get({ phone });
+export async function checkForExistingBackup() {
+  const backup = await CloudStore.getKey();
   if (backup && isId(backup.keyId)) {
     await Keychain.setItem(KEY_ID, backup.keyId);
   }
   return !!backup;
 }
 
-//
-// Workflow A
-//
-
 /**
- * Register a new user. This generates a new encryption key in the keyserver.
- * @param  {string} phone        The user's phone number
+ * Create an encrypted backup in cloud storage. The backup is encrypted using a
+ * random 256 bit encryption key that is stored on the photon-keyserver. A user
+ * chosen PIN is used to authentication download of the encryption key.
+ * @param  {Object} data  A serializable object to be backed up
+ * @param  {string} pin   A user chosen pin to authenticate to the keyserver
  * @return {Promise<undefined>}
  */
-export async function registerNewUser({ phone }) {
-  if (!isPhone(phone)) {
+export async function createBackup({ data, pin }) {
+  if (!isObject(data)) {
     throw new Error('Invalid args');
   }
-  const keyId = await KeyServer.createKey({ phone });
+  setPin({ pin });
+  const keyId = await KeyServer.createKey({ pin });
   await Keychain.setItem(KEY_ID, keyId);
-}
-
-/**
- * Verifiy a new user using a verification code (sent via SMS).
- * @param  {string} phone  The user's phone number
- * @param  {string} code   The verification code sent via SMS
- * @return {Promise<undefined>}
- */
-export async function verifyNewUser({ phone, code }) {
-  if (!isPhone(phone) || !isCode(code)) {
-    throw new Error('Invalid args');
-  }
-  const keyId = await fetchKeyId();
-  const encryptionKey = await KeyServer.verifyCreate({ keyId, phone, code });
-  await Keychain.setItem(keyId, stringifyKey({ phone, encryptionKey }));
-}
-
-/**
- * Create an encrypted backup of an object on cloud storage. This should be
- * called after a new has been registered and verified.
- * @param  {Object} object       The data to be backed up
- * @return {Promise<undefined>}
- */
-export async function createBackup(object) {
-  if (!isObject(object)) {
-    throw new Error('Invalid args');
-  }
-  const plaintext = Buffer.from(JSON.stringify(object), 'utf8');
-  const { keyId, phone, encryptionKey } = await fetchEncryptionKey();
+  const encryptionKey = await KeyServer.fetchKey({ keyId });
+  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
   const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
-  await CloudStore.put({ keyId, phone, ciphertext });
+  await CloudStore.putKey({ keyId, ciphertext });
 }
 
-//
-// Workflow B
-//
-
 /**
- * Register a new device. This is first step to restore a backup on a new
- * device e.g. in case the first device was lost or stolen. A user could also
- * chose to restore their wallet on another device for redunancy.
- * @param  {string} phone        The user's phone number
- * @return {Promise<undefined>}
+ * Restore an encrypted backup from cloud storage. The encryption key is fetched from
+ * the photon-keyserver by authenticating via a user chosen PIN.
+ * @param  {string} pin       A user chosen pin to authenticate to the keyserver
+ * @return {Promise<Object>}  The decrypted backup payload
  */
-export async function registerDevice({ phone }) {
-  if (!isPhone(phone)) {
-    throw new Error('Invalid args');
-  }
+export async function restoreBackup({ pin }) {
+  setPin({ pin });
   const keyId = await fetchKeyId();
-  await KeyServer.fetchKey({ keyId, phone });
-}
-
-/**
- * Verify phone number ownership for the new device by providing a verification
- * code which is sent via SMS
- * @param  {string} phone        The user's phone number
- * @param  {string} code         The verification code sent via SMS
- * @return {Promise<undefined>}
- */
-export async function verifyDevice({ phone, code }) {
-  if (!isPhone(phone) || !isCode(code)) {
-    throw new Error('Invalid args');
-  }
-  const keyId = await fetchKeyId();
-  const encryptionKey = await KeyServer.verifyFetch({ keyId, phone, code });
-  await Keychain.setItem(keyId, stringifyKey({ phone, encryptionKey }));
-}
-
-/**
- * Restore a backed up encrypted object from cloud storage.
- * @return {Promise<Object>}  The restored object
- */
-export async function restoreBackup() {
-  const { keyId, phone, encryptionKey } = await fetchEncryptionKey();
-  const backup = await CloudStore.get({ phone });
+  const encryptionKey = await KeyServer.fetchKey({ keyId });
+  const backup = await CloudStore.getKey();
   if (!backup || backup.keyId !== keyId) {
     return null;
   }
@@ -144,8 +79,152 @@ export async function restoreBackup() {
 }
 
 //
+// Change PIN
+//
+
+/**
+ * Change the user chosen PIN on the photon-keyserver.
+ * @param  {string} pin     A user chosen pin to authenticate to the keyserver
+ * @param  {string} newPin  The new pin to replace the old one
+ * @return {Promise<undefined>}
+ */
+export async function changePin({ pin, newPin }) {
+  if (!isPin(newPin)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const keyId = await fetchKeyId();
+  await KeyServer.changePin({ keyId, newPin });
+}
+
+//
+// Regiser User ID
+//
+
+/**
+ * Register a user id like an email address or phone number that can be used to
+ * reset the pin later in case the user forgets pin. this step is completely
+ * optional and may not be desirable by some users e.g. if they have saved their
+ * pin in a password manager.
+ * @param  {string} userId  The user's phone number or email address
+ * @param  {string} pin     A user chosen pin to authenticate to the keyserver
+ * @return {Promise<undefined>}
+ */
+export async function registerUser({ userId, pin }) {
+  if (!isPhone(userId)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const keyId = await fetchKeyId();
+  await KeyServer.createUser({ keyId, userId });
+}
+
+/**
+ * Verify the user id with a code that was sent from the keyserver either via
+ * SMS or email (depending on the type of user id).
+ * @param  {string} userId  The user's phone number or email address
+ * @param  {string} code    The verification code sent via SMS or email
+ * @return {Promise<undefined>}
+ */
+export async function verifyUser({ userId, code }) {
+  if (!isPhone(userId) || !isCode(code)) {
+    throw new Error('Invalid args');
+  }
+  const keyId = await fetchKeyId();
+  await KeyServer.verifyUser({ keyId, userId, code });
+  await CloudStore.putUser({ keyId, userId });
+}
+
+/**
+ * Get the user id stored on the cloud storage which can be used to reset the pin.
+ * @return {string}  The user id stored on cloud storage
+ */
+export async function getUser() {
+  const item = await CloudStore.getUser();
+  return item ? item.userId : null;
+}
+
+/**
+ * Delete the email address or phone number from the key server and cloud storage.
+ * This should be called e.g. before the user wants to change their user id to a
+ * new one.
+ * @param  {string} userId  The user's phone number or email address
+ * @param  {string} pin     A user chosen pin to authenticate to the keyserver
+ * @return {Promise<undefined>}
+ */
+export async function removeUser({ userId, pin }) {
+  if (!isPhone(userId)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const keyId = await fetchKeyId();
+  await KeyServer.removeUser({ keyId, userId });
+  await CloudStore.removeUser({ keyId });
+}
+
+//
+// Reset PIN
+//
+
+/**
+ * In case the user has forgotten their pin and has verified a user id like an
+ * emaill address or phone number, this can be used to initiate a pin reset with
+ * a 30 day delay (to migidate SIM swap attacks). After calling this function,
+ * calling verifyPinReset will start the 30 day time lock. After that time delay
+ * finalizePinReset can be called with the new pin.
+ * @param  {string} userId       The user's phone number or email address
+ * @return {Promise<undefined>}
+ */
+export async function initPinReset({ userId }) {
+  if (!isPhone(userId)) {
+    throw new Error('Invalid args');
+  }
+  const keyId = await fetchKeyId();
+  await KeyServer.initPinReset({ keyId, userId });
+}
+
+/**
+ * Verify the user id with a code and check if the time lock delay is over.
+ * This function returns an iso formatted date string which represents the
+ * time lock delay. If this value is null it means the delay is over and
+ * finalizePinReset can be called with a new pin.
+ * @param  {string} userId         The user's phone number or email address
+ * @param  {string} code           The verification code sent via SMS or email
+ * @return {Promise<string|null>}  The time lock delay or null if it's over
+ */
+export async function verifyPinReset({ userId, code }) {
+  if (!isPhone(userId) || !isCode(code)) {
+    throw new Error('Invalid args');
+  }
+  const keyId = await fetchKeyId();
+  return KeyServer.verifyPinReset({ keyId, userId, code });
+}
+
+/**
+ * Calling this function after the time lock is over sets the new pin. Afterwards the user can recover their key using the new pin.
+ * @param  {string} userId      The user's phone number or email address
+ * @param  {string} code        The verification code sent via SMS or email
+ * @param  {string} newPin      The new pin (at least 4 digits)
+ *@return {Promise<undefined>}
+ */
+export async function finalizePinReset({ userId, code, newPin }) {
+  if (!isPhone(userId) || !isCode(code) || !isPin(newPin)) {
+    throw new Error('Invalid args');
+  }
+  const keyId = await fetchKeyId();
+  await KeyServer.finalizePinReset({ keyId, userId, code, newPin });
+}
+
+//
 // Helper functions
 //
+
+function setPin({ pin }) {
+  if (!isPin(pin)) {
+    throw new Error('Invalid args');
+  }
+  KeyServer.setPin({ pin });
+}
 
 async function fetchKeyId() {
   const keyId = await Keychain.getItem(KEY_ID);
@@ -153,31 +232,4 @@ async function fetchKeyId() {
     throw new Error('No key id found. Call checkForExistingBackup() first.');
   }
   return keyId;
-}
-
-async function fetchEncryptionKey() {
-  const keyId = await fetchKeyId();
-  const key = parseKey(await Keychain.getItem(keyId));
-  if (!key) {
-    throw new Error('No encryption key in keychain. Call registerNewUser() or registerDevice() first.');
-  }
-  return { keyId, ...key };
-}
-
-function stringifyKey({ phone, encryptionKey }) {
-  return JSON.stringify({
-    phone,
-    encryptionKey: encryptionKey.toString('base64'),
-  });
-}
-
-function parseKey(item) {
-  if (!item) {
-    return null;
-  }
-  const { phone, encryptionKey } = JSON.parse(item);
-  return {
-    phone,
-    encryptionKey: Buffer.from(encryptionKey, 'base64'),
-  };
 }
