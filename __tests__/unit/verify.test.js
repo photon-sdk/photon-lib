@@ -87,6 +87,45 @@ describe('Verify unit test', () => {
     });
   });
 
+  describe('isPin', () => {
+    it('returns true for a four digits', () => {
+      expect(verify.isPin('1234')).toBe(true);
+    });
+
+    it('returns true for a password', () => {
+      expect(verify.isPin('#!Pa$$wörD')).toBe(true);
+    });
+
+    it('returns true for a passphrase', () => {
+      expect(verify.isPin('this is a passphrase')).toBe(true);
+    });
+
+    it('returns false for only three digits', () => {
+      expect(verify.isPin('123')).toBe(false);
+    });
+
+    it('returns false for a new line', () => {
+      expect(verify.isPin('1234\n')).toBe(false);
+    });
+
+    it('returns false if pin is too long', () => {
+      const pin = new Array(257).fill('0').join('');
+      expect(verify.isPin(pin)).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      expect(verify.isPin(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(verify.isPin(undefined)).toBe(false);
+    });
+
+    it('returns false for empty string', () => {
+      expect(verify.isPin('')).toBe(false);
+    });
+  });
+
   describe('isObject', () => {
     it('returns true for a valid Object', () => {
       expect(verify.isObject(new Object())).toBe(true); // eslint-disable-line
