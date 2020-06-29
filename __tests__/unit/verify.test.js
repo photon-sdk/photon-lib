@@ -31,6 +31,40 @@ describe('Verify unit test', () => {
     });
   });
 
+  describe('isEmail', () => {
+    it('returns true for a valid email address', () => {
+      expect(verify.isEmail('jon.smith@example.com')).toBe(true);
+    });
+
+    it('returns false for an invalid email address', () => {
+      expect(verify.isEmail('@example.com')).toBe(false);
+    });
+
+    it('returns false for an invalid email address', () => {
+      expect(verify.isEmail('jon.smith@examplecom')).toBe(false);
+    });
+
+    it('returns false for an invalid email address', () => {
+      expect(verify.isEmail('jon.smithexample.com')).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      expect(verify.isEmail(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(verify.isEmail(undefined)).toBe(false);
+    });
+
+    it('returns false for object', () => {
+      expect(verify.isEmail({})).toBe(false);
+    });
+
+    it('returns false for empty string', () => {
+      expect(verify.isEmail('')).toBe(false);
+    });
+  });
+
   describe('isCode', () => {
     it('returns true for a valid code', () => {
       expect(verify.isCode('000000')).toBe(true);
@@ -84,6 +118,45 @@ describe('Verify unit test', () => {
 
     it('returns false for empty string', () => {
       expect(verify.isId('')).toBe(false);
+    });
+  });
+
+  describe('isPin', () => {
+    it('returns true for a four digits', () => {
+      expect(verify.isPin('1234')).toBe(true);
+    });
+
+    it('returns true for a password', () => {
+      expect(verify.isPin('#!Pa$$wörD')).toBe(true);
+    });
+
+    it('returns true for a passphrase', () => {
+      expect(verify.isPin('this is a passphrase')).toBe(true);
+    });
+
+    it('returns false for only three digits', () => {
+      expect(verify.isPin('123')).toBe(false);
+    });
+
+    it('returns false for a new line', () => {
+      expect(verify.isPin('1234\n')).toBe(false);
+    });
+
+    it('returns false if pin is too long', () => {
+      const pin = new Array(257).fill('0').join('');
+      expect(verify.isPin(pin)).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      expect(verify.isPin(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(verify.isPin(undefined)).toBe(false);
+    });
+
+    it('returns false for empty string', () => {
+      expect(verify.isPin('')).toBe(false);
     });
   });
 

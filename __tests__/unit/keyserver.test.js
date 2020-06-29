@@ -1,9 +1,11 @@
 import * as KeyServer from '../../src/keyserver';
 
-describe('Keychain unit test', () => {
+describe('KeyServer unit test', () => {
   const keyId = 'some-id';
-  const phone = '+4917512345678';
+  const userId = '+4917512345678';
   const code = '000000';
+  const pin = '1234';
+  const newPin = '5678';
   let api;
 
   beforeEach(() => {
@@ -17,7 +19,7 @@ describe('Keychain unit test', () => {
         status: 500,
         body: { message: 'boom' },
       });
-      await expect(KeyServer.createKey({ phone })).rejects.toThrow(/boom/);
+      await expect(KeyServer.createKey({ pin })).rejects.toThrow(/boom/);
     });
 
     it('should return key id on success', async () => {
@@ -25,34 +27,10 @@ describe('Keychain unit test', () => {
         status: 201,
         body: { id: 'some-id' },
       });
-      const resKeyId = await KeyServer.createKey({ phone });
+      const resKeyId = await KeyServer.createKey({ pin });
       expect(resKeyId).toBe('some-id');
-      expect(api.post.mock.calls[0][0]).toBe('/v1/key');
-      expect(api.post.mock.calls[0][1]).toEqual({ body: { phone } });
-    });
-  });
-
-  describe('verifyCreate', () => {
-    it('should fail on api error', async () => {
-      api.put.mockResolvedValue({
-        status: 500,
-        body: { message: 'boom' },
-      });
-      await expect(KeyServer.verifyCreate({ keyId, phone, code })).rejects.toThrow(/boom/);
-    });
-
-    it('should return encryption key on success', async () => {
-      api.put.mockResolvedValue({
-        status: 200,
-        body: {
-          id: 'some-id',
-          encryptionKey: Buffer.from('some-key').toString('base64'),
-        },
-      });
-      const keyBuf = await KeyServer.verifyCreate({ keyId, phone, code });
-      expect(keyBuf.toString()).toBe('some-key');
-      expect(api.put.mock.calls[0][0]).toBe('/v1/key/some-id');
-      expect(api.put.mock.calls[0][1]).toEqual({ body: { phone, code, op: 'verify' } });
+      expect(api.post.mock.calls[0]).toEqual(['/v2/key', { body: { pin } }]);
+      expect(api.auth.mock.calls[0]).toEqual(['', pin]);
     });
   });
 
@@ -62,7 +40,91 @@ describe('Keychain unit test', () => {
         status: 500,
         body: { message: 'boom' },
       });
-      await expect(KeyServer.fetchKey({ keyId, phone })).rejects.toThrow(/boom/);
+      await expect(KeyServer.fetchKey({ keyId })).rejects.toThrow(/boom/);
+    });
+
+    it('should return encryption key on success', async () => {
+      api.get.mockResolvedValue({
+        status: 200,
+        body: {
+          id: 'some-id',
+          encryptionKey: Buffer.from('some-key').toString('base64'),
+        },
+      });
+      const keyBuf = await KeyServer.fetchKey({ keyId });
+      expect(keyBuf.toString()).toBe('some-key');
+      expect(api.get.mock.calls[0][0]).toBe('/v2/key/some-id');
+    });
+  });
+
+  describe('changePin', () => {
+    it('should fail on api error', async () => {
+      api.put.mockResolvedValue({
+        status: 500,
+        body: { message: 'boom' },
+      });
+      await expect(KeyServer.changePin({ keyId, newPin })).rejects.toThrow(/boom/);
+    });
+
+    it('should set new pin on success', async () => {
+      api.put.mockResolvedValue({
+        status: 200,
+        body: { message: 'Success' },
+      });
+      await KeyServer.changePin({ keyId, newPin });
+      expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id');
+      expect(api.put.mock.calls[0][1]).toEqual({ body: { newPin } });
+      expect(api.auth.mock.calls[0]).toEqual(['', '5678']);
+    });
+  });
+
+  describe('createUser', () => {
+    it('should fail on api error', async () => {
+      api.post.mockResolvedValue({
+        status: 500,
+        body: { message: 'boom' },
+      });
+      await expect(KeyServer.createUser({ keyId, userId })).rejects.toThrow(/boom/);
+    });
+
+    it('should return 201 on success', async () => {
+      api.post.mockResolvedValue({
+        status: 201,
+        body: { message: 'Success' },
+      });
+      await KeyServer.createUser({ keyId, userId });
+      expect(api.post.mock.calls[0][0]).toBe('/v2/key/some-id/user');
+      expect(api.post.mock.calls[0][1]).toEqual({ body: { userId } });
+    });
+  });
+
+  describe('verifyUser', () => {
+    it('should fail on api error', async () => {
+      api.put.mockResolvedValue({
+        status: 500,
+        body: { message: 'boom' },
+      });
+      await expect(KeyServer.verifyUser({ keyId, userId, code })).rejects.toThrow(/boom/);
+    });
+
+    it('should return 200 on success', async () => {
+      api.put.mockResolvedValue({
+        status: 200,
+        body: { message: 'Success' },
+      });
+      await KeyServer.verifyUser({ keyId, userId, code });
+      expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
+      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'verify' } });
+    });
+  });
+
+  describe('initPinReset', () => {
+    it('should fail on api error', async () => {
+      api.get.mockResolvedValue({
+        status: 500,
+        body: { message: 'boom' },
+      });
+      await expect(KeyServer.initPinReset({ keyId, userId })).rejects.toThrow(/boom/);
     });
 
     it('should return 200 on success', async () => {
@@ -70,63 +132,53 @@ describe('Keychain unit test', () => {
         status: 200,
         body: { message: 'Success' },
       });
-      await KeyServer.fetchKey({ keyId, phone });
-      expect(api.get.mock.calls[0][0]).toBe('/v1/key/some-id');
-      expect(api.get.mock.calls[0][1]).toEqual({ params: { phone } });
+      await KeyServer.initPinReset({ keyId, userId });
+      expect(api.get.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678/reset');
     });
   });
 
-  describe('verifyFetch', () => {
+  describe('verifyPinReset', () => {
     it('should fail on api error', async () => {
       api.put.mockResolvedValue({
         status: 500,
         body: { message: 'boom' },
       });
-      await expect(KeyServer.verifyFetch({ keyId, phone, code })).rejects.toThrow(/boom/);
+      await expect(KeyServer.verifyPinReset({ keyId, userId, code })).rejects.toThrow(/boom/);
     });
 
-    it('should return encryption key on success', async () => {
+    it('should return 423 on time lock', async () => {
       api.put.mockResolvedValue({
-        status: 200,
+        status: 423,
         body: {
-          id: 'some-id',
-          encryptionKey: Buffer.from('some-key').toString('base64'),
+          message: 'Time locked until',
+          delay: '2020-06-01T03:33:47.980Z',
         },
       });
-      const keyBuf = await KeyServer.verifyFetch({ keyId, phone, code });
-      expect(keyBuf.toString()).toBe('some-key');
-      expect(api.put.mock.calls[0][0]).toBe('/v1/key/some-id');
-      expect(api.put.mock.calls[0][1]).toEqual({ body: { phone, code, op: 'read' } });
-    });
-  });
-
-  describe('removeKey', () => {
-    it('should fail on api error', async () => {
-      api.delete.mockResolvedValue({
-        status: 500,
-        body: { message: 'boom' },
-      });
-      await expect(KeyServer.removeKey({ keyId, phone })).rejects.toThrow(/boom/);
+      const delay = await KeyServer.verifyPinReset({ keyId, userId, code });
+      expect(delay).toBe('2020-06-01T03:33:47.980Z');
+      expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
+      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin' } });
     });
 
-    it('should return 200 on success', async () => {
-      api.delete.mockResolvedValue({
-        status: 200,
+    it('should return 304 for time lock over', async () => {
+      api.put.mockResolvedValue({
+        status: 304,
         body: { message: 'Success' },
       });
-      await KeyServer.removeKey({ keyId, phone });
-      expect(api.delete.mock.calls[0][0]).toBe('/v1/key/some-id');
-      expect(api.delete.mock.calls[0][1]).toEqual({ params: { phone } });
+      const delay = await KeyServer.verifyPinReset({ keyId, userId, code });
+      expect(delay).toBe(null);
+      expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
+      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin' } });
     });
   });
 
-  describe('verifyRemove', () => {
+  describe('finalizePinReset', () => {
     it('should fail on api error', async () => {
       api.put.mockResolvedValue({
         status: 500,
         body: { message: 'boom' },
       });
-      await expect(KeyServer.verifyRemove({ keyId, phone, code })).rejects.toThrow(/boom/);
+      await expect(KeyServer.finalizePinReset({ keyId, userId, code, newPin })).rejects.toThrow(/boom/);
     });
 
     it('should return 200 on success', async () => {
@@ -134,10 +186,29 @@ describe('Keychain unit test', () => {
         status: 200,
         body: { message: 'Success' },
       });
-      const response = await KeyServer.verifyRemove({ keyId, phone, code });
-      expect(response).toBe(null);
-      expect(api.put.mock.calls[0][0]).toBe('/v1/key/some-id');
-      expect(api.put.mock.calls[0][1]).toEqual({ body: { phone, code, op: 'remove' } });
+      await KeyServer.finalizePinReset({ keyId, userId, code, newPin });
+      expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
+      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin', newPin } });
+      expect(api.auth.mock.calls[0]).toEqual(['', '5678']);
+    });
+  });
+
+  describe('removeUser', () => {
+    it('should fail on api error', async () => {
+      api.delete.mockResolvedValue({
+        status: 500,
+        body: { message: 'boom' },
+      });
+      await expect(KeyServer.removeUser({ keyId, userId })).rejects.toThrow(/boom/);
+    });
+
+    it('should return 200 on success', async () => {
+      api.delete.mockResolvedValue({
+        status: 200,
+        body: { message: 'Success' },
+      });
+      await KeyServer.removeUser({ keyId, userId });
+      expect(api.delete.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
     });
   });
 });

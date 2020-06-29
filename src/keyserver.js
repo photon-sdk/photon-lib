@@ -22,73 +22,87 @@ export function init({ baseURI }) {
 }
 
 /**
- * Create a new encryption key by registering a new user id. After this
- * request a verification sms will be sent to the provided phone number
- * to prove ownership.
- * @param  {string} phone     The user's phone number
- * @return {Promise<string>}  The encryption key id
+ * Set the user chosen PIN as a basic authentication http header.
+ * @param {string} pin  A user chosen pin to authenticate to the keyserver
  */
-export async function createKey({ phone }) {
-  const { status, body } = await _api.post(`/v1/key`, {
-    body: { phone },
+export function setPin({ pin }) {
+  _api.auth('', pin);
+}
+
+/**
+ * Create a new encryption key in the photon-keyserver.
+ * @param  {string} pin       A user chosen pin to authenticate to the keyserver
+ * @return {Promise<string>}  The key id for the encryption key
+ */
+export async function createKey({ pin }) {
+  const { status, body } = await _api.post(`/v2/key`, {
+    body: { pin },
   });
   if (status !== 201) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
+  setPin({ pin });
   return body.id;
 }
 
 /**
- * Verify the creation of the new user with the verification code
- * which was sent via sms.
- * @param  {string} keyId     The encryption key id
- * @param  {string} phone     The user's phone number
- * @param  {string} code      The verification code sent via sms
+ * Download the encryption key from the key server. The pin needs to be set in
+ * the http auth headers before calling this method.
+ * @param  {string} keyId     The key id for the encryption key
  * @return {Promise<Buffer>}  The encryption key buffer
  */
-export async function verifyCreate({ keyId, phone, code }) {
-  return _verifyKey({ keyId, phone, code, op: 'verify' });
+export async function fetchKey({ keyId }) {
+  const { status, body } = await _api.get(`/v2/key/${keyId}`);
+  if (status !== 200) {
+    throw new Error(`Keyserver error: ${body.message}`);
+  }
+  return Buffer.from(body.encryptionKey, 'base64');
 }
 
 /**
- * Request encryption key download. After this request a verification sms
- * will be sent to the provided phone number to prove ownership.
- * @param  {string} keyId        The encryption key id
- * @param  {string} phone        The user's phone number
+ * Update the pin to a new one. The pin needs to be set in the http auth headers
+ * before calling this method.
+ * @param  {string} keyId   The key id for the encryption key
+ * @param  {string} newPin  The new pin to replace the old on
  * @return {Promise<undefined>}
  */
-export async function fetchKey({ keyId, phone }) {
-  const { status, body } = await _api.get(`/v1/key/${keyId}`, {
-    params: { phone },
+export async function changePin({ keyId, newPin }) {
+  const { status, body } = await _api.put(`/v2/key/${keyId}`, {
+    body: { newPin },
   });
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
+  setPin({ pin: newPin });
 }
 
 /**
- * Verify the fetch request for the encryption key with the verification code
- * which was sent via sms.
- * @param  {string} keyId     The encryption key id
- * @param  {string} phone     The user's phone number
- * @param  {string} code      The verification code sent via sms
- * @return {Promise<Buffer>}  The encryption key buffer
- */
-export async function verifyFetch({ keyId, phone, code }) {
-  return _verifyKey({ keyId, phone, code, op: 'read' });
-}
-
-/**
- * Request encryption key and phone number removal. After this request a
- * verification sms will be sent to the provided phone number to prove ownership.
- * This should only be called if user's wallet backup is no longer required.
- * @param  {string} keyId        The encryption key id
- * @param  {string} phone        The user's phone number
+ * Register a new user id for a given key id. The pin needs to be set in the
+ * http auth headers before calling this method.
+ * @param  {string} keyId   The key id for the encryption key
+ * @param  {string} userId  The user's phone number or email address
  * @return {Promise<undefined>}
  */
-export async function removeKey({ keyId, phone }) {
-  const { status, body } = await _api.delete(`/v1/key/${keyId}`, {
-    params: { phone },
+export async function createUser({ keyId, userId }) {
+  const { status, body } = await _api.post(`/v2/key/${keyId}/user`, {
+    body: { userId },
+  });
+  if (status !== 201) {
+    throw new Error(`Keyserver error: ${body.message}`);
+  }
+}
+
+/**
+ * Verify the registered user id for a given key id.
+ * @param  {string} keyId   The key id for the encryption key
+ * @param  {string} userId  The user's phone number or email address
+ * @param  {string} code    The verification code sent via SMS or email
+ * @return {Promise<undefined>}
+ */
+export async function verifyUser({ keyId, userId, code }) {
+  userId = encodeURIComponent(userId);
+  const { status, body } = await _api.put(`/v2/key/${keyId}/user/${userId}`, {
+    body: { code, op: 'verify' },
   });
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
@@ -96,24 +110,71 @@ export async function removeKey({ keyId, phone }) {
 }
 
 /**
- * Verify the removal request for the encryption key with the verification code
- * which was sent via sms. This will delete all data accociated with the user.
- * @param  {string} keyId     The encryption key id
- * @param  {string} phone     The user's phone number
- * @param  {string} code      The verification code sent via sms
- * @return {Promise<null>}  The encryption key buffer
+ * Initiate a pin reset in case the user forgot their pin. A time lock will be set
+ * in the keyserver.
+ * @param  {string} keyId   The key id for the encryption key
+ * @param  {string} userId  The user's phone number or email address
+ * @return {Promise<undefined>}
  */
-export async function verifyRemove({ keyId, phone, code }) {
-  return _verifyKey({ keyId, phone, code, op: 'remove' });
+export async function initPinReset({ keyId, userId }) {
+  userId = encodeURIComponent(userId);
+  const { status, body } = await _api.get(`/v2/key/${keyId}/user/${userId}/reset`);
+  if (status !== 200) {
+    throw new Error(`Keyserver error: ${body.message}`);
+  }
 }
 
-async function _verifyKey({ keyId, phone, code, op }) {
-  const { status, body } = await _api.put(`/v1/key/${keyId}`, {
-    body: { phone, code, op },
+/**
+ * Verify a pin reset. This api can be polled until the time lock delay is over and
+ * the http response status code is no longer 423. When the response status is 304
+ * finalizePinReset can be called with the new pin.
+ * @param  {string} keyId          The key id for the encryption key
+ * @param  {string} userId         The user's phone number or email address
+ * @param  {string} code           The verification code sent via SMS or email
+ * @return {Promise<string|null>}  The time lock delay or null when it's over
+ */
+export async function verifyPinReset({ keyId, userId, code }) {
+  userId = encodeURIComponent(userId);
+  const { status, body } = await _api.put(`/v2/key/${keyId}/user/${userId}`, {
+    body: { code, op: 'reset-pin' },
+  });
+  if (status !== 423 && status !== 304) {
+    throw new Error(`Keyserver error: ${body.message}`);
+  }
+  return body.delay || null;
+}
+
+/**
+ * Finalize a pin reset by providing the new pin. After this call is successful the
+ * new pin can be used to download the encryption key.
+ * @param  {string} keyId   The key id for the encryption key
+ * @param  {string} userId  The user's phone number or email address
+ * @param  {string} code    The verification code sent via SMS or email
+ * @param  {string} newPin  The new pin to replace the old on
+ * @return {Promise<undefined>}
+ */
+export async function finalizePinReset({ keyId, userId, code, newPin }) {
+  userId = encodeURIComponent(userId);
+  const { status, body } = await _api.put(`/v2/key/${keyId}/user/${userId}`, {
+    body: { code, op: 'reset-pin', newPin },
   });
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
-  const { encryptionKey } = body;
-  return encryptionKey ? Buffer.from(encryptionKey, 'base64') : null;
+  setPin({ pin: newPin });
+}
+
+/**
+ * Delete a user id from the key server. The pin needs to be set in the http auth
+ * headers before calling this method.
+ * @param  {string} keyId   The key id for the encryption key
+ * @param  {string} userId  The user's phone number or email address
+ * @return {Promise<undefined>}
+ */
+export async function removeUser({ keyId, userId }) {
+  userId = encodeURIComponent(userId);
+  const { status, body } = await _api.delete(`/v2/key/${keyId}/user/${userId}`);
+  if (status !== 200) {
+    throw new Error(`Keyserver error: ${body.message}`);
+  }
 }
