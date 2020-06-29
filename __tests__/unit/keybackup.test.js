@@ -123,12 +123,12 @@ describe('KeyBackup unit test', () => {
     });
 
     it('should fail for invalid phone', async () => {
-      await expect(KeyBackup.registerPhone({ phone: '', pin })).rejects.toThrow(/Invalid/);
+      await expect(KeyBackup.registerPhone({ userId: '', pin })).rejects.toThrow(/Invalid/);
       expect(mockKeyserverApi.post.mock.calls.length).toBe(1);
     });
 
     it('should set phone in key server', async () => {
-      await KeyBackup.registerPhone({ phone, pin });
+      await KeyBackup.registerPhone({ userId: phone, pin });
       expect(mockKeyserverApi.post.mock.calls.length).toBe(2);
     });
   });
@@ -136,17 +136,17 @@ describe('KeyBackup unit test', () => {
   describe('verifyPhone', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ phone, pin });
+      await KeyBackup.registerPhone({ userId: phone, pin });
     });
 
     it('should fail for invalid code', async () => {
-      await expect(KeyBackup.verifyPhone({ phone, code: '' })).rejects.toThrow(/Invalid/);
+      await expect(KeyBackup.verifyPhone({ userId: phone, code: '' })).rejects.toThrow(/Invalid/);
       expect(mockKeyserverApi.put.mock.calls.length).toBe(0);
       expect(await _CloudStore.getPhone()).toBe(null);
     });
 
     it('should verify and store phone in cloud store', async () => {
-      await KeyBackup.verifyPhone({ phone, code });
+      await KeyBackup.verifyPhone({ userId: phone, code });
       expect(mockKeyserverApi.put.mock.calls.length).toBe(1);
       expect(await _CloudStore.getPhone()).toBeDefined();
     });
@@ -155,7 +155,7 @@ describe('KeyBackup unit test', () => {
   describe('getPhone', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ phone, pin });
+      await KeyBackup.registerPhone({ userId: phone, pin });
     });
 
     it('should return null if user was not verified', async () => {
@@ -163,7 +163,7 @@ describe('KeyBackup unit test', () => {
     });
 
     it('should return verified phone', async () => {
-      await KeyBackup.verifyPhone({ phone, code });
+      await KeyBackup.verifyPhone({ userId: phone, code });
       expect(await KeyBackup.getPhone()).toBe(phone);
     });
   });
@@ -171,12 +171,12 @@ describe('KeyBackup unit test', () => {
   describe('removePhone', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ phone, pin });
+      await KeyBackup.registerPhone({ userId: phone, pin });
     });
 
     it('should delete verified phone', async () => {
-      await KeyBackup.verifyPhone({ phone, code });
-      await KeyBackup.removePhone({ phone, pin });
+      await KeyBackup.verifyPhone({ userId: phone, code });
+      await KeyBackup.removePhone({ userId: phone, pin });
       expect(mockKeyserverApi.delete.mock.calls.length).toBe(1);
       expect(await KeyBackup.getPhone()).toBe(null);
     });
@@ -188,12 +188,12 @@ describe('KeyBackup unit test', () => {
     });
 
     it('should fail for invalid email', async () => {
-      await expect(KeyBackup.registerEmail({ email: '', pin })).rejects.toThrow(/Invalid/);
+      await expect(KeyBackup.registerEmail({ userId: '', pin })).rejects.toThrow(/Invalid/);
       expect(mockKeyserverApi.post.mock.calls.length).toBe(1);
     });
 
     it('should set email in key server', async () => {
-      await KeyBackup.registerEmail({ email, pin });
+      await KeyBackup.registerEmail({ userId: email, pin });
       expect(mockKeyserverApi.post.mock.calls.length).toBe(2);
     });
   });
@@ -201,17 +201,17 @@ describe('KeyBackup unit test', () => {
   describe('verifyEmail', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerEmail({ email, pin });
+      await KeyBackup.registerEmail({ userId: email, pin });
     });
 
     it('should fail for invalid code', async () => {
-      await expect(KeyBackup.verifyEmail({ email, code: '' })).rejects.toThrow(/Invalid/);
+      await expect(KeyBackup.verifyEmail({ userId: email, code: '' })).rejects.toThrow(/Invalid/);
       expect(mockKeyserverApi.put.mock.calls.length).toBe(0);
       expect(await _CloudStore.getEmail()).toBe(null);
     });
 
     it('should verify and store email in cloud store', async () => {
-      await KeyBackup.verifyEmail({ email, code });
+      await KeyBackup.verifyEmail({ userId: email, code });
       expect(mockKeyserverApi.put.mock.calls.length).toBe(1);
       expect(await _CloudStore.getEmail()).toBeDefined();
     });
@@ -220,7 +220,7 @@ describe('KeyBackup unit test', () => {
   describe('getEmail', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerEmail({ email, pin });
+      await KeyBackup.registerEmail({ userId: email, pin });
     });
 
     it('should return null if user was not verified', async () => {
@@ -228,7 +228,7 @@ describe('KeyBackup unit test', () => {
     });
 
     it('should return verified email', async () => {
-      await KeyBackup.verifyEmail({ email, code });
+      await KeyBackup.verifyEmail({ userId: email, code });
       expect(await KeyBackup.getEmail()).toBe(email);
     });
   });
@@ -236,12 +236,12 @@ describe('KeyBackup unit test', () => {
   describe('removeEmail', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerEmail({ email, pin });
+      await KeyBackup.registerEmail({ userId: email, pin });
     });
 
     it('should delete verified email', async () => {
-      await KeyBackup.verifyEmail({ email, code });
-      await KeyBackup.removeEmail({ email, pin });
+      await KeyBackup.verifyEmail({ userId: email, code });
+      await KeyBackup.removeEmail({ userId: email, pin });
       expect(mockKeyserverApi.delete.mock.calls.length).toBe(1);
       expect(await KeyBackup.getEmail()).toBe(null);
     });
@@ -250,8 +250,8 @@ describe('KeyBackup unit test', () => {
   describe('initPinReset', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ phone, pin });
-      await KeyBackup.verifyPhone({ phone, code });
+      await KeyBackup.registerPhone({ userId: phone, pin });
+      await KeyBackup.verifyPhone({ userId: phone, code });
     });
 
     it('should fail for invalid user id', async () => {
@@ -269,8 +269,8 @@ describe('KeyBackup unit test', () => {
   describe('verifyPinReset', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ phone, pin });
-      await KeyBackup.verifyPhone({ phone, code });
+      await KeyBackup.registerPhone({ userId: phone, pin });
+      await KeyBackup.verifyPhone({ userId: phone, code });
       await KeyBackup.initPinReset({ userId: phone });
     });
 
@@ -304,8 +304,8 @@ describe('KeyBackup unit test', () => {
   describe('finalizePinReset', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ phone, pin });
-      await KeyBackup.verifyPhone({ phone, code });
+      await KeyBackup.registerPhone({ userId: phone, pin });
+      await KeyBackup.verifyPhone({ userId: phone, code });
       await KeyBackup.initPinReset({ userId: phone });
     });
 

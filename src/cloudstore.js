@@ -50,14 +50,14 @@ export async function removeKeyId({ keyId }) {
 // Phone number storage
 //
 
-export async function putPhone({ phone }) {
-  if (!isPhone(phone)) {
+export async function putPhone({ userId }) {
+  if (!isPhone(userId)) {
     throw new Error('Invalid args');
   }
   if (await Store.getItem(PHONE)) {
     throw new Error('Phone already present');
   }
-  await Store.setItem(PHONE, phone);
+  await Store.setItem(PHONE, userId);
 }
 
 export async function getPhone() {
@@ -72,14 +72,14 @@ export async function removePhone() {
 // Email address storage
 //
 
-export async function putEmail({ email }) {
-  if (!isEmail(email)) {
+export async function putEmail({ userId }) {
+  if (!isEmail(userId)) {
     throw new Error('Invalid args');
   }
   if (await Store.getItem(EMAIL)) {
     throw new Error('Email already present');
   }
-  await Store.setItem(EMAIL, email);
+  await Store.setItem(EMAIL, userId);
 }
 
 export async function getEmail() {
