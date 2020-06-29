@@ -10,9 +10,9 @@ import { isPhone, isEmail, isId, isBuffer } from './verify';
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : AsyncStorage;
 
 const VERSION = '1';
-const ITEM_KEY = `${VERSION}_photon_key`;
-const PHONE_KEY = `${VERSION}_photon_phone`;
-const EMAIL_KEY = `${VERSION}_photon_email`;
+const KEY_ID = `${VERSION}_photon_key_id`;
+const PHONE = `${VERSION}_photon_phone`;
+const EMAIL = `${VERSION}_photon_email`;
 
 //
 // Encrypted key storage
@@ -22,23 +22,28 @@ export async function putKey({ keyId, ciphertext }) {
   if (!isId(keyId) || !isBuffer(ciphertext)) {
     throw new Error('Invalid args');
   }
-  if (await Store.getItem(ITEM_KEY)) {
+  if (await Store.getItem(KEY_ID)) {
     throw new Error('Backup already present');
   }
-  await Store.setItem(ITEM_KEY, stringifyKey({ keyId, ciphertext }));
+  await Store.setItem(KEY_ID, keyId);
+  await Store.setItem(shortKeyId(keyId), stringifyKey({ keyId, ciphertext }));
 }
 
 export async function getKey() {
-  const item = await Store.getItem(ITEM_KEY);
-  return item ? parseKey(item) : null;
+  const keyId = await Store.getItem(KEY_ID);
+  if (!keyId) {
+    return null;
+  }
+  const key = await Store.getItem(shortKeyId(keyId));
+  return key ? parseKey(key) : null;
 }
 
-export async function removeKey({ keyId }) {
+export async function removeKeyId({ keyId }) {
   const item = await getKey();
   if (!item || item.keyId !== keyId) {
     throw new Error('Backup not found');
   }
-  await Store.removeItem(ITEM_KEY);
+  await Store.removeItem(KEY_ID);
 }
 
 //
@@ -49,18 +54,18 @@ export async function putPhone({ phone }) {
   if (!isPhone(phone)) {
     throw new Error('Invalid args');
   }
-  if (await Store.getItem(PHONE_KEY)) {
+  if (await Store.getItem(PHONE)) {
     throw new Error('Phone already present');
   }
-  await Store.setItem(PHONE_KEY, phone);
+  await Store.setItem(PHONE, phone);
 }
 
 export async function getPhone() {
-  return Store.getItem(PHONE_KEY);
+  return Store.getItem(PHONE);
 }
 
 export async function removePhone() {
-  await Store.removeItem(PHONE_KEY);
+  await Store.removeItem(PHONE);
 }
 
 //
@@ -71,23 +76,28 @@ export async function putEmail({ email }) {
   if (!isEmail(email)) {
     throw new Error('Invalid args');
   }
-  if (await Store.getItem(EMAIL_KEY)) {
+  if (await Store.getItem(EMAIL)) {
     throw new Error('Email already present');
   }
-  await Store.setItem(EMAIL_KEY, email);
+  await Store.setItem(EMAIL, email);
 }
 
 export async function getEmail() {
-  return Store.getItem(EMAIL_KEY);
+  return Store.getItem(EMAIL);
 }
 
 export async function removeEmail() {
-  await Store.removeItem(EMAIL_KEY);
+  await Store.removeItem(EMAIL);
 }
 
 //
 // Helper functions
 //
+
+function shortKeyId(keyId) {
+  const shortId = keyId.replace(/-/g, '').slice(0, 8);
+  return `${VERSION}_${shortId}`;
+}
 
 function stringifyKey({ keyId, ciphertext }) {
   return JSON.stringify({

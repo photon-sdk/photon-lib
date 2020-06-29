@@ -21,17 +21,19 @@ describe('CloudStore unit test', () => {
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(0);
     });
 
+    it('store item', async () => {
+      await CloudStore.putKey({ keyId, ciphertext });
+      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_key_id');
+      expect(mockAsyncStorage.setItem.mock.calls[0][1]).toBe(keyId);
+      expect(mockAsyncStorage.setItem.mock.calls[1][0]).toBe('1_8abe1a93');
+      expect(mockAsyncStorage.setItem.mock.calls[1][1]).toMatch(/^{"keyId":.*"}$/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(2);
+    });
+
     it('should not backup twice', async () => {
       await CloudStore.putKey({ keyId, ciphertext });
       await expect(CloudStore.putKey({ keyId, ciphertext })).rejects.toThrow(/already present/);
-      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
-    });
-
-    it('store item', async () => {
-      await CloudStore.putKey({ keyId, ciphertext });
-      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_key');
-      expect(mockAsyncStorage.setItem.mock.calls[0][1]).toMatch(/^{"keyId":.*"}$/);
-      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(2);
     });
   });
 
@@ -52,16 +54,16 @@ describe('CloudStore unit test', () => {
     });
   });
 
-  describe('removeKey', () => {
+  describe('removeKeyId', () => {
     it('fail on invalid args', async () => {
-      await expect(CloudStore.removeKey({ keyId: 'invalid' })).rejects.toThrow(/not found/);
+      await expect(CloudStore.removeKeyId({ keyId: 'invalid' })).rejects.toThrow(/not found/);
       expect(mockAsyncStorage.removeItem.mock.calls.length).toBe(0);
     });
 
     it('should remove stored item', async () => {
       await CloudStore.putKey({ keyId, ciphertext });
       expect(await CloudStore.getKey()).toBeTruthy();
-      await CloudStore.removeKey({ keyId });
+      await CloudStore.removeKeyId({ keyId });
       expect(await CloudStore.getKey()).toBe(null);
     });
   });
