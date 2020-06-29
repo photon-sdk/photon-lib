@@ -8,7 +8,7 @@ import * as chacha from './chacha';
 import * as Keychain from './keychain';
 import * as KeyServer from './keyserver';
 import * as CloudStore from './cloudstore';
-import { isPhone, isId, isCode, isPin, isObject } from './verify';
+import { isPhone, isEmail, isId, isCode, isPin, isObject } from './verify';
 
 export const KEY_ID = 'photon.keyId';
 
@@ -98,68 +98,127 @@ export async function changePin({ pin, newPin }) {
 }
 
 //
-// Regiser User ID
+// Register User ID
 //
 
 /**
- * Register a user id like an email address or phone number that can be used to
- * reset the pin later in case the user forgets pin. this step is completely
- * optional and may not be desirable by some users e.g. if they have saved their
- * pin in a password manager.
- * @param  {string} userId  The user's phone number or email address
- * @param  {string} pin     A user chosen pin to authenticate to the keyserver
+ * Register a phone number that can be used to reset the pin later in case the user
+ * forgets pin. this step is completely optional and may not be desirable by some users
+ * e.g. if they have saved their pin in a password manager.
+ * @param  {string} phone  The user's phone number or email address
+ * @param  {string} pin    A user chosen pin to authenticate to the keyserver
  * @return {Promise<undefined>}
  */
-export async function registerUser({ userId, pin }) {
-  if (!isPhone(userId)) {
+export async function registerPhone({ phone, pin }) {
+  if (!isPhone(phone)) {
     throw new Error('Invalid args');
   }
+  await _registerUser({ userId: phone, pin });
+}
+/**
+ * Verify the phone number with a code that was sent from the keyserver either via SMS.
+ * @param  {string} phone  The user's phone number
+ * @param  {string} code   The verification code sent via SMS or email
+ * @return {Promise<undefined>}
+ */
+export async function verifyPhone({ phone, code }) {
+  if (!isPhone(phone) || !isCode(code)) {
+    throw new Error('Invalid args');
+  }
+  await _verifyUser({ userId: phone, code });
+  await CloudStore.putPhone({ phone });
+}
+
+/**
+ * Get the phone number stored on the cloud storage which can be used to reset the pin.
+ * @return {string}  The user's phone number
+ */
+export async function getPhone() {
+  return CloudStore.getPhone();
+}
+
+/**
+ * Delete the phone number from the key server and cloud storage. This should be called
+ * e.g. before the user wants to change their user id to a new one.
+ * @param  {string} phone  The user's phone number
+ * @param  {string} pin    A user chosen pin to authenticate to the keyserver
+ * @return {Promise<undefined>}
+ */
+export async function removePhone({ phone, pin }) {
+  if (!isPhone(phone)) {
+    throw new Error('Invalid args');
+  }
+  await _removeUser({ userId: phone, pin });
+  await CloudStore.removePhone();
+}
+
+/**
+ * Register an email address that can be used to reset the pin later in case the user
+ * forgets pin. This step is completely optional and may not be desirable by some users
+ * e.g. if they have saved their pin in a password manager.
+ * @param  {string} email  The user's phone number or email address
+ * @param  {string} pin    A user chosen pin to authenticate to the keyserver
+ * @return {Promise<undefined>}
+ */
+export async function registerEmail({ email, pin }) {
+  if (!isEmail(email)) {
+    throw new Error('Invalid args');
+  }
+  await _registerUser({ userId: email, pin });
+}
+
+/**
+ * Verify the email address with a code that was sent from the keyserver either via email.
+ * @param  {string} email  The user's email address
+ * @param  {string} code   The verification code sent via SMS or email
+ * @return {Promise<undefined>}
+ */
+export async function verifyEmail({ email, code }) {
+  if (!isEmail(email) || !isCode(code)) {
+    throw new Error('Invalid args');
+  }
+  await _verifyUser({ userId: email, code });
+  await CloudStore.putEmail({ email });
+}
+
+/**
+ * Get the email address stored on the cloud storage which can be used to reset the pin.
+ * @return {string}  The user's email address
+ */
+export async function getEmail() {
+  return CloudStore.getEmail();
+}
+
+/**
+ * Delete the email address from the key server and cloud storage. This should be called
+ * e.g. before the user wants to change their user id to a new one.
+ * @param  {string} email  The user's email address
+ * @param  {string} pin    A user chosen pin to authenticate to the keyserver
+ * @return {Promise<undefined>}
+ */
+export async function removeEmail({ email, pin }) {
+  if (!isEmail(email)) {
+    throw new Error('Invalid args');
+  }
+  await _removeUser({ userId: email, pin });
+  await CloudStore.removeEmail();
+}
+
+async function _registerUser({ userId, pin }) {
   setPin({ pin });
   const keyId = await fetchKeyId();
   await KeyServer.createUser({ keyId, userId });
 }
 
-/**
- * Verify the user id with a code that was sent from the keyserver either via
- * SMS or email (depending on the type of user id).
- * @param  {string} userId  The user's phone number or email address
- * @param  {string} code    The verification code sent via SMS or email
- * @return {Promise<undefined>}
- */
-export async function verifyUser({ userId, code }) {
-  if (!isPhone(userId) || !isCode(code)) {
-    throw new Error('Invalid args');
-  }
+async function _verifyUser({ userId, code }) {
   const keyId = await fetchKeyId();
   await KeyServer.verifyUser({ keyId, userId, code });
-  await CloudStore.putUser({ keyId, userId });
 }
 
-/**
- * Get the user id stored on the cloud storage which can be used to reset the pin.
- * @return {string}  The user id stored on cloud storage
- */
-export async function getUser() {
-  const item = await CloudStore.getUser();
-  return item ? item.userId : null;
-}
-
-/**
- * Delete the email address or phone number from the key server and cloud storage.
- * This should be called e.g. before the user wants to change their user id to a
- * new one.
- * @param  {string} userId  The user's phone number or email address
- * @param  {string} pin     A user chosen pin to authenticate to the keyserver
- * @return {Promise<undefined>}
- */
-export async function removeUser({ userId, pin }) {
-  if (!isPhone(userId)) {
-    throw new Error('Invalid args');
-  }
+async function _removeUser({ userId, pin }) {
   setPin({ pin });
   const keyId = await fetchKeyId();
   await KeyServer.removeUser({ keyId, userId });
-  await CloudStore.removeUser({ keyId });
 }
 
 //
