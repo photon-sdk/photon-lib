@@ -31,6 +31,40 @@ describe('Verify unit test', () => {
     });
   });
 
+  describe('isEmail', () => {
+    it('returns true for a valid email address', () => {
+      expect(verify.isEmail('jon.smith@example.com')).toBe(true);
+    });
+
+    it('returns false for an invalid email address', () => {
+      expect(verify.isEmail('@example.com')).toBe(false);
+    });
+
+    it('returns false for an invalid email address', () => {
+      expect(verify.isEmail('jon.smith@examplecom')).toBe(false);
+    });
+
+    it('returns false for an invalid email address', () => {
+      expect(verify.isEmail('jon.smithexample.com')).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      expect(verify.isEmail(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(verify.isEmail(undefined)).toBe(false);
+    });
+
+    it('returns false for object', () => {
+      expect(verify.isEmail({})).toBe(false);
+    });
+
+    it('returns false for empty string', () => {
+      expect(verify.isEmail('')).toBe(false);
+    });
+  });
+
   describe('isCode', () => {
     it('returns true for a valid code', () => {
       expect(verify.isCode('000000')).toBe(true);
