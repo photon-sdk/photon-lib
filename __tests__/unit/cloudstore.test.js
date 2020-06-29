@@ -3,7 +3,8 @@ import * as CloudStore from '../../src/cloudstore';
 
 describe('CloudStore unit test', () => {
   const keyId = '8abe1a93-6a9c-490c-bbd5-d7f11a4a9c8f';
-  const userId = '+4917512345678';
+  const phone = '+4917512345678';
+  const email = 'jon.smith@example.com';
   const ciphertext = Buffer.from('encrypted stuff');
 
   beforeEach(() => {
@@ -28,7 +29,7 @@ describe('CloudStore unit test', () => {
 
     it('store item', async () => {
       await CloudStore.putKey({ keyId, ciphertext });
-      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('0_photon_key');
+      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_key');
       expect(mockAsyncStorage.setItem.mock.calls[0][1]).toMatch(/^{"keyId":.*"}$/);
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
     });
@@ -65,50 +66,87 @@ describe('CloudStore unit test', () => {
     });
   });
 
-  describe('putUser', () => {
+  describe('putPhone', () => {
     it('fail on invalid args', async () => {
-      await expect(CloudStore.putUser({ keyId })).rejects.toThrow(/Invalid/);
+      await expect(CloudStore.putPhone({ phone: '' })).rejects.toThrow(/Invalid/);
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(0);
     });
 
     it('should not backup twice', async () => {
-      await CloudStore.putUser({ keyId, userId });
-      await expect(CloudStore.putUser({ keyId, userId })).rejects.toThrow(/already present/);
+      await CloudStore.putPhone({ phone });
+      await expect(CloudStore.putPhone({ phone })).rejects.toThrow(/already present/);
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
     });
 
     it('store item', async () => {
-      await CloudStore.putUser({ keyId, userId });
-      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('0_photon_uid');
-      expect(mockAsyncStorage.setItem.mock.calls[0][1]).toMatch(/^{"keyId":.*"}$/);
+      await CloudStore.putPhone({ phone });
+      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_phone');
+      expect(mockAsyncStorage.setItem.mock.calls[0][1]).toBe(phone);
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
     });
   });
 
-  describe('getUser', () => {
+  describe('getPhone', () => {
     it('should not find item', async () => {
-      const stored = await CloudStore.getUser();
+      const stored = await CloudStore.getPhone();
       expect(stored).toBe(null);
     });
 
     it('should get stored item by userId number', async () => {
-      await CloudStore.putUser({ keyId, userId });
-      const stored = await CloudStore.getUser();
-      expect(stored).toEqual({ keyId, userId });
+      await CloudStore.putPhone({ phone });
+      const stored = await CloudStore.getPhone();
+      expect(stored).toEqual(phone);
     });
   });
 
-  describe('removeUser', () => {
+  describe('removePhone', () => {
+    it('should remove stored item', async () => {
+      await CloudStore.putPhone({ phone });
+      expect(await CloudStore.getPhone()).toBeTruthy();
+      await CloudStore.removePhone({ keyId });
+      expect(await CloudStore.getPhone()).toBe(null);
+    });
+  });
+
+  describe('putEmail', () => {
     it('fail on invalid args', async () => {
-      await expect(CloudStore.removeUser({ keyId: 'invalid' })).rejects.toThrow(/not found/);
-      expect(mockAsyncStorage.removeItem.mock.calls.length).toBe(0);
+      await expect(CloudStore.putEmail({ email: '' })).rejects.toThrow(/Invalid/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(0);
     });
 
+    it('should not backup twice', async () => {
+      await CloudStore.putEmail({ email });
+      await expect(CloudStore.putEmail({ email })).rejects.toThrow(/already present/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
+    });
+
+    it('store item', async () => {
+      await CloudStore.putEmail({ email });
+      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_email');
+      expect(mockAsyncStorage.setItem.mock.calls[0][1]).toBe(email);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('getEmail', () => {
+    it('should not find item', async () => {
+      const stored = await CloudStore.getEmail();
+      expect(stored).toBe(null);
+    });
+
+    it('should get stored item by userId number', async () => {
+      await CloudStore.putEmail({ email });
+      const stored = await CloudStore.getEmail();
+      expect(stored).toEqual(email);
+    });
+  });
+
+  describe('removeEmail', () => {
     it('should remove stored item', async () => {
-      await CloudStore.putUser({ keyId, userId });
-      expect(await CloudStore.getUser()).toBeTruthy();
-      await CloudStore.removeUser({ keyId });
-      expect(await CloudStore.getUser()).toBe(null);
+      await CloudStore.putEmail({ email });
+      expect(await CloudStore.getEmail()).toBeTruthy();
+      await CloudStore.removeEmail({ keyId });
+      expect(await CloudStore.getEmail()).toBe(null);
     });
   });
 });

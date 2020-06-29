@@ -6,12 +6,17 @@
 import { Platform } from 'react-native';
 import RNiCloudStorage from 'react-native-icloudstore';
 import AsyncStorage from '@react-native-community/async-storage';
-import { isPhone, isId, isBuffer } from './verify';
+import { isPhone, isEmail, isId, isBuffer } from './verify';
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : AsyncStorage;
 
-const VERSION = '0';
+const VERSION = '1';
 const ITEM_KEY = `${VERSION}_photon_key`;
-const USER_KEY = `${VERSION}_photon_uid`;
+const PHONE_KEY = `${VERSION}_photon_phone`;
+const EMAIL_KEY = `${VERSION}_photon_email`;
+
+//
+// Encrypted key storage
+//
 
 export async function putKey({ keyId, ciphertext }) {
   if (!isId(keyId) || !isBuffer(ciphertext)) {
@@ -36,27 +41,48 @@ export async function removeKey({ keyId }) {
   await Store.removeItem(ITEM_KEY);
 }
 
-export async function putUser({ keyId, userId }) {
-  if (!isId(keyId) || !isPhone(userId)) {
+//
+// Phone number storage
+//
+
+export async function putPhone({ phone }) {
+  if (!isPhone(phone)) {
     throw new Error('Invalid args');
   }
-  if (await Store.getItem(USER_KEY)) {
-    throw new Error('User already present');
+  if (await Store.getItem(PHONE_KEY)) {
+    throw new Error('Phone already present');
   }
-  await Store.setItem(USER_KEY, JSON.stringify({ keyId, userId }));
+  await Store.setItem(PHONE_KEY, phone);
 }
 
-export async function getUser() {
-  const item = await Store.getItem(USER_KEY);
-  return item ? JSON.parse(item) : null;
+export async function getPhone() {
+  return Store.getItem(PHONE_KEY);
 }
 
-export async function removeUser({ keyId }) {
-  const item = await getUser();
-  if (!item || item.keyId !== keyId) {
-    throw new Error('User not found');
+export async function removePhone() {
+  await Store.removeItem(PHONE_KEY);
+}
+
+//
+// Email address storage
+//
+
+export async function putEmail({ email }) {
+  if (!isEmail(email)) {
+    throw new Error('Invalid args');
   }
-  await Store.removeItem(USER_KEY);
+  if (await Store.getItem(EMAIL_KEY)) {
+    throw new Error('Email already present');
+  }
+  await Store.setItem(EMAIL_KEY, email);
+}
+
+export async function getEmail() {
+  return Store.getItem(EMAIL_KEY);
+}
+
+export async function removeEmail() {
+  await Store.removeItem(EMAIL_KEY);
 }
 
 //
