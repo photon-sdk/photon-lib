@@ -5,7 +5,7 @@
 import * as RNKeychain from 'react-native-keychain';
 import { isString } from './verify';
 
-const VERSION = '0';
+const VERSION = '1';
 const USER = 'photon.user';
 
 /**

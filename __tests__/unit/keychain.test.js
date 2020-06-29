@@ -26,8 +26,8 @@ describe('Keychain unit test', () => {
       await Keychain.setItem('some-key', 'some-value');
       const val = await Keychain.getItem('some-key');
       expect(val).toBe('some-value');
-      expect(RNKeychain.setInternetCredentials).toHaveBeenCalledWith('0_some-key', 'photon.user', 'some-value', { accessible: 'wutdo' });
-      expect(RNKeychain.getInternetCredentials).toHaveBeenCalledWith('0_some-key');
+      expect(RNKeychain.setInternetCredentials).toHaveBeenCalledWith('1_some-key', 'photon.user', 'some-value', { accessible: 'wutdo' });
+      expect(RNKeychain.getInternetCredentials).toHaveBeenCalledWith('1_some-key');
     });
   });
 
