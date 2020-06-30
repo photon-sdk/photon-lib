@@ -118,7 +118,7 @@ await KeyBackup.changePin({ pin, newPin });
 
 ### Add Recovery Phone Number (optional)
 
-In order to allow for wallet recovery in case the user forgets their PIN, a recovery phone number can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The phone number is stored only on the user's iCloud. A hash is stored on the key server for authentication later (hashed with scrypt and a random salt).
+In order to allow for wallet recovery in case the user forgets their PIN, a recovery phone number can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The phone number is stored in plaintext only on the user's iCloud. A hash of the phone number is stored on the key server for authentication (hashed with scrypt and a random salt).
 
 ```js
 import { KeyBackup } from '@photon-sdk/photon-lib';
@@ -133,7 +133,7 @@ await KeyBackup.verifyPhone({ userId, code });   // verify phone number
 
 ### Add Recovery Email Address (optional)
 
-In order to allow for wallet recovery in case the user forgets their PIN, a recovery email address can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The email address is stored only on the user's iCloud. A hash is stored on the key server for authentication later (hashed with scrypt and a random salt).
+In order to allow for wallet recovery in case the user forgets their PIN, a recovery email address can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The email address is stored in plaintext only on the user's iCloud. A hash of the email address is stored on the key server for authentication (hashed with scrypt and a random salt).
 
 ```js
 import { KeyBackup } from '@photon-sdk/photon-lib';
