@@ -69,7 +69,7 @@ KeyBackup.init({
 
 ### Key Backup
 
-Now let's do an encrypted backup of a user's mnemonic to their iCloud account. The encryption key will be stored on your app's key server. We'll use the user's phone number for authentication with the key server.
+Now let's do an encrypted backup of a user's wallet to their iCloud account. The encryption key will be stored on your app's key server. A random `Key ID` (stored automatically on the user's iCloud) and a user chosen `PIN` is used for authentication with the key server.
 
 ```js
 import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
@@ -78,35 +78,98 @@ const wallet = new HDSegwitBech32Wallet();
 await wallet.generate();                         // generate a new seed phrase
 const mnemonic = await wallet.getSecret();       // the seed phrase to backup
 
-const phone = '+4917512345678';                  // the user's number for 2FA
-await KeyBackup.registerNewUser({ phone });      // sends code via SMS
-
-const code = '000000'                            // received via SMS
-await KeyBackup.verifyNewUser({ phone, code });  // verify phone number
-
-await KeyBackup.createBackup({ mnemonic });      // create encrypted cloud backup
+const data = { mnemonic };                       // backup payload (any attributes possible)
+const pin = '1234';                              // PIN for auth to key server
+await KeyBackup.createBackup({ data, pin });     // create encrypted cloud backup
 ```
 
 ### Key Restore
 
-Now let's restore the user's key on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key. The same phone number as for backup will be used to authenticate to the key server.
+Now let's restore the user's wallet on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key from the key server. The random `Key ID` (stored on the user's iCloud) and the `PIN` that was set during wallet backup will be used to authenticate with the key server. **N.B. encryption key download is locked for 7 days after 10 failed authentication attempts.**
 
 ```js
-import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
+import { HDSegwitBech32Wallet, KeyBackup, WalletStore } from '@photon-sdk/photon-lib';
 
-const exists = await KeyBackup.checkForExistingBackup({ phone });
+const exists = await KeyBackup.checkForExistingBackup();
 if (!exists) return;
 
-await KeyBackup.registerDevice({ phone });             // sends code via SMS
-
-const code = '000000'                                  // received via SMS
-await KeyBackup.verifyDevice({ phone, code });         // verify phone number
-
-const { mnemonic } = await KeyBackup.restoreBackup();  // fetch and decrypt user's seed
+const pin = '1234';                                    // PIN for auth to key server
+const data = await KeyBackup.restoreBackup({ pin });   // fetch and decrypt user's seed
 
 const wallet = new HDSegwitBech32Wallet();
-wallet.setSecret(mnemonic);                            // restore from the seed
-wallet.validateMnemonic();                             // should return true
+wallet.setSecret(data.mnemonic);                       // restore from the seed
+
+const store = new WalletStore();
+store.wallets.push(wallet);
+await store.saveToDisk();                              // store securely in device keychain
+```
+
+### Change the PIN
+
+User can change the authentication PIN simply by calling the following api. A PIN must be at least 4 digits, but can also be a complex passphrase up to 256 chars in length.
+
+```js
+import { KeyBackup } from '@photon-sdk/photon-lib';
+
+const pin = '1234';
+const newPin = '5678';
+await KeyBackup.changePin({ pin, newPin });
+```
+
+### Add Recovery Phone Number (optional)
+
+In order to allow for wallet recovery in case the user forgets their PIN, a recovery phone number can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The phone number hash (scrypt with random salt) is stored on the key server and stored in plaintext on the user's iCloud.
+
+```js
+import { KeyBackup } from '@photon-sdk/photon-lib';
+
+const userId = '+4917512345678';                 // the user's number for 2FA
+const pin = '1234';
+await KeyBackup.registerPhone({ userId, pin });  // sends code via SMS
+
+const code = '000000';                           // received via SMS
+await KeyBackup.verifyPhone({ userId, code });   // verify phone number
+```
+
+### Add Recovery Email Address (optional)
+
+In order to allow for wallet recovery in case the user forgets their PIN, a recovery email address can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The email address hash (scrypt with random salt) is stored on the key server and stored in plaintext on the user's iCloud.
+
+```js
+import { KeyBackup } from '@photon-sdk/photon-lib';
+
+const userId = 'jon@example.com';                // the user's number for 2FA
+const pin = '1234';
+await KeyBackup.registerEmail({ userId, pin });  // sends code via SMS
+
+const code = '000000';                           // received via SMS
+await KeyBackup.verifyEmail({ userId, code });   // verify phone number
+```
+
+### Reset the PIN via Recovery Email Address (works the same via phone)
+
+In case the user forgets their PIN, apps should encourage users to set a recovery phone number or email address during sign up. This can be used later to reset the PIN with a 30 day time delay.
+
+```js
+import { KeyBackup } from '@photon-sdk/photon-lib';
+
+const userId = await KeyBackup.getEmail()              // get registered email address
+await KeyBackup.initPinReset({ userId });              // start time delay in key server
+
+const code = '000000';                                 // received via SMS or Email
+const delay = await KeyBackup.verifyPinReset({ userId, code });
+if (delay) {
+  // display delay in the UI and ask user to wait (30 days by default)
+}
+
+await KeyBackup.initPinReset({ userId });              // call again after 30 day delay
+
+const code = '000000';                                 // received via SMS or Email
+const newPin = '5678';                                 // let user chose new pin
+await KeyBackup.finalizePinReset({ userId, code, newPin });
+
+const pin = '5678';                                    // use the new pin for recovery
+const data = await KeyBackup.restoreBackup({ pin });   // fetch and decrypt user's seed
 ```
 
 ### Init Electrum Client
@@ -117,8 +180,8 @@ First we'll need to init the electrum client by specifying the host and port of 
 import { ElectrumClient } from '@photon-sdk/photon-lib';
 
 const options = {
-  host: 'electrum.example.com',
-  ssl: '443'
+  host: 'blockstream.info',
+  ssl: '700'
 };
 await ElectrumClient.connectMain(options);       // connect to your full node
 await ElectrumClient.waitTillConnected();
