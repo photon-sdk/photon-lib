@@ -85,7 +85,7 @@ await KeyBackup.createBackup({ data, pin });     // create encrypted cloud backu
 
 ### Key Restore
 
-Now let's restore the user's wallet on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key from the key server. The random `Key ID` (stored on the user's iCloud) and the `PIN` that was set during wallet backup will be used to authenticate with the key server. **N.B. encryption key download is locked for 7 days after 10 failed authentication attempts.**
+Now let's restore the user's wallet on their new device. This will download their encrypted mnemonic from iCloud and decrypt it using the encryption key from the key server. The random `Key ID` (stored on the user's iCloud) and the `PIN` that was set during wallet backup will be used to authenticate with the key server. **N.B. encryption key download is locked for 7 days after 10 failed authentication attempts to mitigate brute forcing of the PIN.**
 
 ```js
 import { HDSegwitBech32Wallet, KeyBackup, WalletStore } from '@photon-sdk/photon-lib';
@@ -106,19 +106,19 @@ await store.saveToDisk();                              // store securely in devi
 
 ### Change the PIN
 
-User can change the authentication PIN simply by calling the following api. A PIN must be at least 4 digits, but can also be a complex passphrase up to 256 chars in length.
+Users can change the authentication PIN simply by calling the following api. A PIN must be at least 4 digits, but can also be a complex passphrase up to 256 chars in length.
 
 ```js
 import { KeyBackup } from '@photon-sdk/photon-lib';
 
 const pin = '1234';
-const newPin = '5678';
+const newPin = 'complex passphrases are also possible';
 await KeyBackup.changePin({ pin, newPin });
 ```
 
 ### Add Recovery Phone Number (optional)
 
-In order to allow for wallet recovery in case the user forgets their PIN, a recovery phone number can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The phone number hash (scrypt with random salt) is stored on the key server and stored in plaintext on the user's iCloud.
+In order to allow for wallet recovery in case the user forgets their PIN, a recovery phone number can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The phone number is stored only on the user's iCloud. A hash is stored on the key server for authentication later (hashed with scrypt and a random salt).
 
 ```js
 import { KeyBackup } from '@photon-sdk/photon-lib';
@@ -133,7 +133,7 @@ await KeyBackup.verifyPhone({ userId, code });   // verify phone number
 
 ### Add Recovery Email Address (optional)
 
-In order to allow for wallet recovery in case the user forgets their PIN, a recovery email address can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The email address hash (scrypt with random salt) is stored on the key server and stored in plaintext on the user's iCloud.
+In order to allow for wallet recovery in case the user forgets their PIN, a recovery email address can be set. A 30 day time delay is enforced for PIN recovery to mitigate SIM swap attacks. The email address is stored only on the user's iCloud. A hash is stored on the key server for authentication later (hashed with scrypt and a random salt).
 
 ```js
 import { KeyBackup } from '@photon-sdk/photon-lib';
