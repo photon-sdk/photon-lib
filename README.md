@@ -140,9 +140,9 @@ import { KeyBackup } from '@photon-sdk/photon-lib';
 
 const userId = 'jon@example.com';                // the user's number for 2FA
 const pin = '1234';
-await KeyBackup.registerEmail({ userId, pin });  // sends code via SMS
+await KeyBackup.registerEmail({ userId, pin });  // sends code via Email
 
-const code = '000000';                           // received via SMS
+const code = '000000';                           // received via Email
 await KeyBackup.verifyEmail({ userId, code });   // verify phone number
 ```
 
