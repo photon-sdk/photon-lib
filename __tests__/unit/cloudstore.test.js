@@ -74,12 +74,6 @@ describe('CloudStore unit test', () => {
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(0);
     });
 
-    it('should not backup twice', async () => {
-      await CloudStore.putPhone({ userId: phone });
-      await expect(CloudStore.putPhone({ userId: phone })).rejects.toThrow(/already present/);
-      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
-    });
-
     it('store item', async () => {
       await CloudStore.putPhone({ userId: phone });
       expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_phone');
@@ -114,12 +108,6 @@ describe('CloudStore unit test', () => {
     it('fail on invalid args', async () => {
       await expect(CloudStore.putEmail({ userId: '' })).rejects.toThrow(/Invalid/);
       expect(mockAsyncStorage.setItem.mock.calls.length).toBe(0);
-    });
-
-    it('should not backup twice', async () => {
-      await CloudStore.putEmail({ userId: email });
-      await expect(CloudStore.putEmail({ userId: email })).rejects.toThrow(/already present/);
-      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
     });
 
     it('store item', async () => {

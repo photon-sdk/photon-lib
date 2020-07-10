@@ -54,9 +54,6 @@ export async function putPhone({ userId }) {
   if (!isPhone(userId)) {
     throw new Error('Invalid args');
   }
-  if (await Store.getItem(PHONE)) {
-    throw new Error('Phone already present');
-  }
   await Store.setItem(PHONE, userId);
 }
 
@@ -75,9 +72,6 @@ export async function removePhone() {
 export async function putEmail({ userId }) {
   if (!isEmail(userId)) {
     throw new Error('Invalid args');
-  }
-  if (await Store.getItem(EMAIL)) {
-    throw new Error('Email already present');
   }
   await Store.setItem(EMAIL, userId);
 }
