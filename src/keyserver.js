@@ -53,6 +53,9 @@ export async function createKey({ pin }) {
  */
 export async function fetchKey({ keyId }) {
   const { status, body } = await _api.get(`/v2/key/${keyId}`);
+  if (status === 429) {
+    throw new RateLimitError(`Keyserver error: ${body.message}`, body.delay);
+  }
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
@@ -70,6 +73,9 @@ export async function changePin({ keyId, newPin }) {
   const { status, body } = await _api.put(`/v2/key/${keyId}`, {
     body: { newPin },
   });
+  if (status === 429) {
+    throw new RateLimitError(`Keyserver error: ${body.message}`, body.delay);
+  }
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
@@ -87,6 +93,9 @@ export async function createUser({ keyId, userId }) {
   const { status, body } = await _api.post(`/v2/key/${keyId}/user`, {
     body: { userId },
   });
+  if (status === 429) {
+    throw new RateLimitError(`Keyserver error: ${body.message}`, body.delay);
+  }
   if (status !== 201) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
@@ -104,6 +113,9 @@ export async function verifyUser({ keyId, userId, code }) {
   const { status, body } = await _api.put(`/v2/key/${keyId}/user/${userId}`, {
     body: { code, op: 'verify' },
   });
+  if (status === 429) {
+    throw new RateLimitError(`Keyserver error: ${body.message}`, body.delay);
+  }
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
@@ -174,7 +186,21 @@ export async function finalizePinReset({ keyId, userId, code, newPin }) {
 export async function removeUser({ keyId, userId }) {
   userId = encodeURIComponent(userId);
   const { status, body } = await _api.delete(`/v2/key/${keyId}/user/${userId}`);
+  if (status === 429) {
+    throw new RateLimitError(`Keyserver error: ${body.message}`, body.delay);
+  }
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
+  }
+}
+
+//
+// Helpers
+//
+
+export class RateLimitError extends Error {
+  constructor(message, delay) {
+    super(message);
+    this.delay = delay;
   }
 }

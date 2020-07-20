@@ -43,6 +43,17 @@ describe('KeyServer unit test', () => {
       await expect(KeyServer.fetchKey({ keyId })).rejects.toThrow(/boom/);
     });
 
+    it('should throw delay error on rate limit', async () => {
+      api.get.mockResolvedValue({
+        status: 429,
+        body: {
+          message: 'Time locked until',
+          delay: '2020-06-01T03:33:47.980Z',
+        },
+      });
+      await expect(KeyServer.fetchKey({ keyId })).rejects.toThrow(KeyServer.RateLimitError);
+    });
+
     it('should return encryption key on success', async () => {
       api.get.mockResolvedValue({
         status: 200,
@@ -66,6 +77,17 @@ describe('KeyServer unit test', () => {
       await expect(KeyServer.changePin({ keyId, newPin })).rejects.toThrow(/boom/);
     });
 
+    it('should throw delay error on rate limit', async () => {
+      api.put.mockResolvedValue({
+        status: 429,
+        body: {
+          message: 'Time locked until',
+          delay: '2020-06-01T03:33:47.980Z',
+        },
+      });
+      await expect(KeyServer.changePin({ keyId, newPin })).rejects.toThrow(KeyServer.RateLimitError);
+    });
+
     it('should set new pin on success', async () => {
       api.put.mockResolvedValue({
         status: 200,
@@ -87,6 +109,17 @@ describe('KeyServer unit test', () => {
       await expect(KeyServer.createUser({ keyId, userId })).rejects.toThrow(/boom/);
     });
 
+    it('should throw delay error on rate limit', async () => {
+      api.post.mockResolvedValue({
+        status: 429,
+        body: {
+          message: 'Time locked until',
+          delay: '2020-06-01T03:33:47.980Z',
+        },
+      });
+      await expect(KeyServer.createUser({ keyId, userId })).rejects.toThrow(KeyServer.RateLimitError);
+    });
+
     it('should return 201 on success', async () => {
       api.post.mockResolvedValue({
         status: 201,
@@ -105,6 +138,17 @@ describe('KeyServer unit test', () => {
         body: { message: 'boom' },
       });
       await expect(KeyServer.verifyUser({ keyId, userId, code })).rejects.toThrow(/boom/);
+    });
+
+    it('should throw delay error on rate limit', async () => {
+      api.put.mockResolvedValue({
+        status: 429,
+        body: {
+          message: 'Time locked until',
+          delay: '2020-06-01T03:33:47.980Z',
+        },
+      });
+      await expect(KeyServer.verifyUser({ keyId, userId })).rejects.toThrow(KeyServer.RateLimitError);
     });
 
     it('should return 200 on success', async () => {
@@ -200,6 +244,17 @@ describe('KeyServer unit test', () => {
         body: { message: 'boom' },
       });
       await expect(KeyServer.removeUser({ keyId, userId })).rejects.toThrow(/boom/);
+    });
+
+    it('should throw delay error on rate limit', async () => {
+      api.delete.mockResolvedValue({
+        status: 429,
+        body: {
+          message: 'Time locked until',
+          delay: '2020-06-01T03:33:47.980Z',
+        },
+      });
+      await expect(KeyServer.removeUser({ keyId, userId })).rejects.toThrow(KeyServer.RateLimitError);
     });
 
     it('should return 200 on success', async () => {
