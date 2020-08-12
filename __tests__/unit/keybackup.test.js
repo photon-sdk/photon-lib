@@ -1,7 +1,5 @@
 import { KeyBackup } from '../../';
-import * as _Keychain from '../../src/keychain';
 import * as _CloudStore from '../../src/cloudstore';
-import * as mockRNKeychain from 'react-native-keychain';
 import { _api as mockKeyserverApi } from '../../src/keyserver';
 import mockCloudStorage from '@react-native-community/async-storage';
 
@@ -17,9 +15,6 @@ describe('KeyBackup unit test', () => {
 
   beforeEach(() => {
     // reset mocks
-    mockRNKeychain._nuke();
-    mockRNKeychain.setInternetCredentials.mockClear();
-    mockRNKeychain.getInternetCredentials.mockClear();
     mockCloudStorage.clear();
     mockCloudStorage.getAllKeys.mockClear();
     mockCloudStorage.getItem.mockClear();
@@ -59,7 +54,7 @@ describe('KeyBackup unit test', () => {
       await _CloudStore.putKey({ keyId, ciphertext });
       const exists = await KeyBackup.checkForExistingBackup();
       expect(exists).toBe(true);
-      expect(await _Keychain.getItem(KeyBackup.KEY_ID)).toBe(keyId);
+      expect((await _CloudStore.getKey()).keyId).toBe(keyId);
     });
   });
 
@@ -85,7 +80,6 @@ describe('KeyBackup unit test', () => {
   describe('restoreBackup', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: { foo: 'bar' }, pin });
-      mockRNKeychain._nuke(); // simulate new unsynced device
       expect(await KeyBackup.checkForExistingBackup()).toBe(true);
     });
 
@@ -96,8 +90,8 @@ describe('KeyBackup unit test', () => {
 
     it('should return null if no backup found', async () => {
       mockCloudStorage.clear();
-      const backup = await KeyBackup.restoreBackup({ pin });
-      expect(backup).toBe(null);
+      expect(await KeyBackup.checkForExistingBackup()).toBe(false);
+      await expect(KeyBackup.restoreBackup({ pin })).rejects.toThrow(/No key id/);
     });
   });
 

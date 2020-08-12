@@ -5,12 +5,9 @@
  */
 
 import * as chacha from './chacha';
-import * as Keychain from './keychain';
 import * as KeyServer from './keyserver';
 import * as CloudStore from './cloudstore';
 import { isPhone, isEmail, isId, isCode, isPin, isObject } from './verify';
-
-export const KEY_ID = 'photon.keyId';
 
 /**
  * Initialize the key backup module by specifying the key server which is
@@ -32,9 +29,6 @@ export function init({ keyServerURI }) {
  */
 export async function checkForExistingBackup() {
   const backup = await CloudStore.getKey();
-  if (backup && isId(backup.keyId)) {
-    await Keychain.setItem(KEY_ID, backup.keyId);
-  }
   return !!backup;
 }
 
@@ -52,7 +46,6 @@ export async function createBackup({ data, pin }) {
   }
   setPin({ pin });
   const keyId = await KeyServer.createKey({ pin });
-  await Keychain.setItem(KEY_ID, keyId);
   const encryptionKey = await KeyServer.fetchKey({ keyId });
   const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
   const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
@@ -286,9 +279,9 @@ function setPin({ pin }) {
 }
 
 async function fetchKeyId() {
-  const keyId = await Keychain.getItem(KEY_ID);
-  if (!keyId) {
+  const backup = await CloudStore.getKey();
+  if (!backup || !isId(backup.keyId)) {
     throw new Error('No key id found. Call checkForExistingBackup() first.');
   }
-  return keyId;
+  return backup.keyId;
 }
