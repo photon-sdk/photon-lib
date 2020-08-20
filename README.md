@@ -15,7 +15,7 @@ Provide an easy-to-use high level api for the following:
 
 ## Demo
 
-![backup flow](https://github.com/photon-sdk/photon-lib/raw/af4377c79519ad827d04e6e81de8e49593cdcb4b/backup_flow_2x.gif)
+![restore flow](https://raw.githubusercontent.com/photon-sdk/photon-lib/demo-images/restore_flow.gif)
 
 ## Threat model
 
