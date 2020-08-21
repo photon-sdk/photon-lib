@@ -2,8 +2,6 @@
 
 A high level library for building bitcoin wallets with react native.
 
-**Still very much under development and not yet recommended for production use.**
-
 ## Scope
 
 Provide an easy-to-use high level api for the following:
