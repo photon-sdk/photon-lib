@@ -34,7 +34,7 @@ npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-
 ### Update cocoapods
 
 ```
-cd ios && pod install && cd ..
+npx pod-install
 ```
 
 ### Configure Xcode project
