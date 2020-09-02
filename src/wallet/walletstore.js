@@ -241,6 +241,7 @@ export class WalletStore {
     let finalBalance = 0;
     for (let wal of this.wallets) {
       finalBalance += wal.getBalance();
+      finalBalance += wal.getUnconfirmedBalance();
     }
     return finalBalance;
   }
