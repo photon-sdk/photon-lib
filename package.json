@@ -1,6 +1,6 @@
 {
   "name": "@photon-sdk/photon-lib",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "A high level library for building bitcoin wallets with react native",
   "license": "MIT",
   "repository": {
