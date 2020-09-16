@@ -44,6 +44,10 @@ Wallet developers should also implement regular [backup integrity checks](https:
 
 In case the iCloud/GDrive account is compromised the wallet private key is protected using 256 bit encryption using the [ChaCha20](https://en.wikipedia.org/wiki/Salsa20)-[Poly1305](https://en.wikipedia.org/wiki/Poly1305) algorithm ([IETF variant](https://tools.ietf.org/html/rfc7539) with a 96 bit nonce). The attacker would required access to the user’s PIN as well to recover the wallet and steal funds.
 
+### Compromise of the user's Email account
+
+This threat is similar to the compromise of the iCloud/GDrive account since those accounts are tied to an email address. If the user sets the email address they use for their cloud storage as their recovery email, this can lead to the attacker getting access to both the cloud storage as well as the PIN (after a 30 day PIN reset). In order to mitigate this threat the app should recommend using a different email address as the user's cloud storage or use a phone number of PIN recovery. Another way to mitigate this threat is by the use of an additional 2 factor authentication method such as Google Authenticator for encryption key recovery.
+
 ### Compromise of photon-keyserver database
 
 In case the keyserver is compromised the adversary would have access to all of the encryption keys, but not of users’ iCloud/GDrive accounts. Upon detection of the compromise of the keyserver database, a public announcement should be made to ask users to re-register and rotate encryption keys.
