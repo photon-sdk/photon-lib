@@ -207,6 +207,29 @@ const balance = store.getBalance();              // the wallet balance to displa
 const address = await wallet.getAddressAsync();  // a new address to receive bitcoin
 ```
 
+### Create & Broadcast Transaction
+
+Finally we'll fetch the wallets utxos, create a new transaction, and broadcast it using the electrum client.
+
+```js
+import { HDSegwitBech32Wallet, WalletStore } from '@photon-sdk/photon-lib';
+
+const wallet = new HDSegwitBech32Wallet();
+await wallet.generate();                         // or use restored (see above)
+
+await wallet.fetchUtxo();                        // fetch UTXOs
+const utxo = wallet.getUtxo();                   // set UTXO as input
+const target = [{                                // set output address and value in sats
+  value: 1000,
+  address: 'some-address'
+}];
+const feeRate = 1;                               // set fee rate in sat/vbyte
+const changeTo = await wallet.getAddressAsync(); // get change address
+const newTx = wallet.createTransaction(utxo, target, feeRate, changeTo);
+
+await wallet.broadcastTx(newTx.tx.toHex());      // broadcast tx to the network
+```
+
 ## Development and testing
 
 Clone the git repo and then:
