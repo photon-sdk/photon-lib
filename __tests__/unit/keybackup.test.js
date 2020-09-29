@@ -273,6 +273,11 @@ describe('KeyBackup unit test', () => {
       expect(mockKeyserverApi.put.mock.calls.length).toBe(1);
     });
 
+    it('should fail for invalid new pin', async () => {
+      await expect(KeyBackup.verifyPinReset({ userId: phone, code, newPin: '' })).rejects.toThrow(/Invalid/);
+      expect(mockKeyserverApi.put.mock.calls.length).toBe(1);
+    });
+
     it('should verify pin reset and return time lock delay', async () => {
       mockKeyserverApi.put.mockResolvedValue({
         status: 423,
@@ -281,35 +286,13 @@ describe('KeyBackup unit test', () => {
           delay: '2020-06-01T03:33:47.980Z',
         },
       });
-      const delay = await KeyBackup.verifyPinReset({ userId: phone, code });
+      const delay = await KeyBackup.verifyPinReset({ userId: phone, code, newPin });
       expect(delay).toBeTruthy();
     });
 
-    it('should verify pin reset and return null if time lock is over', async () => {
-      mockKeyserverApi.put.mockResolvedValue({
-        status: 304,
-        body: { message: 'Invalid new pin' },
-      });
-      const delay = await KeyBackup.verifyPinReset({ userId: phone, code });
-      expect(delay).toBe(null);
-    });
-  });
-
-  describe('finalizePinReset', () => {
-    beforeEach(async () => {
-      await KeyBackup.createBackup({ data: {}, pin });
-      await KeyBackup.registerPhone({ userId: phone, pin });
-      await KeyBackup.verifyPhone({ userId: phone, code });
-      await KeyBackup.initPinReset({ userId: phone });
-    });
-
-    it('should fail for invalid new pin', async () => {
-      await expect(KeyBackup.finalizePinReset({ userId: phone, code, newPin: '' })).rejects.toThrow(/Invalid/);
-      expect(mockKeyserverApi.put.mock.calls.length).toBe(1);
-    });
-
     it('should call pin reset api in server with new pin', async () => {
-      await KeyBackup.finalizePinReset({ userId: phone, code, newPin });
+      const delay = await KeyBackup.verifyPinReset({ userId: phone, code, newPin });
+      expect(delay).toBe(null);
       expect(mockKeyserverApi.put.mock.calls.length).toBe(2);
     });
   });

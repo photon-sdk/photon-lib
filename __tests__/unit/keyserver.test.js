@@ -198,31 +198,10 @@ describe('KeyServer unit test', () => {
           delay: '2020-06-01T03:33:47.980Z',
         },
       });
-      const delay = await KeyServer.verifyPinReset({ keyId, userId, code });
+      const delay = await KeyServer.verifyPinReset({ keyId, userId, code, newPin });
       expect(delay).toBe('2020-06-01T03:33:47.980Z');
       expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
-      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin' } });
-    });
-
-    it('should return 304 for time lock over', async () => {
-      api.put.mockResolvedValue({
-        status: 304,
-        body: { message: 'Success' },
-      });
-      const delay = await KeyServer.verifyPinReset({ keyId, userId, code });
-      expect(delay).toBe(null);
-      expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
-      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin' } });
-    });
-  });
-
-  describe('finalizePinReset', () => {
-    it('should fail on api error', async () => {
-      api.put.mockResolvedValue({
-        status: 500,
-        body: { message: 'boom' },
-      });
-      await expect(KeyServer.finalizePinReset({ keyId, userId, code, newPin })).rejects.toThrow(/boom/);
+      expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin', newPin } });
     });
 
     it('should return 200 on success', async () => {
@@ -230,7 +209,7 @@ describe('KeyServer unit test', () => {
         status: 200,
         body: { message: 'Success' },
       });
-      await KeyServer.finalizePinReset({ keyId, userId, code, newPin });
+      await KeyServer.verifyPinReset({ keyId, userId, code, newPin });
       expect(api.put.mock.calls[0][0]).toBe('/v2/key/some-id/user/%2B4917512345678');
       expect(api.put.mock.calls[0][1]).toEqual({ body: { code, op: 'reset-pin', newPin } });
       expect(api.auth.mock.calls[0]).toEqual(['', '5678']);
