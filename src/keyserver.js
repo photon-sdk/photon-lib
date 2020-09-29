@@ -138,42 +138,27 @@ export async function initPinReset({ keyId, userId }) {
 
 /**
  * Verify a pin reset. This api can be polled until the time lock delay is over and
- * the http response status code is no longer 423. When the response status is 304
- * finalizePinReset can be called with the new pin.
+ * the http response status code is no longer 423. After this call is successful the
+ * new pin can be used to download the encryption key.
  * @param  {string} keyId          The key id for the encryption key
  * @param  {string} userId         The user's phone number or email address
  * @param  {string} code           The verification code sent via SMS or email
+ * @param  {string} newPin         The new pin to replace the old on
  * @return {Promise<string|null>}  The time lock delay or null when it's over
  */
-export async function verifyPinReset({ keyId, userId, code }) {
-  userId = encodeURIComponent(userId);
-  const { status, body } = await _api.put(`/v2/key/${keyId}/user/${userId}`, {
-    body: { code, op: 'reset-pin' },
-  });
-  if (status !== 423 && status !== 304) {
-    throw new Error(`Keyserver error: ${body.message}`);
-  }
-  return body.delay || null;
-}
-
-/**
- * Finalize a pin reset by providing the new pin. After this call is successful the
- * new pin can be used to download the encryption key.
- * @param  {string} keyId   The key id for the encryption key
- * @param  {string} userId  The user's phone number or email address
- * @param  {string} code    The verification code sent via SMS or email
- * @param  {string} newPin  The new pin to replace the old on
- * @return {Promise<undefined>}
- */
-export async function finalizePinReset({ keyId, userId, code, newPin }) {
+export async function verifyPinReset({ keyId, userId, code, newPin }) {
   userId = encodeURIComponent(userId);
   const { status, body } = await _api.put(`/v2/key/${keyId}/user/${userId}`, {
     body: { code, op: 'reset-pin', newPin },
   });
+  if (status === 423) {
+    return body.delay;
+  }
   if (status !== 200) {
     throw new Error(`Keyserver error: ${body.message}`);
   }
   setPin({ pin: newPin });
+  return null;
 }
 
 /**

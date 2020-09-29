@@ -238,33 +238,19 @@ export async function initPinReset({ userId }) {
 /**
  * Verify the user id with a code and check if the time lock delay is over.
  * This function returns an iso formatted date string which represents the
- * time lock delay. If this value is null it means the delay is over and
- * finalizePinReset can be called with a new pin.
+ * time lock delay. If this value is null it means the delay is over and the
+ * user can recover their key using the new pin.
  * @param  {string} userId         The user's phone number or email address
  * @param  {string} code           The verification code sent via SMS or email
+ * @param  {string} newPin      The new pin (at least 4 digits)
  * @return {Promise<string|null>}  The time lock delay or null if it's over
  */
-export async function verifyPinReset({ userId, code }) {
-  if ((!isPhone(userId) && !isEmail(userId)) || !isCode(code)) {
-    throw new Error('Invalid args');
-  }
-  const keyId = await fetchKeyId();
-  return KeyServer.verifyPinReset({ keyId, userId, code });
-}
-
-/**
- * Calling this function after the time lock is over sets the new pin. Afterwards the user can recover their key using the new pin.
- * @param  {string} userId      The user's phone number or email address
- * @param  {string} code        The verification code sent via SMS or email
- * @param  {string} newPin      The new pin (at least 4 digits)
- *@return {Promise<undefined>}
- */
-export async function finalizePinReset({ userId, code, newPin }) {
+export async function verifyPinReset({ userId, code, newPin }) {
   if ((!isPhone(userId) && !isEmail(userId)) || !isCode(code) || !isPin(newPin)) {
     throw new Error('Invalid args');
   }
   const keyId = await fetchKeyId();
-  await KeyServer.finalizePinReset({ keyId, userId, code, newPin });
+  return KeyServer.verifyPinReset({ keyId, userId, code, newPin });
 }
 
 //
