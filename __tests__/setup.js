@@ -4,6 +4,11 @@ jest.mock('@react-native-community/async-storage', () => mockAsyncStorage);
 
 jest.mock('react-native-icloudstore', () => mockAsyncStorage);
 
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  OS: 'ios',
+  select: jest.fn(selector => selector.ios),
+}));
+
 jest.mock('react-native-keychain', () => {
   let IN_MEMORY_STORE = {};
   return {
@@ -30,4 +35,16 @@ jest.mock('frisbee', () => {
       delete: jest.fn(),
     };
   });
+});
+
+jest.mock('react-native-google-drive-api-wrapper', () => {
+  return {
+    files: {
+      safeCreateFolder: jest.fn(),
+      createFileMultipart: jest.fn(),
+      get: jest.fn(),
+      getId: jest.fn(),
+      delete: jest.fn(),
+    },
+  };
 });

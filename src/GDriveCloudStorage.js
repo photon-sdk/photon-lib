@@ -1,38 +1,34 @@
 import GDrive from 'react-native-google-drive-api-wrapper';
 
-const GDriveCloudStorage = {
-  async setItem(keyId, value) {
-    const folderId = await GDrive.files.safeCreateFolder({ name: 'Photon', parents: ['root'] });
+export async function setItem(keyId, value) {
+  const folderId = await GDrive.files.safeCreateFolder({ name: 'Photon', parents: ['root'] });
 
-    return GDrive.files.createFileMultipart(
-      '',
-      'text/plain',
-      {
-        parents: ['root', folderId],
-        name: keyId,
-        appProperties: {
-          keyId: value,
-        },
+  return GDrive.files.createFileMultipart(
+    '',
+    'text/plain',
+    {
+      parents: ['root', folderId],
+      name: keyId,
+      appProperties: {
+        keyId: value,
       },
-      false,
-    );
-  },
+    },
+    false,
+  );
+}
 
-  async getItem(keyId) {
-    return new Promise((resolve, reject) => {
-      GDrive.files.getId(keyId, ['Photon'], 'text/plain', false).then(fileId => {
-        GDrive.files
-          .get(fileId)
-          .then(meta => resolve(JSON.stringify(meta.appProperties)))
-          .catch(e => reject(e));
-      });
-    });
-  },
+export async function getItem(keyId) {
+  try {
+    const fileId = await GDrive.files.getId(keyId, ['Photon'], 'text/plain', false);
+    const meta = await GDrive.files.get(fileId);
 
-  async removeItem(keyId) {
-    const fileId = await GDrive.files.getId(keyId, ['PhotonBackups'], 'text/plain', false);
-    return GDrive.files.delete(fileId);
-  },
-};
+    return JSON.stringify(meta.appProperties);
+  } catch (e) {
+    return new Error(e);
+  }
+}
 
-export default GDriveCloudStorage;
+export async function removeItem(keyId) {
+  const fileId = await GDrive.files.getId(keyId, ['PhotonBackups'], 'text/plain', false);
+  return GDrive.files.delete(fileId);
+}

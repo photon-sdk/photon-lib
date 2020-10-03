@@ -5,7 +5,7 @@
 
 import { Platform } from 'react-native';
 import RNiCloudStorage from 'react-native-icloudstore';
-import GDriveCloudStorage from './GDriveCloudStorage';
+import * as GDriveCloudStorage from './GDriveCloudStorage';
 import { isPhone, isEmail, isId, isBuffer } from './verify';
 
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : GDriveCloudStorage;
@@ -23,9 +23,12 @@ export async function putKey({ keyId, ciphertext }) {
   if (!isId(keyId) || !isBuffer(ciphertext)) {
     throw new Error('Invalid args');
   }
-  if (await Store.getItem(KEY_ID)) {
+
+  const item = await Store.getItem(KEY_ID);
+  if (item) {
     throw new Error('Backup already present');
   }
+
   await Store.setItem(KEY_ID, keyId);
   await Store.setItem(shortKeyId(keyId), stringifyKey({ keyId, ciphertext }));
 }

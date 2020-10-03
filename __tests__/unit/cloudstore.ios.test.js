@@ -1,7 +1,7 @@
 import mockAsyncStorage from '@react-native-community/async-storage';
 import * as CloudStore from '../../src/cloudstore';
 
-describe('CloudStore unit test', () => {
+describe('CloudStore ios unit test', () => {
   const keyId = '8abe1a93-6a9c-490c-bbd5-d7f11a4a9c8f';
   const phone = '+4917512345678';
   const email = 'jon.smith@example.com';
@@ -23,6 +23,7 @@ describe('CloudStore unit test', () => {
 
     it('store item', async () => {
       await CloudStore.putKey({ keyId, ciphertext });
+
       expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_key_id');
       expect(mockAsyncStorage.setItem.mock.calls[0][1]).toBe(keyId);
       expect(mockAsyncStorage.setItem.mock.calls[1][0]).toBe('1_8abe1a93');
