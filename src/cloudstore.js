@@ -5,9 +5,10 @@
 
 import { Platform } from 'react-native';
 import RNiCloudStorage from 'react-native-icloudstore';
-import AsyncStorage from '@react-native-community/async-storage';
+import GDriveCloudStorage from './GDriveCloudStorage';
 import { isPhone, isEmail, isId, isBuffer } from './verify';
-const Store = Platform.OS === 'ios' ? RNiCloudStorage : AsyncStorage;
+
+const Store = Platform.OS === 'ios' ? RNiCloudStorage : GDriveCloudStorage;
 
 const VERSION = '1';
 const KEY_ID = `${VERSION}_photon_key_id`;
