@@ -23,7 +23,6 @@ describe('CloudStore ios unit test', () => {
 
     it('store item', async () => {
       await CloudStore.putKey({ keyId, ciphertext });
-
       expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_key_id');
       expect(mockAsyncStorage.setItem.mock.calls[0][1]).toBe(keyId);
       expect(mockAsyncStorage.setItem.mock.calls[1][0]).toBe('1_8abe1a93');

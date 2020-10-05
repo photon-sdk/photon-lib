@@ -27,7 +27,6 @@ export async function putKey({ keyId, ciphertext }) {
   if (await Store.getItem(KEY_ID)) {
     throw new Error('Backup already present');
   }
-
   await Store.setItem(KEY_ID, keyId);
   await Store.setItem(shortKeyId(keyId), stringifyKey({ keyId, ciphertext }));
 }
