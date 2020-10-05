@@ -24,8 +24,7 @@ export async function putKey({ keyId, ciphertext }) {
     throw new Error('Invalid args');
   }
 
-  const item = await Store.getItem(KEY_ID);
-  if (item) {
+  if (await Store.getItem(KEY_ID)) {
     throw new Error('Backup already present');
   }
 
