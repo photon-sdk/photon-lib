@@ -1,4 +1,18 @@
 import GDrive from 'react-native-google-drive-api-wrapper';
+import { GoogleSignin } from '@react-native-community/google-signin';
+
+GoogleSignin.configure({
+  scopes: ['https://www.googleapis.com/drive/v3/files'],
+});
+
+const { accessToken } = GoogleSignin.getTokens();
+
+GDrive.setAccessToken(accessToken);
+GDrive.init();
+
+if (!GDrive.isInitialized) {
+  throw new Error('Unable to use G drive');
+}
 
 export async function setItem(keyId, value) {
   const folderId = await GDrive.files.safeCreateFolder({ name: 'Photon', parents: ['root'] });
