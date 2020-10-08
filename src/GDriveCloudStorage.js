@@ -2,7 +2,11 @@ import GDrive from 'react-native-google-drive-api-wrapper';
 import { GoogleSignin } from '@react-native-community/google-signin';
 
 GoogleSignin.configure({
-  scopes: ['https://www.googleapis.com/drive/v3/files'],
+  scopes: [
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive.appdata',
+    'https://www.googleapis.com/auth/drive.metadata',
+  ],
 });
 
 const { accessToken } = GoogleSignin.getTokens();
