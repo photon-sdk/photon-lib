@@ -4,11 +4,6 @@ jest.mock('@react-native-community/async-storage', () => mockAsyncStorage);
 
 jest.mock('react-native-icloudstore', () => mockAsyncStorage);
 
-jest.mock('react-native/Libraries/Utilities/Platform', () => ({
-  OS: 'ios',
-  select: jest.fn(selector => selector.ios),
-}));
-
 jest.mock('react-native-keychain', () => {
   let IN_MEMORY_STORE = {};
   return {
