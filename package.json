@@ -27,6 +27,7 @@
     "chacha": "^2.1.0",
     "coinselect": "^3.1.12",
     "create-hash": "^1.2.0",
+    "crypto": "^1.0.1",
     "frisbee": "^3.1.2",
     "util": "^0.12.3"
   },
