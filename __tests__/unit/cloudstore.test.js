@@ -1,7 +1,7 @@
 import mockAsyncStorage from '@react-native-community/async-storage';
 import * as CloudStore from '../../src/cloudstore';
 
-describe('CloudStore ios unit test', () => {
+describe('CloudStore unit test', () => {
   const keyId = '8abe1a93-6a9c-490c-bbd5-d7f11a4a9c8f';
   const phone = '+4917512345678';
   const email = 'jon.smith@example.com';
