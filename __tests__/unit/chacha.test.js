@@ -25,9 +25,6 @@ describe('Chacha20-Poly1305 unit test', () => {
       const key = await chacha.generateKey();
       const pt = Buffer.from('secret stuff', 'utf8');
       const ct = await chacha.encrypt(pt, key);
-      console.log(key);
-      console.log('plain text:' + pt);
-      console.log(ct);
       const decrypted = await nodeDecrypt(ct, key);
       expect(decrypted.toString('utf8')).toBe('secret stuff');
     });
