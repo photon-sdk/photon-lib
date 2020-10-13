@@ -105,9 +105,8 @@ class ChachaTests: XCTestCase {
     /// This unit test takes a key and sealedbox, generated using the  encrypt() function in chachatest.js, and decrypts it using Apple's CryptoKit implementation. The JS output was obtained by console.log'ing the key and sealedbox as a Buffer() string and then copying this into the unit test below.
     func testJSSealedboxIsDecryptedCorrectly(){
         // Given
-        let jsKeyAsBuffer = "75 5d e5 95 cf fb 8c 3a 74 bb c1 01 ab 24 72 6f 48 d7 41 8a 2e 42 26 a0 b4 98 df e4 36 28 57 44"
-        let jsKeyAsBufferWithoutSpaces = jsKeyAsBuffer.components(separatedBy: .whitespaces).joined()
-        let jsKey = Data(hexString: jsKeyAsBufferWithoutSpaces)
+        let jsKeyHex = "0b9da4d2aa1802e32a89716e44cffcf4b6bcfe891435b9fd67797a627d4f5aea"
+        let jsKey = Data(hexString: jsKeyHex)
         
         let encryptedTextAsBuffer = "05 74 91 6a 2d 6a a2 8c 7b aa e4 de ef f8 58 dc 27 7b 17 ac 4b 29 1d ac 69 a9 a1 b6 8b 04 21 12 2e 0b e2 4e d3 2e 6b 69"
         let encryptedTextAsBufferWithoutSpaces = encryptedTextAsBuffer.components(separatedBy: .whitespaces).joined()
