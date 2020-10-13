@@ -1,7 +1,7 @@
 import GDrive from 'react-native-google-drive-api-wrapper';
 import { GoogleSignin } from '@react-native-community/google-signin';
 
-async function initialGoogle() {
+async function authenticate() {
   GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.appdata'],
   });
