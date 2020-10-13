@@ -6,7 +6,6 @@ async function authenticate() {
     scopes: ['https://www.googleapis.com/auth/drive.appdata'],
   });
   const { accessToken } = await GoogleSignin.getTokens();
-
   GDrive.setAccessToken(accessToken);
   GDrive.init();
 
