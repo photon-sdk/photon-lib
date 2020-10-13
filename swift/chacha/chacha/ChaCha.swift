@@ -27,9 +27,6 @@ extension Data {
     }
 }
 
-
-
-
 class ChaCha {
     
     enum ChaChaErrors: Error {
@@ -72,4 +69,3 @@ class ChaCha {
         return openedBox
     }
 }
-
