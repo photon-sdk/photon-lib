@@ -8,7 +8,6 @@ async function authenticate() {
   const { accessToken } = await GoogleSignin.getTokens();
   GDrive.setAccessToken(accessToken);
   GDrive.init();
-
   if (!GDrive.isInitialized) {
     throw new Error('Unable to use G drive');
   }
