@@ -98,7 +98,6 @@ class ChachaTests: XCTestCase {
         
        // Then
        XCTAssertNil(openBox)
-        
     }
     
     /// This unit test takes a key and sealedbox, generated using the  encrypt() function in chachatest.js, and decrypts it using Apple's CryptoKit implementation. The JS output was obtained by console.log'ing the key and sealedbox as a Buffer() string and then copying this into the unit test below.
