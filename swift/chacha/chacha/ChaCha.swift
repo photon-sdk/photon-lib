@@ -51,7 +51,6 @@ class ChaCha {
         return sealedBox
     }
     
-    
     /// This function decrypts a secret (Data) using a key (Data). It returns a data object (bytes) or nil.
     func decrypt(cipher_bytes:Data, key:Data) throws -> Data? {
         let sealedBox = try! ChaChaPoly.SealedBox(combined: cipher_bytes) // turn bytes to a sealedbox
