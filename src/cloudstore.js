@@ -23,7 +23,6 @@ export async function putKey({ keyId, ciphertext }) {
   if (!isId(keyId) || !isBuffer(ciphertext)) {
     throw new Error('Invalid args');
   }
-
   if (await Store.getItem(KEY_ID)) {
     throw new Error('Backup already present');
   }
