@@ -39,7 +39,6 @@ class ChaCha {
         return key
     }
     
-    
     /// This function encrypts a secret (Data) using a key (Data). It returns a data object (bytes) or nil.
     func encrypt(secret:Data, key:Data) throws -> Data? {
         let symmetric_key = SymmetricKey(data: key)
