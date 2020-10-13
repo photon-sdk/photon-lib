@@ -118,7 +118,6 @@ class ChachaTests: XCTestCase {
         
         // Then
         XCTAssertEqual(decodedSecret, "secret stuff")
-        
     }
 
 }
