@@ -9,7 +9,7 @@ async function authenticate() {
   GDrive.setAccessToken(accessToken);
   GDrive.init();
   if (!GDrive.isInitialized) {
-    throw new Error('Unable to use G drive');
+    throw new Error('Unable to use GDrive');
   }
 }
 
