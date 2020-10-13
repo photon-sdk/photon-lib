@@ -79,7 +79,6 @@ class ChachaTests: XCTestCase {
         
        // Then
        XCTAssertNil(sealedBox)
-        
     }
     
     func testWrongKeySizeForDecryption(){
