@@ -31,16 +31,17 @@
     "util": "^0.12.3"
   },
   "peerDependencies": {
+    "@photon-sdk/react-native-icloudstore": "^1.0.0",
     "@photon-sdk/react-native-tcp": "^6.0.0",
     "@react-native-community/async-storage": "^1.9.0",
     "node-libs-react-native": "^1.2.0",
-    "react-native-icloudstore": "^0.9.0",
     "react-native-keychain": "^6.0.0",
     "react-native-randombytes": "^3.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
     "@babel/runtime": "^7.6.2",
+    "@photon-sdk/react-native-icloudstore": "^1.0.0",
     "@react-native-community/async-storage": "^1.9.0",
     "@react-native-community/eslint-config": "^0.0.5",
     "babel-eslint": "^10.0.2",
@@ -60,7 +61,6 @@
     "metro-react-native-babel-preset": "^0.58.0",
     "react": "16.11.0",
     "react-native": "0.62.2",
-    "react-native-icloudstore": "^0.9.0",
     "react-native-keychain": "^6.0.0"
   },
   "react-native": {
