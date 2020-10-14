@@ -2,7 +2,7 @@ import mockAsyncStorage from '@react-native-community/async-storage/jest/async-s
 
 jest.mock('@react-native-community/async-storage', () => mockAsyncStorage);
 
-jest.mock('react-native-icloudstore', () => mockAsyncStorage);
+jest.mock('@photon-sdk/react-native-icloudstore', () => mockAsyncStorage);
 
 jest.mock('react-native-keychain', () => {
   let IN_MEMORY_STORE = {};

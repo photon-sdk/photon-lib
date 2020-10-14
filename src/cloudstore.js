@@ -4,7 +4,7 @@
  */
 
 import { Platform } from 'react-native';
-import RNiCloudStorage from 'react-native-icloudstore';
+import RNiCloudStorage from '@photon-sdk/react-native-icloudstore';
 import AsyncStorage from '@react-native-community/async-storage';
 import { isPhone, isEmail, isId, isBuffer } from './verify';
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : AsyncStorage;
