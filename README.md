@@ -28,7 +28,7 @@ In your react-native app...
 Make sure to install all peer dependencies:
 
 ```
-npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain react-native-icloudstore @react-native-community/async-storage @photon-sdk/react-native-tcp node-libs-react-native
+npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-icloudstore @react-native-community/async-storage @photon-sdk/react-native-tcp node-libs-react-native
 ```
 
 ### Update cocoapods
