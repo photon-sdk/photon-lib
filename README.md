@@ -154,17 +154,20 @@ import { KeyBackup } from '@photon-sdk/photon-lib';
 const userId = await KeyBackup.getEmail()              // get registered email address
 await KeyBackup.initPinReset({ userId });              // start time delay in key server
 
-const code = '000000';                                 // received via SMS or Email
-const delay = await KeyBackup.verifyPinReset({ userId, code });
+const code = '123456';                                 // received via SMS or Email
+const newPin = '5678';                                 // let user chose new pin
+const delay = await KeyBackup.verifyPinReset({ userId, code, newPin });
 if (delay) {
-  // display delay in the UI and ask user to wait (30 days by default)
+  // display delay in the UI and tell user to wait (30 days by default)
+  return
 }
+
+// if delay is null the time lock is over and pin reset can be confirmed ...
 
 await KeyBackup.initPinReset({ userId });              // call again after 30 day delay
 
-const code = '000000';                                 // received via SMS or Email
-const newPin = '5678';                                 // let user chose new pin
-await KeyBackup.finalizePinReset({ userId, code, newPin });
+const code = '654321';                                 // received via SMS or Email
+await KeyBackup.verifyPinReset({ userId, code, newPin });
 
 const pin = '5678';                                    // use the new pin for recovery
 const data = await KeyBackup.restoreBackup({ pin });   // fetch and decrypt user's seed
