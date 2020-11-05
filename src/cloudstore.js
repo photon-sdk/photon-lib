@@ -15,6 +15,12 @@ const KEY_ID = `${VERSION}_photon_key_id`;
 const PHONE = `${VERSION}_photon_phone`;
 const EMAIL = `${VERSION}_photon_email`;
 
+export async function authenticate(options) {
+  if (Store.authenticate) {
+    await Store.authenticate(options);
+  }
+}
+
 //
 // Encrypted key storage
 //

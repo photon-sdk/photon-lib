@@ -19,6 +19,10 @@ export function init({ keyServerURI }) {
   KeyServer.init({ baseURI: keyServerURI });
 }
 
+export async function authenticate(options) {
+  await CloudStore.authenticate(options);
+}
+
 //
 // Backup & Restore
 //
