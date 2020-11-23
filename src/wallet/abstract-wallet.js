@@ -1,14 +1,15 @@
 import { BitcoinUnit, Chain } from '../model';
 import createHash from 'create-hash';
+import b58 from 'bs58check';
 
 export class AbstractWallet {
   static type = 'abstract';
   static typeReadable = 'abstract';
 
   static fromJson(obj) {
-    let obj2 = JSON.parse(obj);
-    let temp = new this();
-    for (let key2 of Object.keys(obj2)) {
+    const obj2 = JSON.parse(obj);
+    const temp = new this();
+    for (const key2 of Object.keys(obj2)) {
       temp[key2] = obj2[key2];
     }
 
@@ -22,7 +23,6 @@ export class AbstractWallet {
     this.secret = ''; // private key or recovery phrase
     this.balance = 0;
     this.unconfirmed_balance = 0;
-    this.transactions = [];
     this._address = false; // cache
     this.utxo = [];
     this._lastTxFetch = 0;
@@ -31,17 +31,15 @@ export class AbstractWallet {
     this.chain = Chain.ONCHAIN;
     this.hideBalance = false;
     this.userHasSavedExport = false;
+    this._hideTransactionsInWalletsList = false;
   }
 
   getID() {
-    return createHash('sha256')
-      .update(this.getSecret())
-      .digest()
-      .toString('hex');
+    return createHash('sha256').update(this.getSecret()).digest().toString('hex');
   }
 
   getTransactions() {
-    return this.transactions;
+    throw new Error('not implemented');
   }
 
   getUserHasSavedExport() {
@@ -50,6 +48,14 @@ export class AbstractWallet {
 
   setUserHasSavedExport(value) {
     this.userHasSavedExport = value;
+  }
+
+  getHideTransactionsInWalletsList() {
+    return this._hideTransactionsInWalletsList;
+  }
+
+  setHideTransactionsInWalletsList(value) {
+    this._hideTransactionsInWalletsList = value;
   }
 
   /**
@@ -76,7 +82,7 @@ export class AbstractWallet {
   }
 
   getPreferredBalanceUnit() {
-    for (let value of Object.values(BitcoinUnit)) {
+    for (const value of Object.values(BitcoinUnit)) {
       if (value === this.preferredBalanceUnit) {
         return this.preferredBalanceUnit;
       }
@@ -108,7 +114,15 @@ export class AbstractWallet {
     return false;
   }
 
+  allowPayJoin() {
+    return false;
+  }
+
   weOwnAddress(address) {
+    throw Error('not implemented');
+  }
+
+  weOwnTransaction(txid) {
     throw Error('not implemented');
   }
 
@@ -116,7 +130,7 @@ export class AbstractWallet {
    * Returns delta of unconfirmed balance. For example, if theres no
    * unconfirmed balance its 0
    *
-   * @return {number}
+   * @return {number} Satoshis
    */
   getUnconfirmedBalance() {
     return this.unconfirmed_balance;
@@ -132,12 +146,21 @@ export class AbstractWallet {
   }
 
   setSecret(newSecret) {
-    this.secret = newSecret
-      .trim()
-      .replace('bitcoin:', '')
-      .replace('BITCOIN:', '');
+    this.secret = newSecret.trim().replace('bitcoin:', '').replace('BITCOIN:', '');
 
     if (this.secret.startsWith('BC1')) this.secret = this.secret.toLowerCase();
+
+    // [fingerprint/derivation]zpub
+    const re = /\[([^\]]+)\](.*)/;
+    const m = this.secret.match(re);
+    if (m && m.length === 3) {
+      let hexFingerprint = m[1].split('/')[0];
+      if (hexFingerprint.length === 8) {
+        hexFingerprint = Buffer.from(hexFingerprint, 'hex').reverse().toString('hex');
+        this.masterFingerprint = parseInt(hexFingerprint, 16);
+      }
+      this.secret = m[2];
+    }
 
     try {
       const parsedSecret = JSON.parse(this.secret);
@@ -150,6 +173,13 @@ export class AbstractWallet {
         this.secret = parsedSecret.keystore.xpub;
         this.masterFingerprint = masterFingerprint;
       }
+      // It is a Cobo Vault Hardware Wallet
+      if (parsedSecret && parsedSecret.ExtPubKey && parsedSecret.MasterFingerprint) {
+        this.secret = parsedSecret.ExtPubKey;
+        const mfp = Buffer.from(parsedSecret.MasterFingerprint, 'hex').reverse().toString('hex');
+        this.masterFingerprint = parseInt(mfp, 16);
+        this.setLabel('Cobo Vault ' + parsedSecret.MasterFingerprint);
+      }
     } catch (_) {}
     return this;
   }
@@ -158,13 +188,48 @@ export class AbstractWallet {
     return 0;
   }
 
-  // createTx () { throw Error('not implemented') }
+  getLatestTransactionTimeEpoch() {
+    if (this.getTransactions().length === 0) {
+      return 0;
+    }
+    let max = 0;
+    for (const tx of this.getTransactions()) {
+      max = Math.max(new Date(tx.received) * 1, max);
+    }
+    return max;
+  }
+
+  /**
+   * @deprecated
+   */
+  createTx() {
+    throw Error('not implemented');
+  }
+
+  /**
+   *
+   * @param utxos {Array.<{vout: Number, value: Number, txId: String, address: String}>} List of spendable utxos
+   * @param targets {Array.<{value: Number, address: String}>} Where coins are going. If theres only 1 target and that target has no value - this will send MAX to that address (respecting fee rate)
+   * @param feeRate {Number} satoshi per byte
+   * @param changeAddress {String} Excessive coins will go back to that address
+   * @param sequence {Number} Used in RBF
+   * @param skipSigning {boolean} Whether we should skip signing, use returned `psbt` in that case
+   * @param masterFingerprint {number} Decimal number of wallet's master fingerprint
+   * @returns {{outputs: Array, tx: Transaction, inputs: Array, fee: Number, psbt: Psbt}}
+   */
+  createTransaction(utxos, targets, feeRate, changeAddress, sequence, skipSigning = false, masterFingerprint) {
+    throw Error('not implemented');
+  }
 
   getAddress() {
     throw Error('not implemented');
   }
 
   getAddressAsync() {
+    return new Promise(resolve => resolve(this.getAddress()));
+  }
+
+  async getChangeAddressAsync() {
     return new Promise(resolve => resolve(this.getAddress()));
   }
 
@@ -175,4 +240,44 @@ export class AbstractWallet {
   async wasEverUsed() {
     throw new Error('Not implemented');
   }
+
+  /**
+   * Returns _all_ external addresses in hierarchy (for HD wallets) or just address for single-address wallets
+   * _Not_ internal ones, as this method is supposed to be used for subscription of external notifications.
+   *
+   * @returns string[] Addresses
+   */
+  getAllExternalAddresses() {
+    return [];
+  }
+
+  /*
+   * Converts zpub to xpub
+   *
+   * @param {String} zpub
+   * @returns {String} xpub
+   */
+  static _zpubToXpub(zpub) {
+    let data = b58.decode(zpub);
+    data = data.slice(4);
+    data = Buffer.concat([Buffer.from('0488b21e', 'hex'), data]);
+
+    return b58.encode(data);
+  }
+
+  /**
+   * Converts ypub to xpub
+   * @param {String} ypub - wallet ypub
+   * @returns {*}
+   */
+  static _ypubToXpub(ypub) {
+    let data = b58.decode(ypub);
+    if (data.readUInt32BE() !== 0x049d7cb2) throw new Error('Not a valid ypub extended key!');
+    data = data.slice(4);
+    data = Buffer.concat([Buffer.from('0488b21e', 'hex'), data]);
+
+    return b58.encode(data);
+  }
+
+  prepareForSerialization() {}
 }
