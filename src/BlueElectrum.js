@@ -52,7 +52,7 @@ export async function connectMain(options) {
   try {
     console.log('begin connection:', JSON.stringify(usingPeer));
     mainClient = new ElectrumClient(usingPeer.ssl || usingPeer.tcp, usingPeer.host, usingPeer.ssl ? 'tls' : 'tcp');
-    mainClient.onError = function(e) {
+    mainClient.onError = function (e) {
       if (Platform.OS === 'android' && mainConnected) {
         // android sockets are buggy and dont always issue CLOSE event, which actually makes the persistence code to reconnect.
         // so lets do it manually, but only if we were previously connected (mainConnected), otherwise theres other
@@ -146,7 +146,7 @@ async function getRandomDynamicPeer() {
  * @param address {String}
  * @returns {Promise<Object>}
  */
-export const getBalanceByAddress = async function(address) {
+export const getBalanceByAddress = async function (address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   const script = bitcoin.address.toOutputScript(address);
   const hash = bitcoin.crypto.sha256(script);
@@ -156,7 +156,7 @@ export const getBalanceByAddress = async function(address) {
   return balance;
 };
 
-export const getConfig = async function() {
+export const getConfig = async function () {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return {
     host: mainClient.host,
@@ -166,7 +166,7 @@ export const getConfig = async function() {
   };
 };
 
-export const getSecondsSinceLastRequest = function() {
+export const getSecondsSinceLastRequest = function () {
   return mainClient && mainClient.timeLastCall ? (+new Date() - mainClient.timeLastCall) / 1000 : -1;
 };
 
@@ -175,7 +175,7 @@ export const getSecondsSinceLastRequest = function() {
  * @param address {String}
  * @returns {Promise<Array>}
  */
-export const getTransactionsByAddress = async function(address) {
+export const getTransactionsByAddress = async function (address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   const script = bitcoin.address.toOutputScript(address);
   const hash = bitcoin.crypto.sha256(script);
@@ -188,7 +188,7 @@ export const getTransactionsByAddress = async function(address) {
   return history;
 };
 
-export const ping = async function() {
+export const ping = async function () {
   try {
     await mainClient.server_ping();
   } catch (_) {
@@ -198,7 +198,7 @@ export const ping = async function() {
   return true;
 };
 
-export const getTransactionsFullByAddress = async function(address) {
+export const getTransactionsFullByAddress = async function (address) {
   const txs = await this.getTransactionsByAddress(address);
   const ret = [];
   for (const tx of txs) {
@@ -237,7 +237,7 @@ export const getTransactionsFullByAddress = async function(address) {
  * @param batchsize {Number}
  * @returns {Promise<{balance: number, unconfirmed_balance: number, addresses: object}>}
  */
-export const multiGetBalanceByAddress = async function(addresses, batchsize) {
+export const multiGetBalanceByAddress = async function (addresses, batchsize) {
   batchsize = batchsize || 200;
   if (!mainClient) throw new Error('Electrum client is not connected');
   const ret = { balance: 0, unconfirmed_balance: 0, addresses: {} };
@@ -277,7 +277,7 @@ export const multiGetBalanceByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-export const multiGetUtxoByAddress = async function(addresses, batchsize) {
+export const multiGetUtxoByAddress = async function (addresses, batchsize) {
   batchsize = batchsize || 100;
   if (!mainClient) throw new Error('Electrum client is not connected');
   const ret = {};
@@ -318,7 +318,7 @@ export const multiGetUtxoByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-export const multiGetHistoryByAddress = async function(addresses, batchsize) {
+export const multiGetHistoryByAddress = async function (addresses, batchsize) {
   batchsize = batchsize || 100;
   if (!mainClient) throw new Error('Electrum client is not connected');
   const ret = {};
@@ -363,7 +363,7 @@ export const multiGetHistoryByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-export const multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
+export const multiGetTransactionByTxid = async function (txids, batchsize, verbose) {
   batchsize = batchsize || 45;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
@@ -425,10 +425,10 @@ export const multiGetTransactionByTxid = async function(txids, batchsize, verbos
  *
  * @returns {Promise<Promise<*> | Promise<*>>}
  */
-export const waitTillConnected = async function() {
+export const waitTillConnected = async function () {
   let waitTillConnectedInterval = false;
   let retriesCounter = 0;
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     waitTillConnectedInterval = setInterval(() => {
       if (mainConnected) {
         clearInterval(waitTillConnectedInterval);
@@ -449,7 +449,7 @@ export const waitTillConnected = async function() {
   });
 };
 
-export const estimateFees = async function() {
+export const estimateFees = async function () {
   if (!mainClient) throw new Error('Electrum client is not connected');
   const fast = await mainClient.blockchainEstimatefee(1);
   const medium = await mainClient.blockchainEstimatefee(5);
@@ -463,7 +463,7 @@ export const estimateFees = async function() {
  * @param numberOfBlocks {number} The number of blocks to target for confirmation
  * @returns {Promise<number>} Satoshis per byte
  */
-export const estimateFee = async function(numberOfBlocks) {
+export const estimateFee = async function (numberOfBlocks) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   numberOfBlocks = numberOfBlocks || 1;
   const coinUnitsPerKilobyte = await mainClient.blockchainEstimatefee(numberOfBlocks);
@@ -471,12 +471,12 @@ export const estimateFee = async function(numberOfBlocks) {
   return Math.round(new BigNumber(coinUnitsPerKilobyte).dividedBy(1024).multipliedBy(100000000).toNumber());
 };
 
-export const serverFeatures = async function() {
+export const serverFeatures = async function () {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return mainClient.server_features();
 };
 
-export const broadcast = async function(hex) {
+export const broadcast = async function (hex) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   try {
     const broadcast = await mainClient.blockchainTransaction_broadcast(hex);
@@ -486,12 +486,12 @@ export const broadcast = async function(hex) {
   }
 };
 
-export const broadcastV2 = async function(hex) {
+export const broadcastV2 = async function (hex) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   return mainClient.blockchainTransaction_broadcast(hex);
 };
 
-export const estimateCurrentBlockheight = function() {
+export const estimateCurrentBlockheight = function () {
   if (latestBlockheight) {
     const timeDiff = Math.floor(+new Date() / 1000) - latestBlockheightTimestamp;
     const extraBlocks = Math.floor(timeDiff / (9.93 * 60));
@@ -508,7 +508,7 @@ export const estimateCurrentBlockheight = function() {
  * @param height
  * @returns {number} Timestamp in seconds
  */
-export const calculateBlockTime = function(height) {
+export const calculateBlockTime = function (height) {
   if (latestBlockheight) {
     return Math.floor(latestBlockheightTimestamp + (height - latestBlockheight) * 9.93 * 60);
   }
@@ -525,7 +525,7 @@ export const calculateBlockTime = function(height) {
  * @param sslPort
  * @returns {Promise<boolean>} Whether provided host:port is a valid electrum server
  */
-export const testConnection = async function(host, tcpPort, sslPort) {
+export const testConnection = async function (host, tcpPort, sslPort) {
   const client = new ElectrumClient(sslPort || tcpPort, host, sslPort ? 'tls' : 'tcp');
   client.onError = () => {}; // mute
   let timeoutId = false;
@@ -554,7 +554,7 @@ export const forceDisconnect = () => {
   mainClient.close();
 };
 
-const splitIntoChunks = function(arr, chunkSize) {
+const splitIntoChunks = function (arr, chunkSize) {
   const groups = [];
   let i;
   for (i = 0; i < arr.length; i += chunkSize) {

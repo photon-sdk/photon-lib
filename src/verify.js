@@ -24,11 +24,11 @@ export function isPin(o) {
 }
 
 export function isObject(o) {
-  return Object.prototype.isPrototypeOf(o);
+  return typeof o === 'object' && o !== null;
 }
 
 export function isString(o) {
-  return typeof o === 'string' || String.prototype.isPrototypeOf(o);
+  return typeof o === 'string' || o instanceof String;
 }
 
 export function isBuffer(o) {
