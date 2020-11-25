@@ -2,14 +2,14 @@ import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import bip39 from 'bip39';
 import b58 from 'bs58check';
 import { decodeUR } from 'bc-ur';
-const BlueElectrum = require('../../blue_modules/BlueElectrum');
-const coinSelectAccumulative = require('coinselect/accumulative');
-const coinSelectSplit = require('coinselect/split');
-const HDNode = require('bip32');
-const bitcoin = require('bitcoinjs-lib');
-const createHash = require('create-hash');
-const reverse = require('buffer-reverse');
-const mn = require('electrum-mnemonic');
+import BlueElectrum from '../BlueElectrum';
+import coinSelectAccumulative from 'coinselect/accumulative';
+import coinSelectSplit from 'coinselect/split';
+import HDNode from 'bip32';
+import bitcoin from 'bitcoinjs-lib';
+import createHash from 'create-hash';
+import reverse from 'buffer-reverse';
+import * as mn from 'electrum-mnemonic';
 
 const MNEMONIC_TO_SEED_OPTS_SEGWIT = {
   prefix: mn.PREFIXES.segwit,
