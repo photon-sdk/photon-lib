@@ -1623,7 +1623,7 @@ describe('multisig-cosigner', () => {
   it('can parse files from sparrow wallet', () => {
     const secrets = [
       JSON.stringify(require('./fixtures/fromsparrow-electrum.json')),
-      require('fs').readFileSync('./tests/unit/fixtures/fromsparrow-coldcard.txt', 'ascii'),
+      require('fs').readFileSync(require('path').join(__dirname, '/fixtures/fromsparrow-coldcard.txt'), 'ascii'),
       JSON.stringify(require('./fixtures/fromsparrow-specter.json')),
     ];
 
