@@ -1,8 +1,5 @@
 import bip39 from 'bip39';
-import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
-import signer from '../model/signer';
-import { BitcoinUnit } from '../model';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as HDNode from 'bip32';
@@ -32,6 +29,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
    * @private
    */
   _getWIFByIndex(internal, index) {
+    if (!this.secret) return false;
     const mnemonic = this.secret;
     const seed = bip39.mnemonicToSeed(mnemonic);
     const root = bitcoin.bip32.fromSeed(seed);
@@ -97,50 +95,31 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     return this._xpub;
   }
 
-  /**
-   *
-   * @param utxos
-   * @param amount Either float (BTC) or string 'MAX' (BitcoinUnit.MAX) to send all
-   * @param fee
-   * @param address
-   * @returns {string}
-   */
-  createTx(utxos, amount, fee, address) {
-    for (let utxo of utxos) {
-      utxo.wif = this._getWifForAddress(utxo.address);
-    }
+  _addPsbtInput(psbt, input, sequence, masterFingerprintBuffer) {
+    const pubkey = this._getPubkeyByAddress(input.address);
+    const path = this._getDerivationPathByAddress(input.address, 49);
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
 
-    let amountPlusFee = parseFloat(new BigNumber(amount).plus(fee).toString(10));
+    psbt.addInput({
+      hash: input.txid,
+      index: input.vout,
+      sequence,
+      bip32Derivation: [
+        {
+          masterFingerprint: masterFingerprintBuffer,
+          path,
+          pubkey,
+        },
+      ],
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.amount || input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
 
-    if (amount === BitcoinUnit.MAX) {
-      amountPlusFee = new BigNumber(0);
-      for (let utxo of utxos) {
-        amountPlusFee = amountPlusFee.plus(utxo.amount);
-      }
-      amountPlusFee = amountPlusFee.dividedBy(100000000).toString(10);
-    }
-
-    return signer.createHDSegwitTransaction(
-      utxos,
-      address,
-      amountPlusFee,
-      fee,
-      this._getInternalAddressByIndex(this.next_free_change_address_index),
-    );
-  }
-
-  /**
-   * Converts ypub to xpub
-   * @param {String} ypub - wallet ypub
-   * @returns {*}
-   */
-  static _ypubToXpub(ypub) {
-    let data = b58.decode(ypub);
-    if (data.readUInt32BE() !== 0x049d7cb2) throw new Error('Not a valid ypub extended key!');
-    data = data.slice(4);
-    data = Buffer.concat([Buffer.from('0488b21e', 'hex'), data]);
-
-    return b58.encode(data);
+    return psbt;
   }
 
   /**

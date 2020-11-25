@@ -233,6 +233,30 @@ const newTx = wallet.createTransaction(utxo, target, feeRate, changeTo);
 await wallet.broadcastTx(newTx.tx.toHex());      // broadcast tx to the network
 ```
 
+### Create Multisig Wallet & cosign PSBT
+
+In this example we'll create a 2-of-2 multisig wallet. Cosigners can be added as either xpubs or mnemonics. Once created, the wallet can be interacted with using the same apis as above.
+
+```js
+import { MultisigHDWallet, WalletStore } from '@photon-sdk/photon-lib';
+
+const path = "m/48'/0'/0'/2'";
+const key1_mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+const key2_fp = '168DD603';
+const key2_zpub = 'Zpub75mAE8EjyxSzoyPmGnd5E6MyD7ALGNndruWv52xpzimZQKukwvEfXTHqmH8nbbc6ccP5t2aM3mws3pKYSnKpKMMytdbNEZFUxKzztYFM8Pn';
+
+const wallet = new MultisigHDWallet();
+wallet.addCosigner(key1_mnemonic);
+wallet.addCosigner(key2_zpub, key2_fp);
+wallet.setDerivationPath(path);
+wallet.setM(2);
+
+const newTx = wallet.createTransaction(utxo, target, feeRate, changeTo); // see above for how to specify args
+const signedTx = wallet.cosignPsbt(newTx.psbt);     // cosign the psbt (must be done by both cosigners)
+
+await wallet.broadcastTx(signedTx.tx.toHex());      // broadcast tx to the network
+```
+
 ## Development and testing
 
 Clone the git repo and then:

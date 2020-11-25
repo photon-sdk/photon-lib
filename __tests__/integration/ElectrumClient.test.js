@@ -15,8 +15,8 @@ const hardcodedPeers = [
 
 describe('ElectrumClient', () => {
   it('can connect and query', async () => {
-    for (let peer of hardcodedPeers) {
-      let mainClient = new ElectrumClient(peer.ssl || peer.tcp, peer.host, peer.ssl ? 'tls' : 'tcp');
+    for (const peer of hardcodedPeers) {
+      const mainClient = new ElectrumClient(peer.ssl || peer.tcp, peer.host, peer.ssl ? 'tls' : 'tcp');
 
       try {
         await mainClient.connect();
@@ -31,9 +31,9 @@ describe('ElectrumClient', () => {
       let script = bitcoin.address.toOutputScript(addr4elect);
       let hash = bitcoin.crypto.sha256(script);
       let reversedHash = Buffer.from(hash.reverse());
-      let start = +new Date();
+      const start = +new Date();
       let balance = await mainClient.blockchainScripthash_getBalance(reversedHash.toString('hex'));
-      let end = +new Date();
+      const end = +new Date();
       end - start > 1000 && console.warn(peer.host, 'took', (end - start) / 1000, 'seconds to fetch balance');
       assert.ok(balance.confirmed > 0);
 

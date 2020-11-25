@@ -2,9 +2,9 @@ import { randomBytes } from './rng';
 import { AbstractWallet } from './abstract-wallet';
 import { HDSegwitBech32Wallet } from './';
 import * as bitcoin from 'bitcoinjs-lib';
-import BigNumber from 'bignumber.js';
-import { Signer } from '../model';
 import * as BlueElectrum from '../BlueElectrum';
+import coinSelectAccumulative from 'coinselect/accumulative';
+import coinSelectSplit from 'coinselect/split';
 
 /**
  *  Has private key and single address like "1ABCD....."
@@ -34,7 +34,7 @@ export class LegacyWallet extends AbstractWallet {
    * @return {boolean}
    */
   timeToRefreshTransaction() {
-    for (let tx of this.getTransactions()) {
+    for (const tx of this.getTransactions()) {
       if (tx.confirmations < 7) {
         return true;
       }
@@ -47,6 +47,21 @@ export class LegacyWallet extends AbstractWallet {
     this.secret = bitcoin.ECPair.makeRandom({ rng: () => buf }).toWIF();
   }
 
+  async generateFromEntropy(user) {
+    let i = 0;
+    do {
+      i += 1;
+      const random = await randomBytes(user.length < 32 ? 32 - user.length : 0);
+      const buf = Buffer.concat([user, random], 32);
+      try {
+        this.secret = bitcoin.ECPair.fromPrivateKey(buf).toWIF();
+        return;
+      } catch (e) {
+        if (i === 5) throw e;
+      }
+    } while (true);
+  }
+
   /**
    *
    * @returns {string}
@@ -55,7 +70,7 @@ export class LegacyWallet extends AbstractWallet {
     if (this._address) return this._address;
     let address;
     try {
-      let keyPair = bitcoin.ECPair.fromWIF(this.secret);
+      const keyPair = bitcoin.ECPair.fromWIF(this.secret);
       address = bitcoin.payments.p2pkh({
         pubkey: keyPair.publicKey,
       }).address;
@@ -68,6 +83,13 @@ export class LegacyWallet extends AbstractWallet {
   }
 
   /**
+   * @inheritDoc
+   */
+  getAllExternalAddresses() {
+    return [this.getAddress()];
+  }
+
+  /**
    * Fetches balance of the Wallet via API.
    * Returns VOID. Get the actual balance via getter.
    *
@@ -75,10 +97,9 @@ export class LegacyWallet extends AbstractWallet {
    */
   async fetchBalance() {
     try {
-      let balance = await BlueElectrum.getBalanceByAddress(this.getAddress());
+      const balance = await BlueElectrum.getBalanceByAddress(this.getAddress());
       this.balance = Number(balance.confirmed);
-      this.unconfirmed_balance = new BigNumber(balance.unconfirmed);
-      this.unconfirmed_balance = this.unconfirmed_balance.dividedBy(100000000).toString() * 1; // wtf
+      this.unconfirmed_balance = Number(balance.unconfirmed);
       this._lastBalanceFetch = +new Date();
     } catch (Error) {
       console.warn(Error);
@@ -92,25 +113,40 @@ export class LegacyWallet extends AbstractWallet {
    */
   async fetchUtxo() {
     try {
-      let utxos = await BlueElectrum.multiGetUtxoByAddress([this.getAddress()]);
+      const utxos = await BlueElectrum.multiGetUtxoByAddress([this.getAddress()]);
       this.utxo = [];
-      for (let arr of Object.values(utxos)) {
+      for (const arr of Object.values(utxos)) {
         this.utxo = this.utxo.concat(arr);
       }
+
+      // now we need to fetch txhash for each input as required by PSBT
+      if (LegacyWallet.type !== this.type) return; // but only for LEGACY single-address wallets
+      const txhexes = await BlueElectrum.multiGetTransactionByTxid(
+        this.utxo.map(u => u.txId),
+        50,
+        false,
+      );
+
+      const newUtxos = [];
+      for (const u of this.utxo) {
+        if (txhexes[u.txId]) u.txhex = txhexes[u.txId];
+        newUtxos.push(u);
+      }
+
+      this.utxo = newUtxos;
     } catch (Error) {
       console.warn(Error);
-    }
-
-    // backward compatibility
-    for (let u of this.utxo) {
-      u.tx_output_n = u.vout;
-      u.tx_hash = u.txId;
-      u.confirmations = u.height ? 1 : 0;
     }
   }
 
   getUtxo() {
-    return this.utxo;
+    const ret = [];
+    for (const u of this.utxo) {
+      if (u.txId) u.txid = u.txId;
+      if (!u.confirmations && u.height) u.confirmations = BlueElectrum.estimateCurrentBlockheight() - u.height;
+      ret.push(u);
+    }
+    return ret;
   }
 
   /**
@@ -123,37 +159,37 @@ export class LegacyWallet extends AbstractWallet {
   async fetchTransactions() {
     // Below is a simplified copypaste from HD electrum wallet
     this._txs_by_external_index = [];
-    let addresses2fetch = [this.getAddress()];
+    const addresses2fetch = [this.getAddress()];
 
     // first: batch fetch for all addresses histories
-    let histories = await BlueElectrum.multiGetHistoryByAddress(addresses2fetch);
-    let txs = {};
-    for (let history of Object.values(histories)) {
-      for (let tx of history) {
+    const histories = await BlueElectrum.multiGetHistoryByAddress(addresses2fetch);
+    const txs = {};
+    for (const history of Object.values(histories)) {
+      for (const tx of history) {
         txs[tx.tx_hash] = tx;
       }
     }
 
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs));
+    const txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs));
 
     // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
     // then we combine all this data (we need inputs to see source addresses and amounts)
-    let vinTxids = [];
-    for (let txdata of Object.values(txdatas)) {
-      for (let vin of txdata.vin) {
+    const vinTxids = [];
+    for (const txdata of Object.values(txdatas)) {
+      for (const vin of txdata.vin) {
         vinTxids.push(vin.txid);
       }
     }
-    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids);
+    const vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids);
 
     // fetched all transactions from our inputs. now we need to combine it.
     // iterating all _our_ transactions:
-    for (let txid of Object.keys(txdatas)) {
+    for (const txid of Object.keys(txdatas)) {
       // iterating all inputs our our single transaction:
       for (let inpNum = 0; inpNum < txdatas[txid].vin.length; inpNum++) {
-        let inpTxid = txdatas[txid].vin[inpNum].txid;
-        let inpVout = txdatas[txid].vin[inpNum].vout;
+        const inpTxid = txdatas[txid].vin[inpNum].txid;
+        const inpVout = txdatas[txid].vin[inpNum].vout;
         // got txid and output number of _previous_ transaction we shoud look into
         if (vintxdatas[inpTxid] && vintxdatas[inpTxid].vout[inpVout]) {
           // extracting amount & addresses from previous output and adding it to _our_ input:
@@ -165,11 +201,11 @@ export class LegacyWallet extends AbstractWallet {
 
     // now, we need to put transactions in all relevant `cells` of internal hashmaps: this.transactions_by_internal_index && this.transactions_by_external_index
 
-    for (let tx of Object.values(txdatas)) {
-      for (let vin of tx.vin) {
+    for (const tx of Object.values(txdatas)) {
+      for (const vin of tx.vin) {
         if (vin.addresses && vin.addresses.indexOf(this.getAddress()) !== -1) {
           // this TX is related to our address
-          let clonedTx = Object.assign({}, tx);
+          const clonedTx = Object.assign({}, tx);
           clonedTx.inputs = tx.vin.slice(0);
           clonedTx.outputs = tx.vout.slice(0);
           delete clonedTx.vin;
@@ -178,10 +214,10 @@ export class LegacyWallet extends AbstractWallet {
           this._txs_by_external_index.push(clonedTx);
         }
       }
-      for (let vout of tx.vout) {
-        if (vout.scriptPubKey.addresses.indexOf(this.getAddress()) !== -1) {
+      for (const vout of tx.vout) {
+        if (vout.scriptPubKey.addresses && vout.scriptPubKey.addresses.indexOf(this.getAddress()) !== -1) {
           // this TX is related to our address
-          let clonedTx = Object.assign({}, tx);
+          const clonedTx = Object.assign({}, tx);
           clonedTx.inputs = tx.vin.slice(0);
           clonedTx.outputs = tx.vout.slice(0);
           delete clonedTx.vin;
@@ -200,43 +236,107 @@ export class LegacyWallet extends AbstractWallet {
     this._txs_by_external_index = this._txs_by_external_index || [];
     this._txs_by_internal_index = [];
 
-    let hd = new HDSegwitBech32Wallet();
+    const hd = new HDSegwitBech32Wallet();
     return hd.getTransactions.apply(this);
   }
 
+  /**
+   * Broadcast txhex. Can throw an exception if failed
+   *
+   * @param {String} txhex
+   * @returns {Promise<boolean>}
+   */
   async broadcastTx(txhex) {
-    try {
-      const broadcast = await BlueElectrum.broadcast(txhex);
-      return broadcast;
-    } catch (error) {
-      return error;
+    const broadcast = await BlueElectrum.broadcastV2(txhex);
+    console.log({ broadcast });
+    if (broadcast.indexOf('successfully') !== -1) return true;
+    return broadcast.length === 64; // this means return string is txid (precise length), so it was broadcasted ok
+  }
+
+  coinselect(utxos, targets, feeRate, changeAddress) {
+    if (!changeAddress) throw new Error('No change address provided');
+
+    let algo = coinSelectAccumulative;
+    if (targets.length === 1 && targets[0] && !targets[0].value) {
+      // we want to send MAX
+      algo = coinSelectSplit;
     }
+
+    const { inputs, outputs, fee } = algo(utxos, targets, feeRate);
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) {
+      throw new Error('Not enough balance. Try sending smaller amount');
+    }
+
+    return { inputs, outputs, fee };
   }
 
   /**
-   * Takes UTXOs, transforms them into
-   * format expected by signer module, creates tx and returns signed string txhex.
    *
-   * @param utxos Unspent outputs, expects blockcypher format
-   * @param amount
-   * @param fee
-   * @param toAddress
-   * @param memo
-   * @return string Signed txhex ready for broadcast
+   * @param utxos {Array.<{vout: Number, value: Number, txId: String, address: String, txhex: String, }>} List of spendable utxos
+   * @param targets {Array.<{value: Number, address: String}>} Where coins are going. If theres only 1 target and that target has no value - this will send MAX to that address (respecting fee rate)
+   * @param feeRate {Number} satoshi per byte
+   * @param changeAddress {String} Excessive coins will go back to that address
+   * @param sequence {Number} Used in RBF
+   * @param skipSigning {boolean} Whether we should skip signing, use returned `psbt` in that case
+   * @param masterFingerprint {number} Decimal number of wallet's master fingerprint
+   * @returns {{outputs: Array, tx: Transaction, inputs: Array, fee: Number, psbt: Psbt}}
    */
-  createTx(utxos, amount, fee, toAddress, memo) {
-    // transforming UTXOs fields to how module expects it
-    for (let u of utxos) {
-      u.confirmations = 6; // hack to make module accept 0 confirmations
-      u.txid = u.tx_hash;
-      u.vout = u.tx_output_n;
-      u.amount = new BigNumber(u.value);
-      u.amount = u.amount.dividedBy(100000000);
-      u.amount = u.amount.toString(10);
+  createTransaction(utxos, targets, feeRate, changeAddress, sequence, skipSigning = false, masterFingerprint) {
+    if (targets.length === 0) throw new Error('No destination provided');
+    const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
+    sequence = sequence || 0xffffffff; // disable RBF by default
+    const psbt = new bitcoin.Psbt();
+    let c = 0;
+    const values = {};
+    let keyPair;
+
+    inputs.forEach(input => {
+      if (!skipSigning) {
+        // skiping signing related stuff
+        keyPair = bitcoin.ECPair.fromWIF(this.secret); // secret is WIF
+      }
+      values[c] = input.value;
+      c++;
+
+      if (!input.txhex) throw new Error('UTXO is missing txhex of the input, which is required by PSBT for non-segwit input');
+
+      psbt.addInput({
+        hash: input.txid,
+        index: input.vout,
+        sequence,
+        // non-segwit inputs now require passing the whole previous tx as Buffer
+        nonWitnessUtxo: Buffer.from(input.txhex, 'hex'),
+      });
+    });
+
+    outputs.forEach(output => {
+      // if output has no address - this is change output
+      if (!output.address) {
+        output.address = changeAddress;
+      }
+
+      const outputData = {
+        address: output.address,
+        value: output.value,
+      };
+
+      psbt.addOutput(outputData);
+    });
+
+    if (!skipSigning) {
+      // skiping signing related stuff
+      for (let cc = 0; cc < c; cc++) {
+        psbt.signInput(cc, keyPair);
+      }
     }
-    // console.log('creating legacy tx ', amount, ' with fee ', fee, 'secret=', this.getSecret(), 'from address', this.getAddress());
-    let amountPlusFee = parseFloat(new BigNumber(amount).plus(fee).toString(10));
-    return Signer.createTransaction(utxos, toAddress, amountPlusFee, fee, this.getSecret(), this.getAddress());
+
+    let tx;
+    if (!skipSigning) {
+      tx = psbt.finalizeAllInputs().extractTransaction();
+    }
+    return { tx, inputs, outputs, fee, psbt };
   }
 
   getLatestTransactionTime() {
@@ -244,10 +344,9 @@ export class LegacyWallet extends AbstractWallet {
       return 0;
     }
     let max = 0;
-    for (let tx of this.getTransactions()) {
+    for (const tx of this.getTransactions()) {
       max = Math.max(new Date(tx.received) * 1, max);
     }
-
     return new Date(max).toString();
   }
 
@@ -288,5 +387,17 @@ export class LegacyWallet extends AbstractWallet {
 
   weOwnAddress(address) {
     return this.getAddress() === address || this._address === address;
+  }
+
+  weOwnTransaction(txid) {
+    for (const tx of this.getTransactions()) {
+      if (tx && tx.txid && tx.txid === txid) return true;
+    }
+
+    return false;
+  }
+
+  allowSendMax() {
+    return true;
   }
 }

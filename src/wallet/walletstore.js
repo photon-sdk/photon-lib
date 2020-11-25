@@ -42,10 +42,10 @@ export class WalletStore {
       if (data !== null) {
         data = JSON.parse(data);
         if (!data.wallets) return false;
-        let wallets = data.wallets;
-        for (let key of wallets) {
+        const wallets = data.wallets;
+        for (const key of wallets) {
           // deciding which type is wallet and instatiating correct object
-          let tempObj = JSON.parse(key);
+          const tempObj = JSON.parse(key);
           let unserializedWallet;
           switch (tempObj.type) {
             case SegwitBech32Wallet.type:
@@ -88,10 +88,10 @@ export class WalletStore {
    * @param wallet {AbstractWallet}
    */
   deleteWallet(wallet) {
-    let secret = wallet.getSecret();
-    let tempWallets = [];
+    const secret = wallet.getSecret();
+    const tempWallets = [];
 
-    for (let value of this.wallets) {
+    for (const value of this.wallets) {
       if (value.getSecret() === secret) {
         // the one we should delete
         // nop
@@ -109,13 +109,13 @@ export class WalletStore {
    * @returns {Promise} Result of storage save
    */
   async saveToDisk() {
-    let walletsToSave = [];
-    for (let key of this.wallets) {
+    const walletsToSave = [];
+    for (const key of this.wallets) {
       if (typeof key === 'boolean') continue;
       if (key.prepareForSerialization) key.prepareForSerialization();
       walletsToSave.push(JSON.stringify({ ...key, type: key.type }));
     }
-    let data = {
+    const data = {
       wallets: walletsToSave,
       tx_metadata: this.tx_metadata,
     };
@@ -134,13 +134,13 @@ export class WalletStore {
     console.log('fetchWalletBalances for wallet#', index);
     if (index || index === 0) {
       let c = 0;
-      for (let wallet of this.wallets) {
+      for (const wallet of this.wallets) {
         if (c++ === index) {
           await wallet.fetchBalance();
         }
       }
     } else {
-      for (let wallet of this.wallets) {
+      for (const wallet of this.wallets) {
         await wallet.fetchBalance();
       }
     }
@@ -160,7 +160,7 @@ export class WalletStore {
     console.log('fetchWalletTransactions for wallet#', index);
     if (index || index === 0) {
       let c = 0;
-      for (let wallet of this.wallets) {
+      for (const wallet of this.wallets) {
         if (c++ === index) {
           await wallet.fetchTransactions();
           if (wallet.fetchPendingTransactions) {
@@ -172,7 +172,7 @@ export class WalletStore {
         }
       }
     } else {
-      for (let wallet of this.wallets) {
+      for (const wallet of this.wallets) {
         await wallet.fetchTransactions();
         if (wallet.fetchPendingTransactions) {
           await wallet.fetchPendingTransactions();
@@ -204,7 +204,7 @@ export class WalletStore {
     if (index || index === 0) {
       let txs = [];
       let c = 0;
-      for (let wallet of this.wallets) {
+      for (const wallet of this.wallets) {
         if (c++ === index) {
           txs = txs.concat(wallet.getTransactions());
         }
@@ -213,20 +213,20 @@ export class WalletStore {
     }
 
     let txs = [];
-    for (let wallet of this.wallets) {
-      let walletTransactions = wallet.getTransactions();
-      for (let t of walletTransactions) {
+    for (const wallet of this.wallets) {
+      const walletTransactions = wallet.getTransactions();
+      for (const t of walletTransactions) {
         t.walletPreferredBalanceUnit = wallet.getPreferredBalanceUnit();
       }
       txs = txs.concat(walletTransactions);
     }
 
-    for (let t of txs) {
+    for (const t of txs) {
       t.sort_ts = +new Date(t.received);
     }
 
     return txs
-      .sort(function(a, b) {
+      .sort(function (a, b) {
         return b.sort_ts - a.sort_ts;
       })
       .slice(0, limit);
@@ -239,7 +239,7 @@ export class WalletStore {
    */
   getBalance() {
     let finalBalance = 0;
-    for (let wal of this.wallets) {
+    for (const wal of this.wallets) {
       finalBalance += wal.getBalance();
       finalBalance += wal.getUnconfirmedBalance();
     }
