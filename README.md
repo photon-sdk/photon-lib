@@ -1,4 +1,4 @@
-# photon-lib [![Build Status](https://travis-ci.org/photon-sdk/photon-lib.svg?branch=master)](https://travis-ci.org/photon-sdk/photon-lib)
+# photon-lib ![Node.js CI](https://github.com/photon-sdk/photon-lib/workflows/Node.js%20CI/badge.svg?branch=master)
 
 A high level library for building bitcoin wallets with react native.
 
