@@ -2,7 +2,7 @@ import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import bip39 from 'bip39';
 import b58 from 'bs58check';
 import { decodeUR } from 'bc-ur';
-import BlueElectrum from '../BlueElectrum';
+import * as BlueElectrum from '../BlueElectrum';
 import coinSelectAccumulative from 'coinselect/accumulative';
 import coinSelectSplit from 'coinselect/split';
 import * as HDNode from 'bip32';
