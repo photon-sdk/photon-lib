@@ -1,5 +1,5 @@
 import GDrive from 'react-native-google-drive-api-wrapper';
-import { GoogleSignin } from '@react-native-community/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-community/google-signin';
 
 export async function authenticate(options = {}) {
   GoogleSignin.configure({
@@ -9,7 +9,15 @@ export async function authenticate(options = {}) {
   await GoogleSignin.hasPlayServices({
     showPlayServicesUpdateDialog: true,
   });
-  await GoogleSignin.signIn();
+
+  try {
+    await GoogleSignin.signInSilently();
+  } catch (error) {
+    if (error.code === statusCodes.SIGN_IN_REQUIRED) {
+      await GoogleSignin.signIn();
+    }
+  }
+
   const { accessToken } = await GoogleSignin.getTokens();
   GDrive.setAccessToken(accessToken);
   GDrive.init();
@@ -19,35 +27,49 @@ export async function authenticate(options = {}) {
 }
 
 export async function setItem(keyId, value) {
-  return GDrive.files.createFileMultipart(
-    '',
+  const content = Buffer.from(value).toString('base64');
+
+  await GDrive.files.createFileMultipart(
+    content,
     'text/plain',
     {
       parents: ['appDataFolder'],
       name: keyId,
-      appProperties: { value },
     },
-    false,
+    true,
   );
 }
 
-async function _getFileId(keyId) {
-  return GDrive.files.getId(keyId, ['appDataFolder'], 'text/plain', false);
+export async function _getFileId(keyId) {
+  const response = await GDrive.files.list({ spaces: 'appDataFolder', fields: 'nextPageToken, files(id, name)' });
+  const json = await response.json();
+
+  if (json.files.length === 0) {
+    return null;
+  }
+
+  const file = json.files.find(file => file.name === keyId);
+
+  return file ? file.id : null;
 }
 
 export async function getItem(keyId) {
   const fileId = await _getFileId(keyId);
+
   if (!fileId) {
     return null;
   }
-  const meta = await GDrive.files.get(fileId);
-  return meta ? meta.appProperties.value : null;
+
+  const response = await GDrive.files.get(fileId, { alt: 'media' });
+  const key = await response.text();
+
+  return key;
 }
 
 export async function removeItem(keyId) {
   const fileId = await _getFileId(keyId);
   if (!fileId) {
-    throw new Error('Item not found');
+    return null;
   }
-  return GDrive.files.delete(fileId);
+  await GDrive.files.delete(fileId);
 }
