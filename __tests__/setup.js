@@ -31,3 +31,34 @@ jest.mock('frisbee', () => {
     };
   });
 });
+
+jest.mock('react-native-google-drive-api-wrapper', () => {
+  return {
+    setAccessToken: jest.fn(),
+    init: jest.fn(),
+    isInitialized: jest.fn(),
+    files: {
+      safeCreateFolder: jest.fn(),
+      createFileMultipart: jest.fn(),
+      get: jest.fn(),
+      getId: jest.fn(),
+      delete: jest.fn(),
+      list: jest.fn(() =>
+        Promise.resolve({
+          json: jest.fn(() => ({
+            files: jest.fn(),
+          })),
+        }),
+      ),
+    },
+  };
+});
+
+jest.mock('@react-native-community/google-signin', () => {
+  return {
+    GoogleSignin: {
+      configure: jest.fn(),
+      getTokens: jest.fn(() => ({ accessToken: 'accessToken' })),
+    },
+  };
+});
