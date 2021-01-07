@@ -10,13 +10,15 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test": "npm run test:lint && npm run test:unit && npm run test:integration",
+    "test": "npm run test:lint && npm run test:unit && npm run test:unit:android && npm run test:integration",
     "test:lint": "eslint .",
     "test:unit": "jest __tests__/unit/*",
+    "test:unit:android": "jest --config jest.android.json __tests__/unit/.*\\.android\\..*",
     "test:integration": "jest __tests__/integration/*"
   },
   "dependencies": {
     "@photon-sdk/rn-electrum-client": "^4.0.0",
+    "@react-native-community/google-signin": "^5.0.0",
     "base-x": "^3.0.8",
     "bc-ur": "^0.1.6",
     "bech32": "^1.1.4",
@@ -31,6 +33,7 @@
     "create-hash": "^1.2.0",
     "electrum-mnemonic": "^2.0.0",
     "frisbee": "^3.1.2",
+    "react-native-google-drive-api-wrapper": "^1.3.0",
     "util": "^0.12.3"
   },
   "peerDependencies": {
@@ -79,6 +82,10 @@
     ],
     "watchPathIgnorePatterns": [
       "<rootDir>/node_modules"
+    ],
+    "testPathIgnorePatterns": [
+      "node_modules",
+      ".*\\.android\\..*"
     ]
   }
 }

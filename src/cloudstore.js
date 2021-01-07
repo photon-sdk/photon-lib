@@ -5,14 +5,21 @@
 
 import { Platform } from 'react-native';
 import RNiCloudStorage from '@photon-sdk/react-native-icloudstore';
-import AsyncStorage from '@react-native-community/async-storage';
+import * as GDriveCloudStorage from './GDriveCloudStorage';
 import { isPhone, isEmail, isId, isBuffer } from './verify';
-const Store = Platform.OS === 'ios' ? RNiCloudStorage : AsyncStorage;
+
+const Store = Platform.OS === 'ios' ? RNiCloudStorage : GDriveCloudStorage;
 
 const VERSION = '1';
 const KEY_ID = `${VERSION}_photon_key_id`;
 const PHONE = `${VERSION}_photon_phone`;
 const EMAIL = `${VERSION}_photon_email`;
+
+export async function authenticate(options) {
+  if (Store.authenticate) {
+    await Store.authenticate(options);
+  }
+}
 
 //
 // Encrypted key storage
