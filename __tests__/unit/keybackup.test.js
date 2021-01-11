@@ -296,4 +296,14 @@ describe('KeyBackup unit test', () => {
       expect(mockKeyserverApi.put.mock.calls.length).toBe(2);
     });
   });
+
+  describe('authenticate', () => {
+    it('should call authenticate with the correct params', async () => {
+      const authenticate = jest.spyOn(_CloudStore, 'authenticate');
+
+      await KeyBackup.authenticate({ clientId: 'clientId' });
+      expect(authenticate.mock.calls[0][0]).toStrictEqual({ clientId: 'clientId' });
+      expect(authenticate.mock.calls.length).toBe(1);
+    });
+  });
 });

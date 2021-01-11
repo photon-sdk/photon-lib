@@ -19,6 +19,15 @@ export function init({ keyServerURI }) {
   KeyServer.init({ baseURI: keyServerURI });
 }
 
+/**
+ * Authentication for Google login
+ * @param {Object} options Configuration options for logging in to Google e.g clientId
+ * @return {Promise<undefined>}
+ */
+export async function authenticate(options = {}) {
+  await CloudStore.authenticate(options);
+}
+
 //
 // Backup & Restore
 //
