@@ -72,6 +72,8 @@ Now let's do an encrypted backup of a user's wallet to their iCloud account. The
 ```js
 import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
 
+await KeyBackup.authenticate({ clientId: '<FROM DEVELOPER CONSOLE>' }); // only required on Android for Google drive backups
+
 const wallet = new HDSegwitBech32Wallet();
 await wallet.generate();                         // generate a new seed phrase
 const mnemonic = await wallet.getSecret();       // the seed phrase to backup
