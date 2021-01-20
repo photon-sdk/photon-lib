@@ -139,12 +139,30 @@ export class LegacyWallet extends AbstractWallet {
     }
   }
 
-  getUtxo() {
-    const ret = [];
+  /**
+   * Getter for previously fetched UTXO. For example:
+   *     [ { height: 0,
+   *    value: 666,
+   *    address: 'string',
+   *    txId: 'string',
+   *    vout: 1,
+   *    txid: 'string',
+   *    amount: 666,
+   *    wif: 'string',
+   *    confirmations: 0 } ]
+   *
+   * @param respectFrozen {boolean} Add Frozen outputs
+   * @returns {[]}
+   */
+  getUtxo(respectFrozen = false) {
+    let ret = [];
     for (const u of this.utxo) {
       if (u.txId) u.txid = u.txId;
       if (!u.confirmations && u.height) u.confirmations = BlueElectrum.estimateCurrentBlockheight() - u.height;
       ret.push(u);
+    }
+    if (!respectFrozen) {
+      ret = ret.filter(({ txid, vout }) => !this.getUTXOMetadata(txid, vout).frozen);
     }
     return ret;
   }
@@ -158,7 +176,7 @@ export class LegacyWallet extends AbstractWallet {
    */
   async fetchTransactions() {
     // Below is a simplified copypaste from HD electrum wallet
-    this._txs_by_external_index = [];
+    const _txsByExternalIndex = [];
     const addresses2fetch = [this.getAddress()];
 
     // first: batch fetch for all addresses histories
@@ -211,7 +229,7 @@ export class LegacyWallet extends AbstractWallet {
           delete clonedTx.vin;
           delete clonedTx.vout;
 
-          this._txs_by_external_index.push(clonedTx);
+          _txsByExternalIndex.push(clonedTx);
         }
       }
       for (const vout of tx.vout) {
@@ -223,11 +241,12 @@ export class LegacyWallet extends AbstractWallet {
           delete clonedTx.vin;
           delete clonedTx.vout;
 
-          this._txs_by_external_index.push(clonedTx);
+          _txsByExternalIndex.push(clonedTx);
         }
       }
     }
 
+    this._txs_by_external_index = _txsByExternalIndex;
     this._lastTxFetch = +new Date();
   }
 
@@ -257,8 +276,8 @@ export class LegacyWallet extends AbstractWallet {
     if (!changeAddress) throw new Error('No change address provided');
 
     let algo = coinSelectAccumulative;
-    if (targets.length === 1 && targets[0] && !targets[0].value) {
-      // we want to send MAX
+    // if targets has output without a value, we want send MAX to it
+    if (targets.some(i => !('value' in i))) {
       algo = coinSelectSplit;
     }
 
@@ -266,7 +285,7 @@ export class LegacyWallet extends AbstractWallet {
 
     // .inputs and .outputs will be undefined if no solution was found
     if (!inputs || !outputs) {
-      throw new Error('Not enough balance. Try sending smaller amount');
+      throw new Error('Not enough balance. Try sending smaller amount or decrease the fee.');
     }
 
     return { inputs, outputs, fee };
@@ -399,5 +418,16 @@ export class LegacyWallet extends AbstractWallet {
 
   allowSendMax() {
     return true;
+  }
+
+  /**
+   * Check if address is a Change address. Needed for Coin control.
+   * Useless for Legacy wallets, so it is always false
+   *
+   * @param address
+   * @returns {Boolean} Either address is a change or not
+   */
+  addressIsChange(address) {
+    return false;
   }
 }

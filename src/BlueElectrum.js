@@ -71,7 +71,7 @@ export async function connectMain(options) {
       serverName = ver[0];
       mainConnected = true;
       wasConnectedAtLeastOnce = true;
-      if (ver[0].startsWith('ElectrumPersonalServer') || ver[0].startsWith('electrs')) {
+      if (ver[0].startsWith('ElectrumPersonalServer') || ver[0].startsWith('electrs') || ver[0].startsWith('Fulcrum')) {
         // TODO: once they release support for batching - disable batching only for lower versions
         disableBatching = true;
       }
@@ -299,6 +299,8 @@ export const multiGetUtxoByAddress = async function (addresses, batchsize) {
 
     if (disableBatching) {
       // ElectrumPersonalServer doesnt support `blockchain.scripthash.listunspent`
+      // electrs OTOH supports it, but we dont know it we are currently connected to it or to EPS
+      // so it is pretty safe to do nothing, as caller can derive UTXO from stored transactions
     } else {
       results = await mainClient.blockchainScripthash_listunspentBatch(scripthashes);
     }
