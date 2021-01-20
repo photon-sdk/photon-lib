@@ -714,11 +714,21 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    *    wif: 'string',
    *    confirmations: 0 } ]
    *
+   * @param respectFrozen {boolean} Add Frozen outputs
    * @returns {[]}
    */
-  getUtxo() {
-    if (this._utxo.length === 0) return this.getDerivedUtxoFromOurTransaction(); // oy vey, no stored utxo. lets attempt to derive it from stored transactions
-    return this._utxo;
+  getUtxo(respectFrozen = false) {
+    let ret = [];
+
+    if (this._utxo.length === 0) {
+      ret = this.getDerivedUtxoFromOurTransaction(); // oy vey, no stored utxo. lets attempt to derive it from stored transactions
+    } else {
+      ret = this._utxo;
+    }
+    if (!respectFrozen) {
+      ret = ret.filter(({ txid, vout }) => !this.getUTXOMetadata(txid, vout).frozen);
+    }
+    return ret;
   }
 
   getDerivedUtxoFromOurTransaction(returnSpentUtxoAsWell = false) {
@@ -1002,19 +1012,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   /**
-   * Broadcast txhex. Can throw an exception if failed
-   *
-   * @param {String} txhex
-   * @returns {Promise<boolean>}
-   */
-  async broadcastTx(txhex) {
-    const broadcast = await BlueElectrum.broadcastV2(txhex);
-    console.log({ broadcast });
-    if (broadcast.indexOf('successfully') !== -1) return true;
-    return broadcast.length === 64; // this means return string is txid (precise length), so it was broadcasted ok
-  }
-
-  /**
    * Probes zero address in external hierarchy for transactions, if there are any returns TRUE.
    * Zero address is a pretty good indicator, since its a first one to fund the wallet. How can you use the wallet and
    * not fund it first?
@@ -1037,5 +1034,18 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     return ret;
+  }
+
+  /**
+   * Check if address is a Change address. Needed for Coin control.
+   *
+   * @param address
+   * @returns {Boolean} Either address is a change or not
+   */
+  addressIsChange(address) {
+    for (let c = 0; c < this.next_free_change_address_index + 1; c++) {
+      if (address === this._getInternalAddressByIndex(c)) return true;
+    }
+    return false;
   }
 }
