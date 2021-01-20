@@ -65,14 +65,22 @@ KeyBackup.init({
 });
 ```
 
+### Authenticate Cloud Storage
+
+The encrypted backup is stored on the user's cloud storage account. On Android the user is required to grant access to an app specific Google Drive folder with an OAuth dialog. For iOS apps this step can be ignored as iCloud does not require extra authentication.
+
+```js
+await KeyBackup.authenticate({
+  clientId: '<FROM DEVELOPER CONSOLE>'   // see the Google Drive API docs
+});
+```
+
 ### Key Backup
 
 Now let's do an encrypted backup of a user's wallet to their iCloud account. The encryption key will be stored on your app's key server. A random `Key ID` (stored automatically on the user's iCloud) and a user chosen `PIN` is used for authentication with the key server.
 
 ```js
 import { HDSegwitBech32Wallet, KeyBackup } from '@photon-sdk/photon-lib';
-
-await KeyBackup.authenticate({ clientId: '<FROM DEVELOPER CONSOLE>' }); // only required on Android for Google drive backups
 
 const wallet = new HDSegwitBech32Wallet();
 await wallet.generate();                         // generate a new seed phrase
