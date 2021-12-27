@@ -74,4 +74,22 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     hd2.setSecret(hd.getSecret());
     assert.ok(hd2.validateMnemonic());
   });
+
+  it('signs and verifies messages', async () => {
+    const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+    const hd = new HDSegwitBech32Wallet();
+    hd.setSecret(mnemonic);
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu');
+    assert.strictEqual(
+      hd.signMessage('running bitcoin', hd._getExternalAddressByIndex(0), true),
+      'IJXWxJ3J7lxfIAWK6NDSfMrK2C9Zjyse5zfG+AGp3CzpZ0uUnaLwouZtcQfZjCicZ02NsqkGUTnj9D7ky91tLQk=',
+    );
+    assert.ok(
+      hd.verifyMessage(
+        'running bitcoin',
+        hd._getExternalAddressByIndex(0),
+        'IJXWxJ3J7lxfIAWK6NDSfMrK2C9Zjyse5zfG+AGp3CzpZ0uUnaLwouZtcQfZjCicZ02NsqkGUTnj9D7ky91tLQk=',
+      ),
+    );
+  });
 });
