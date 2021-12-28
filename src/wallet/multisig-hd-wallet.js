@@ -8,6 +8,9 @@ import * as bitcoin from 'bitcoinjs-lib';
 import createHash from 'create-hash';
 import reverse from 'buffer-reverse';
 import * as mn from 'electrum-mnemonic';
+import { ECPairFactory } from 'ecpair';
+const ecc = require('tiny-secp256k1');
+const ECPair = ECPairFactory(ecc);
 
 const MNEMONIC_TO_SEED_OPTS_SEGWIT = {
   prefix: mn.PREFIXES.segwit,
@@ -145,7 +148,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   static isXprvValid(xprv) {
     try {
       xprv = MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv);
-      bitcoin.bip32.fromBase58(xprv);
+      HDNode.bip32.fromBase58(xprv);
       return true;
     } catch (_) {
       return false;
@@ -210,7 +213,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   }
 
   static convertXprvToXpub(xprv) {
-    const restored = bitcoin.bip32.fromBase58(MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv));
+    const restored = HDNode.bip32.fromBase58(MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv));
     return restored.neutered().toBase58();
   }
 
@@ -305,7 +308,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       seed = bip39.mnemonicToSeed(mnemonic);
     }
 
-    const root = bitcoin.bip32.fromSeed(seed);
+    const root = HDNode.fromSeed(seed);
     const child = root.derivePath(path).neutered();
     return child.toBase58();
   }
@@ -316,7 +319,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
    */
   static seedToFingerprint(mnemonic) {
     const seed = bip39.mnemonicToSeed(mnemonic);
-    const root = bitcoin.bip32.fromSeed(seed);
+    const root = HDNode.fromSeed(seed);
     let hex = root.fingerprint.toString('hex');
     while (hex.length < 8) hex = '0' + hex; // leading zeroes
     return hex.toUpperCase();
@@ -855,7 +858,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
               seed = MultisigHDWallet.convertElectrumMnemonicToSeed(cosigner);
             }
 
-            const hdRoot = bitcoin.bip32.fromSeed(seed);
+            const hdRoot = HDNode.fromSeed(seed);
             psbt.signInputHD(cc, hdRoot);
             signaturesMade++;
           }
@@ -900,7 +903,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   }
 
   static isPathValid(path) {
-    const root = bitcoin.bip32.fromSeed(Buffer.alloc(32));
+    const root = HDNode.fromSeed(Buffer.alloc(32));
     try {
       root.derivePath(path);
       return true;
@@ -995,7 +998,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
         if (!MultisigHDWallet.isXpubString(cosigner)) {
           // ok this is a mnemonic, lets try to sign
           const seed = bip39.mnemonicToSeed(cosigner);
-          const hdRoot = bitcoin.bip32.fromSeed(seed);
+          const hdRoot = HDNode.fromSeed(seed);
           try {
             psbt.signInputHD(cc, hdRoot);
           } catch (_) {} // protects agains duplicate cosignings
@@ -1020,7 +1023,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
               // ^^^ we assume that counterparty has Zpub for specified derivation path
               const child = root.derivePath(path);
               if (psbt.inputHasPubkey(cc, child.publicKey)) {
-                const keyPair = bitcoin.ECPair.fromPrivateKey(child.privateKey);
+                const keyPair = ECPair.fromPrivateKey(child.privateKey);
                 try {
                   psbt.signInput(cc, keyPair);
                 } catch (_) {}
