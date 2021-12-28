@@ -7,6 +7,9 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as BlueElectrum from '../BlueElectrum';
 import * as HDNode from 'bip32';
 import reverse from 'buffer-reverse';
+import { ECPairFactory } from 'ecpair';
+const ecc = require('tiny-secp256k1');
+const ECPair = ECPairFactory(ecc);
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -853,7 +856,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       let keyPair;
       if (!skipSigning) {
         // skiping signing related stuff
-        keyPair = bitcoin.ECPair.fromWIF(this._getWifForAddress(input.address));
+        keyPair = ECPair.fromWIF(this._getWifForAddress(input.address));
         keypairs[c] = keyPair;
       }
       values[c] = input.value;
