@@ -1,9 +1,15 @@
-import GDrive from 'react-native-google-drive-api-wrapper';
-import { GoogleSignin, statusCodes } from '@react-native-community/google-signin';
+import {
+  GDrive,
+  MimeTypes,
+} from "@robinbobin/react-native-google-drive-api-wrapper";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 export async function authenticate(options = {}) {
   GoogleSignin.configure({
-    scopes: ['https://www.googleapis.com/auth/drive.appdata'],
+    scopes: ["https://www.googleapis.com/auth/drive.appdata"],
     ...options,
   });
   await GoogleSignin.hasPlayServices({
@@ -16,34 +22,41 @@ export async function authenticate(options = {}) {
       await GoogleSignin.signIn();
     }
   }
-  const { accessToken } = await GoogleSignin.getTokens();
-  GDrive.setAccessToken(accessToken);
-  GDrive.init();
-  if (!GDrive.isInitialized) {
-    throw new Error('Unable to use GDrive');
+  const gDrive = await initDrive();
+  if (!gDrive.accessToken) {
+    throw new Error("Unable to use GDrive");
   }
 }
 
 export async function setItem(keyId, value) {
-  const content = Buffer.from(value).toString('base64');
-  await GDrive.files.createFileMultipart(
-    content,
-    'text/plain',
-    {
-      parents: ['appDataFolder'],
+  const content = Buffer.from(value).toString("base64");
+  const gDrive = await initDrive();
+
+  await gDrive.files
+    .newMultipartUploader()
+    .setData(content, MimeTypes.BINARY)
+    .setRequestBody({
       name: keyId,
-    },
-    true,
-  );
+    })
+    .execute();
+}
+
+async function initDrive() {
+  const gDrive = new GDrive();
+  gDrive.accessToken = (await GoogleSignin.getTokens()).accessToken;
+  return gDrive;
 }
 
 export async function _getFileId(keyId) {
-  const response = await GDrive.files.list({ spaces: 'appDataFolder', fields: 'nextPageToken, files(id, name)' });
-  const json = await response.json();
+  const gDrive = await initDrive();
+  const json = await gDrive.files.list({
+    spaces: "appDataFolder",
+    fields: "nextPageToken, files(id, name)",
+  });
   if (json.files.length === 0) {
     return null;
   }
-  const file = json.files.find(file => file.name === keyId);
+  const file = json.files.find((file) => file.name === keyId);
   return file ? file.id : null;
 }
 
@@ -52,7 +65,8 @@ export async function getItem(keyId) {
   if (!fileId) {
     return null;
   }
-  const response = await GDrive.files.get(fileId, { alt: 'media' });
+  const gDrive = await initDrive();
+  const response = await gDrive.files.get(fileId, { alt: "media" });
   const key = await response.text();
   return key;
 }
@@ -62,5 +76,6 @@ export async function removeItem(keyId) {
   if (!fileId) {
     return null;
   }
-  await GDrive.files.delete(fileId);
+  const gDrive = await initDrive();
+  await gDrive.files.delete(fileId);
 }
