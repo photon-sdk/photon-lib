@@ -1,15 +1,9 @@
-import {
-  GDrive,
-  MimeTypes,
-} from "@robinbobin/react-native-google-drive-api-wrapper";
-import {
-  GoogleSignin,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
+import { GDrive, MimeTypes } from '@robinbobin/react-native-google-drive-api-wrapper';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 export async function authenticate(options = {}) {
   GoogleSignin.configure({
-    scopes: ["https://www.googleapis.com/auth/drive.appdata"],
+    scopes: ['https://www.googleapis.com/auth/drive.appdata'],
     ...options,
   });
   await GoogleSignin.hasPlayServices({
@@ -24,19 +18,20 @@ export async function authenticate(options = {}) {
   }
   const gDrive = await initDrive();
   if (!gDrive.accessToken) {
-    throw new Error("Unable to use GDrive");
+    throw new Error('Unable to use GDrive');
   }
 }
 
 export async function setItem(keyId, value) {
-  const content = Buffer.from(value).toString("base64");
+  const content = Buffer.from(value).toString('base64');
   const gDrive = await initDrive();
 
   await gDrive.files
     .newMultipartUploader()
-    .setData(content, MimeTypes.BINARY)
+    .setData(content, MimeTypes.TEXT)
     .setRequestBody({
       name: keyId,
+      parents: ['appDataFolder'],
     })
     .execute();
 }
@@ -50,13 +45,13 @@ async function initDrive() {
 export async function _getFileId(keyId) {
   const gDrive = await initDrive();
   const json = await gDrive.files.list({
-    spaces: "appDataFolder",
-    fields: "nextPageToken, files(id, name)",
+    spaces: 'appDataFolder',
+    fields: 'nextPageToken, files(id, name)',
   });
   if (json.files.length === 0) {
     return null;
   }
-  const file = json.files.find((file) => file.name === keyId);
+  const file = json.files.find(file => file.name === keyId);
   return file ? file.id : null;
 }
 
@@ -66,7 +61,7 @@ export async function getItem(keyId) {
     return null;
   }
   const gDrive = await initDrive();
-  const response = await gDrive.files.get(fileId, { alt: "media" });
+  const response = await gDrive.files.get(fileId, { alt: 'media' });
   const key = await response.text();
   return key;
 }

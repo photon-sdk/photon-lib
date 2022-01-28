@@ -28,7 +28,12 @@ In your react-native app...
 Make sure to install all peer dependencies:
 
 ```
-npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-icloudstore @react-native-community/async-storage @photon-sdk/react-native-tcp @react-native-community/google-signin react-native-google-drive-api-wrapper node-libs-react-native
+npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-icloudstore @react-native-async-storage/async-storage @photon-sdk/react-native-tcp @react-native-google-signin/google-signin @robinbobin/react-native-google-drive-api-wrapper node-libs-react-native
+
+OR
+
+yarn add @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-icloudstore @react-native-async-storage/async-storage @photon-sdk/react-native-tcp @react-native-google-signin/google-signin @robinbobin/react-native-google-drive-api-wrapper node-libs-react-native
+
 ```
 
 ### Update cocoapods
@@ -280,3 +285,6 @@ npm install && npm test
 * The wallet and electrum client implementation is based on BlueWallet ([a7f299d](https://github.com/BlueWallet/BlueWallet/tree/a7f299d667ba57dff7b91e00763b009a6ea14256)).
 * [BitcoinJS](https://github.com/bitcoinjs/bitcoinjs-lib) is used for bips and low level primitives
 * Key storage is done via [react-native-keychain](https://github.com/oblador/react-native-keychain)
+
+https://developers.google.com/drive/api/v3/reference/files
+https://developers.google.com/drive/api/v3/appdata#node.js
