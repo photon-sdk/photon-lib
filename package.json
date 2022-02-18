@@ -1,6 +1,6 @@
 {
   "name": "@photon-sdk/photon-lib",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "A high level library for building bitcoin wallets with react native",
   "license": "MIT",
   "repository": {
@@ -23,7 +23,7 @@
     "bech32": "^1.1.4",
     "bignumber.js": "^9.0.1",
     "bip32": "^2.0.6",
-    "bip39": "^2.6.0",
+    "bip39": "3.0.4",
     "bitcoinjs-lib": "^5.2.0",
     "bs58check": "^2.1.2",
     "buffer-reverse": "^1.0.1",
@@ -54,7 +54,6 @@
     "@robinbobin/react-native-google-drive-api-wrapper": "^1.0.1",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.1.0",
-    "dotenv": "^14.3.2",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.14.0",
     "eslint-config-standard": "^14.1.1",
