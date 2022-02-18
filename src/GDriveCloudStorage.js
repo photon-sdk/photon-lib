@@ -1,5 +1,11 @@
-import { GDrive, MimeTypes } from '@robinbobin/react-native-google-drive-api-wrapper';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import {
+  GDrive,
+  MimeTypes,
+} from '@robinbobin/react-native-google-drive-api-wrapper';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 export async function authenticate(options = {}) {
   GoogleSignin.configure({
@@ -33,6 +39,7 @@ export async function setItem(keyId, value) {
       name: keyId,
       parents: ['appDataFolder'],
     })
+    .setIsBase64(true)
     .execute();
 }
 
@@ -51,7 +58,7 @@ export async function _getFileId(keyId) {
   if (json.files.length === 0) {
     return null;
   }
-  const file = json.files.find(file => file.name === keyId);
+  const file = json.files.find((file) => file.name === keyId);
   return file ? file.id : null;
 }
 
