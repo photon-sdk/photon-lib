@@ -1,7 +1,5 @@
 import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
-require('dotenv').config();
-
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
 jest.mock('@photon-sdk/react-native-icloudstore', () => mockAsyncStorage);
