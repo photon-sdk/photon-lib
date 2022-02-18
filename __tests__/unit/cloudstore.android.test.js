@@ -15,7 +15,7 @@ describe('CloudStore android unit test', () => {
 
     it('store item', async () => {
       const getItemSpy = jest.spyOn(GDriveCloudStorage, 'getItem').mockImplementation();
-      const setItemSpy = jest.spyOn(GDriveCloudStorage, 'setItem');
+      const setItemSpy = jest.spyOn(GDriveCloudStorage, 'setItem').mockImplementation();
 
       await CloudStore.putKey({ keyId, ciphertext });
       expect(setItemSpy.mock.calls[0][0]).toBe('1_photon_key_id');
@@ -30,14 +30,11 @@ describe('CloudStore android unit test', () => {
 
     it('should not backup twice', async () => {
       const getItemSpy = jest.spyOn(GDriveCloudStorage, 'getItem').mockResolvedValue('resolved value');
-      const setItemSpy = jest.spyOn(GDriveCloudStorage, 'setItem');
+      const setItemSpy = jest.spyOn(GDriveCloudStorage, 'setItem').mockImplementation();
 
       await expect(CloudStore.putKey({ keyId, ciphertext })).rejects.toThrow(/already present/);
+      expect(setItemSpy.mock.calls.length).toBe(0);
       getItemSpy.mockRestore();
-
-      await CloudStore.putKey({ keyId, ciphertext });
-      expect(setItemSpy.mock.calls.length).toBe(2);
-
       setItemSpy.mockRestore();
     });
   });
