@@ -1,11 +1,5 @@
-import {
-  GDrive,
-  MimeTypes,
-} from '@robinbobin/react-native-google-drive-api-wrapper';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+import { GDrive, MimeTypes } from '@robinbobin/react-native-google-drive-api-wrapper';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 export async function authenticate(options = {}) {
   GoogleSignin.configure({
@@ -31,7 +25,6 @@ export async function authenticate(options = {}) {
 export async function setItem(keyId, value) {
   const content = Buffer.from(value).toString('base64');
   const gDrive = await initDrive();
-
   await gDrive.files
     .newMultipartUploader()
     .setData(content, MimeTypes.TEXT)
@@ -58,7 +51,7 @@ export async function _getFileId(keyId) {
   if (json.files.length === 0) {
     return null;
   }
-  const file = json.files.find((file) => file.name === keyId);
+  const file = json.files.find(file => file.name === keyId);
   return file ? file.id : null;
 }
 

@@ -33,8 +33,12 @@ describe('CloudStore android unit test', () => {
       const setItemSpy = jest.spyOn(GDriveCloudStorage, 'setItem').mockImplementation();
 
       await expect(CloudStore.putKey({ keyId, ciphertext })).rejects.toThrow(/already present/);
+      getItemSpy.mockReset();
       expect(setItemSpy.mock.calls.length).toBe(0);
-      getItemSpy.mockRestore();
+
+      await CloudStore.putKey({ keyId, ciphertext });
+      expect(setItemSpy.mock.calls.length).toBe(2);
+
       setItemSpy.mockRestore();
     });
   });
