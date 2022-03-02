@@ -281,6 +281,3 @@ npm install && npm test
 * The wallet and electrum client implementation is based on BlueWallet ([a7f299d](https://github.com/BlueWallet/BlueWallet/tree/a7f299d667ba57dff7b91e00763b009a6ea14256)).
 * [BitcoinJS](https://github.com/bitcoinjs/bitcoinjs-lib) is used for bips and low level primitives
 * Key storage is done via [react-native-keychain](https://github.com/oblador/react-native-keychain)
-
-https://developers.google.com/drive/api/v3/reference/files
-https://developers.google.com/drive/api/v3/appdata#node.js
