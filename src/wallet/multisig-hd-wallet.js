@@ -667,8 +667,6 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       // ^^ path resembles _custom path_, if provided by user during setup, otherwise default path for wallet type gona be used
       const masterFingerprint = Buffer.from(this._cosignersFingerprints[c], 'hex');
 
-      // console.log('@path---cosigner--', path, cosigner);
-
       const xpub = this._getXpubFromCosigner(cosigner);
       const hdNode0 = HDNode.fromBase58(xpub);
       const splt = path.split('/');
