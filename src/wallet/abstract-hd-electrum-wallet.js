@@ -1068,12 +1068,4 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     return AbstractHDElectrumWallet.seedToFingerprint(seed);
   }
-
-  /**
-   * @returns {string} Hex string of fingerprint derived from wallet mnemonics. Always has lenght of 8 chars and correct leading zeroes
-   */
-  getMasterFingerprintHex() {
-    const seed = this._getSeed();
-    return AbstractHDElectrumWallet.seedToFingerprint(seed);
-  }
 }
