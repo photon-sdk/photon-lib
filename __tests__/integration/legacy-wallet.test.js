@@ -68,20 +68,26 @@ describe('LegacyWallet', function () {
   });
 
   it('can fetch TXs', async () => {
-    const w = new LegacyWallet();
-    w._address = '12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG';
+    const w = new SegwitBech32Wallet();
+    w._address = 'bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc';
+    assert.ok(w.weOwnAddress('bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc'));
+    assert.ok(!w.weOwnAddress('garbage'));
+    assert.ok(!w.weOwnAddress(false));
     await w.fetchTransactions();
     assert.strictEqual(w.getTransactions().length, 2);
+    const tx = w.getTransactions()[1];
+    assert.ok(tx.hash);
+    assert.strictEqual(tx.value, 100000);
+    assert.ok(tx.received);
+    assert.ok(tx.confirmations > 1);
 
-    for (const tx of w.getTransactions()) {
-      assert.ok(tx.hash);
-      assert.ok(tx.value);
-      assert.ok(tx.received);
-      assert.ok(tx.confirmations > 1);
-    }
+    const tx0 = w.getTransactions()[0];
+    assert.ok(tx0.inputs);
+    assert.ok(tx0.inputs.length === 1);
+    assert.ok(tx0.outputs);
+    assert.ok(tx0.outputs.length === 2);
 
-    assert.ok(w.weOwnTransaction('4924f3a29acdee007ebcf6084d2c9e1752c4eb7f26f7d1a06ef808780bf5fe6d'));
-    assert.ok(w.weOwnTransaction('d0432027a86119c63a0be8fa453275c2333b59067f1e559389cd3e0e377c8b96'));
+    assert.ok(w.weOwnTransaction('49944e90fe917952e36b1967cdbc1139e60c89b4800b91258bf2345a77a8b888'));
     assert.ok(!w.weOwnTransaction('825c12f277d1f84911ac15ad1f41a3de28e9d906868a930b0a7bca61b17c8881'));
   });
 
@@ -136,15 +142,17 @@ describe('SegwitP2SHWallet', function () {
 describe('SegwitBech32Wallet', function () {
   it('can fetch balance', async () => {
     const w = new SegwitBech32Wallet();
-    w._address = 'bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc';
-    assert.ok(w.weOwnAddress('bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc'));
+    w._address = 'bc1q063ctu6jhe5k4v8ka99qac8rcm2tzjjnuktyrl';
+    assert.ok(w.weOwnAddress('bc1q063ctu6jhe5k4v8ka99qac8rcm2tzjjnuktyrl'));
+    assert.ok(!w.weOwnAddress('garbage'));
+    assert.ok(!w.weOwnAddress(false));
     await w.fetchBalance();
-    assert.strictEqual(w.getBalance(), 100000);
+    assert.strictEqual(w.getBalance(), 69909);
   });
 
   it('can fetch UTXO', async () => {
     const w = new SegwitBech32Wallet();
-    w._address = 'bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc';
+    w._address = 'bc1q063ctu6jhe5k4v8ka99qac8rcm2tzjjnuktyrl';
     await w.fetchUtxo();
     const l1 = w.getUtxo().length;
     assert.ok(w.getUtxo().length > 0, 'unexpected empty UTXO');
@@ -177,24 +185,24 @@ describe('SegwitBech32Wallet', function () {
   });
 
   it('can fetch TXs', async () => {
-    const w = new LegacyWallet();
+    const w = new SegwitBech32Wallet();
     w._address = 'bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc';
     assert.ok(w.weOwnAddress('bc1qn887fmetaytw4vj68vsh529ft408q8j9x3dndc'));
+    assert.ok(!w.weOwnAddress('garbage'));
+    assert.ok(!w.weOwnAddress(false));
     await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 1);
-
-    for (const tx of w.getTransactions()) {
-      assert.ok(tx.hash);
-      assert.strictEqual(tx.value, 100000);
-      assert.ok(tx.received);
-      assert.ok(tx.confirmations > 1);
-    }
+    assert.strictEqual(w.getTransactions().length, 2);
+    const tx = w.getTransactions()[1];
+    assert.ok(tx.hash);
+    assert.strictEqual(tx.value, 100000);
+    assert.ok(tx.received);
+    assert.ok(tx.confirmations > 1);
 
     const tx0 = w.getTransactions()[0];
     assert.ok(tx0.inputs);
     assert.ok(tx0.inputs.length === 1);
     assert.ok(tx0.outputs);
-    assert.ok(tx0.outputs.length === 3);
+    assert.ok(tx0.outputs.length === 2);
 
     assert.ok(w.weOwnTransaction('49944e90fe917952e36b1967cdbc1139e60c89b4800b91258bf2345a77a8b888'));
     assert.ok(!w.weOwnTransaction('825c12f277d1f84911ac15ad1f41a3de28e9d906868a930b0a7bca61b17c8881'));

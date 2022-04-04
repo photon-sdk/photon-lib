@@ -1,7 +1,7 @@
 import { KeyBackup } from '../../';
 import * as _CloudStore from '../../src/cloudstore';
 import { _api as mockKeyserverApi } from '../../src/keyserver';
-import mockCloudStorage from '@react-native-community/async-storage';
+import mockCloudStorage from '@react-native-async-storage/async-storage';
 
 describe('KeyBackup unit test', () => {
   const keyId = '8abe1a93-6a9c-490c-bbd5-d7f11a4a9c8f';

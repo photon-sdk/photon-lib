@@ -1,5 +1,5 @@
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
-import bip39 from 'bip39';
+import * as bip39 from 'bip39';
 import b58 from 'bs58check';
 import { decodeUR } from 'bc-ur';
 import * as BlueElectrum from '../BlueElectrum';
@@ -140,7 +140,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       xpub = super._zpubToXpub(key);
       HDNode.fromBase58(xpub);
       return true;
-    } catch (_) {}
+    } catch (_) { }
 
     return false;
   }
@@ -192,7 +192,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     } else {
       // mnemonics. lets derive fingerprint (if it wasnt provided)
       if (!bip39.validateMnemonic(key)) throw new Error('Not a valid mnemonic phrase');
-      fingerprint = fingerprint || MultisigHDWallet.seedToFingerprint(key);
+      fingerprint = fingerprint || MultisigHDWallet.mnemonicToFingerprint(key);
     }
 
     if (fingerprint && this._cosignersFingerprints.indexOf(fingerprint.toUpperCase()) !== -1 && fingerprint !== '00000000') {
@@ -268,20 +268,29 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     if (this.isWrappedSegwit()) {
       const { address } = bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wsh({
-          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+          redeem: bitcoin.payments.p2ms({
+            m: this._m,
+            pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+          }),
         }),
       });
 
       return address;
     } else if (this.isNativeSegwit()) {
       const { address } = bitcoin.payments.p2wsh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({
+          m: this._m,
+          pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+        }),
       });
 
       return address;
     } else if (this.isLegacy()) {
       const { address } = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({
+          m: this._m,
+          pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+        }),
       });
 
       return address;
@@ -305,7 +314,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     if (mnemonic.startsWith(ELECTRUM_SEED_PREFIX)) {
       seed = MultisigHDWallet.convertElectrumMnemonicToSeed(mnemonic);
     } else {
-      seed = bip39.mnemonicToSeed(mnemonic);
+      seed = bip39.mnemonicToSeedSync(mnemonic);
     }
 
     const root = HDNode.fromSeed(seed);
@@ -318,8 +327,8 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
    * @returns {string} Hex string of fingerprint derived from mnemonics. Always has lenght of 8 chars and correct leading zeroes
    */
   static seedToFingerprint(mnemonic) {
-    const seed = bip39.mnemonicToSeed(mnemonic);
-    const root = HDNode.fromSeed(seed);
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    const root = bitcoin.bip32.fromSeed(seed);
     let hex = root.fingerprint.toString('hex');
     while (hex.length < 8) hex = '0' + hex; // leading zeroes
     return hex.toUpperCase();
@@ -369,7 +378,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
    * Converts fingerprint that is stored as a deciman number to hex string (all caps)
    *
    * @param xfp {number} For example 64392470
-   * @returns {string} For example 168DD603
+   * @returns {string} For example 05C0D4E1
    */
   static ckccXfp2fingerprint(xfp) {
     let masterFingerprintHex = Number(xfp).toString(16);
@@ -449,7 +458,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       } else {
         if (coordinationSetup) {
           const xpub = this.convertXpubToMultisignatureXpub(
-            MultisigHDWallet.seedToXpub(this._cosigners[index], this._cosignersCustomPaths[index] || this._derivationPath),
+            MultisigHDWallet.seedToXpub(this._cosigners[index], this._cosignersCustomPaths[index] || this._derivationPath)
           );
           const fingerprint = MultisigHDWallet.seedToFingerprint(this._cosigners[index]);
           ret += fingerprint + ': ' + xpub + '\n';
@@ -476,7 +485,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     let json;
     try {
       json = JSON.parse(secret);
-    } catch (_) {}
+    } catch (_) { }
     if (json && json.xfp && json.p2wsh_deriv && json.p2wsh) {
       this.addCosigner(json.p2wsh, json.xfp); // technically we dont need deriv (json.p2wsh_deriv), since cosigner is already an xpub
       return;
@@ -656,7 +665,8 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     const pubkeys = [];
     for (let c = 0; c < this._cosigners.length; c++) {
       const cosigner = this._cosigners[c];
-      const path = this._getDerivationPathByAddressWithCustomPath(input.address, this._cosignersCustomPaths[c] || this._derivationPath);
+      let path = this._getDerivationPathByAddressWithCustomPath(input.address, this._cosignersCustomPaths[c] || this._derivationPath);
+      if (!path) path = "m/46'/0'/0'/1'/0/0";
       // ^^ path resembles _custom path_, if provided by user during setup, otherwise default path for wallet type gona be used
       const masterFingerprint = Buffer.from(this._cosignersFingerprints[c], 'hex');
 
@@ -678,7 +688,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
 
     if (this.isNativeSegwit()) {
       const p2wsh = bitcoin.payments.p2wsh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({
+          m: this._m,
+          pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+        }),
       });
       const witnessScript = p2wsh.redeem.output;
 
@@ -701,7 +714,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     } else if (this.isWrappedSegwit()) {
       const p2shP2wsh = bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wsh({
-          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+          redeem: bitcoin.payments.p2ms({
+            m: this._m,
+            pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+          }),
         }),
       });
       const witnessScript = p2shP2wsh.redeem.redeem.output;
@@ -724,7 +740,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       });
     } else if (this.isLegacy()) {
       const p2sh = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({
+          m: this._m,
+          pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+        }),
       });
       const redeemScript = p2sh.redeem.output;
       psbt.addInput({
@@ -773,12 +792,18 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     outputData.bip32Derivation = bip32Derivation;
 
     if (this.isLegacy()) {
-      const p2sh = bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) });
+      const p2sh = bitcoin.payments.p2ms({
+        m: this._m,
+        pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+      });
       outputData.redeemScript = p2sh.output;
     } else if (this.isWrappedSegwit()) {
       const p2shP2wsh = bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wsh({
-          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+          redeem: bitcoin.payments.p2ms({
+            m: this._m,
+            pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+          }),
         }),
       });
       outputData.witnessScript = p2shP2wsh.redeem.redeem.output;
@@ -786,7 +811,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     } else if (this.isNativeSegwit()) {
       // not needed by coldcard, apparently..?
       const p2wsh = bitcoin.payments.p2wsh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({
+          m: this._m,
+          pubkeys: MultisigHDWallet.sortBuffers(pubkeys),
+        }),
       });
       outputData.witnessScript = p2wsh.redeem.output;
     } else {
@@ -853,12 +881,13 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
               // dont sign more than we need, otherwise there will be "Too many signatures" error
               continue;
             }
-            let seed = bip39.mnemonicToSeed(cosigner);
+            let seed = bip39.mnemonicToSeedSync(cosigner);
             if (cosigner.startsWith(ELECTRUM_SEED_PREFIX)) {
               seed = MultisigHDWallet.convertElectrumMnemonicToSeed(cosigner);
             }
 
-            const hdRoot = HDNode.fromSeed(seed);
+
+            const hdRoot = bitcoin.bip32.fromSeed(seed);
             psbt.signInputHD(cc, hdRoot);
             signaturesMade++;
           }
@@ -907,7 +936,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     try {
       root.derivePath(path);
       return true;
-    } catch (_) {}
+    } catch (_) { }
     return false;
   }
 
@@ -921,7 +950,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     const txhexes = await BlueElectrum.multiGetTransactionByTxid(
       this.getUtxo(true).map(x => x.txid),
       50,
-      false,
+      false
     );
 
     const newUtxos = [];
@@ -997,11 +1026,11 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       for (const [cosignerIndex, cosigner] of this._cosigners.entries()) {
         if (!MultisigHDWallet.isXpubString(cosigner)) {
           // ok this is a mnemonic, lets try to sign
-          const seed = bip39.mnemonicToSeed(cosigner);
-          const hdRoot = HDNode.fromSeed(seed);
+          const seed = bip39.mnemonicToSeedSync(cosigner);
+          const hdRoot = bitcoin.bip32.fromSeed(seed);
           try {
             psbt.signInputHD(cc, hdRoot);
-          } catch (_) {} // protects agains duplicate cosignings
+          } catch (_) { } // protects agains duplicate cosignings
 
           if (!psbt.inputHasHDKey(cc, hdRoot)) {
             // failed signing as HD. probably bitcoinjs-lib could not match provided hdRoot's
@@ -1013,7 +1042,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
               // correctly points to `/internal/index`, so we extract pubkey from our stored mnemonics+path and
               // match it to the one provided in PSBT's input, and if we have a match - we are in luck! we can sign
               // with this private key.
-              const seed = bip39.mnemonicToSeed(cosigner);
+              const seed = bip39.mnemonicToSeedSync(cosigner);
               const root = HDNode.fromSeed(seed);
               const splt = derivation.path.split('/');
               const internal = +splt[splt.length - 2];
@@ -1026,7 +1055,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
                 const keyPair = ECPair.fromPrivateKey(child.privateKey);
                 try {
                   psbt.signInput(cc, keyPair);
-                } catch (_) {}
+                } catch (_) { }
               }
             }
           }
@@ -1124,5 +1153,14 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
    */
   static isXpubForMultisig(xpub) {
     return ['xpub', 'Ypub', 'Zpub'].includes(xpub.substring(0, 4));
+  }
+
+  /**
+   * @param mnemonic {string}  Mnemonic phrase (12 or 24 words)
+   * @returns {string} Hex fingerprint
+   */
+  static mnemonicToFingerprint(mnemonic) {
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    return AbstractHDElectrumWallet.seedToFingerprint(seed);
   }
 }
