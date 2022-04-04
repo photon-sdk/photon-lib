@@ -40,6 +40,13 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getExternalAddressByIndex(1)), "m/84'/0'/0'/0/1");
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getInternalAddressByIndex(0)), "m/84'/0'/0'/1/0");
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getInternalAddressByIndex(1)), "m/84'/0'/0'/1/1");
+
+    // fetch multiple addresses starting with first free address index
+    assert.strictEqual((await hd.getNextAddressesAsync(5))[0].address, hd._getExternalAddressByIndex(0));
+    assert.strictEqual((await hd.getNextAddressesAsync(5))[1].address, hd._getExternalAddressByIndex(1));
+    assert.strictEqual((await hd.getNextAddressesAsync(5))[2].address, hd._getExternalAddressByIndex(2));
+    assert.strictEqual((await hd.getNextAddressesAsync(5))[3].address, hd._getExternalAddressByIndex(3));
+    assert.strictEqual((await hd.getNextAddressesAsync(5))[4].address, hd._getExternalAddressByIndex(4));
   });
 
   it('can generate addresses only via zpub', function () {
