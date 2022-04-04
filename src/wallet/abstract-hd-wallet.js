@@ -105,6 +105,41 @@ export class AbstractHDWallet extends LegacyWallet {
   }
 
   /**
+   * Derives from hierarchy, returns next free address
+   * (the one that has no transactions) + subsequent n-1 addresses.
+   * Looks for several, gives up if none found, and returns the
+   * used one.
+   *
+   * @return {Promise.<string[]>}
+   */
+  async getNextAddressesAsync(number) {
+    // get next free address
+    const nextFreeAddress = await this.getAddressAsync();
+
+    // retrieve next n-1 addresses too
+    const nextFreeIndex = parseFloat(this._getDerivationPathByAddress(nextFreeAddress).slice(-1));
+
+    // sanity check - this address must match just found freeAddress
+    if (this._address !== this._getExternalAddressByIndex(nextFreeIndex)) {
+      // TODO - properly handle error
+      throw new Error('Derivation path error - DANGEROUS');
+    }
+
+    let c;
+    const nextFreeAddresses = [];
+    for (c = 0; c < number; c++) {
+      const nextAddressObject = {
+        index: nextFreeIndex + c,
+        address: this._getExternalAddressByIndex(nextFreeIndex + c),
+      };
+      nextFreeAddresses.push(nextAddressObject);
+    }
+
+    return nextFreeAddresses;
+  }
+  // return object: [{ index: "", address: ""}, ...]
+
+  /**
    * Derives from hierarchy, returns next free CHANGE address
    * (the one that has no transactions). Looks for several,
    * gives up if none found, and returns the used one
