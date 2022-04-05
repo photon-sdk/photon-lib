@@ -1,4 +1,4 @@
-import mockAsyncStorage from '@react-native-community/async-storage';
+import mockAsyncStorage from '@react-native-async-storage/async-storage';
 import * as CloudStore from '../../src/cloudstore';
 
 describe('CloudStore unit test', () => {

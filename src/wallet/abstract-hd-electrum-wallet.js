@@ -1,4 +1,4 @@
-import bip39 from 'bip39';
+import * as bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
 import { randomBytes } from './rng';
@@ -96,7 +96,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   _getWIFByIndex(internal, index) {
     if (!this.secret) return false;
     const mnemonic = this.secret;
-    const seed = bip39.mnemonicToSeed(mnemonic);
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
     const root = HDNode.fromSeed(seed);
     const path = `m/84'/0'/0'/${internal ? 1 : 0}/${index}`;
     const child = root.derivePath(path);
@@ -188,7 +188,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
     // first, getting xpub
     const mnemonic = this.secret;
-    const seed = bip39.mnemonicToSeed(mnemonic);
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
     const root = HDNode.fromSeed(seed);
 
     const path = "m/84'/0'/0'";
@@ -1047,5 +1047,25 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       if (address === this._getInternalAddressByIndex(c)) return true;
     }
     return false;
+  }
+
+  /**
+   * @param seed {Buffer} Buffer object with seed
+   * @returns {string} Hex string of fingerprint derived from mnemonics. Always has lenght of 8 chars and correct leading zeroes. All caps
+   */
+  static seedToFingerprint(seed) {
+    const root = HDNode.fromSeed(seed);
+    let hex = root.fingerprint.toString('hex');
+    while (hex.length < 8) hex = '0' + hex; // leading zeroes
+    return hex.toUpperCase();
+  }
+
+  /**
+   * @param mnemonic {string}  Mnemonic phrase (12 or 24 words)
+   * @returns {string} Hex fingerprint
+   */
+  static mnemonicToFingerprint(mnemonic) {
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+    return AbstractHDElectrumWallet.seedToFingerprint(seed);
   }
 }

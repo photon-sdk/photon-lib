@@ -1,6 +1,6 @@
-import mockAsyncStorage from '@react-native-community/async-storage/jest/async-storage-mock';
+import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
-jest.mock('@react-native-community/async-storage', () => mockAsyncStorage);
+jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
 jest.mock('@photon-sdk/react-native-icloudstore', () => mockAsyncStorage);
 
@@ -32,7 +32,7 @@ jest.mock('frisbee', () => {
   });
 });
 
-jest.mock('react-native-google-drive-api-wrapper', () => {
+jest.mock('@robinbobin/react-native-google-drive-api-wrapper', () => {
   return {
     setAccessToken: jest.fn(),
     init: jest.fn(),
@@ -54,7 +54,7 @@ jest.mock('react-native-google-drive-api-wrapper', () => {
   };
 });
 
-jest.mock('@react-native-community/google-signin', () => {
+jest.mock('@react-native-google-signin/google-signin', () => {
   return {
     GoogleSignin: {
       configure: jest.fn(),

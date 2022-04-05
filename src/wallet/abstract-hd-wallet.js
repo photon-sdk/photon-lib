@@ -1,7 +1,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bitcoinMessage from 'bitcoinjs-message';
 import { LegacyWallet } from './legacy-wallet';
-import bip39 from 'bip39';
+import * as bip39 from 'bip39';
 import * as BlueElectrum from '../BlueElectrum';
 
 /**
@@ -63,7 +63,7 @@ export class AbstractHDWallet extends LegacyWallet {
   }
 
   getMnemonicToSeedHex() {
-    return bip39.mnemonicToSeedHex(this.secret);
+    return bip39.mnemonicToSeedSync(this.secret).toString('hex');
   }
 
   /**
