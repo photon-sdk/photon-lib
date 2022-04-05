@@ -28,7 +28,7 @@ In your react-native app...
 Make sure to install all peer dependencies:
 
 ```
-npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-icloudstore @react-native-community/async-storage @photon-sdk/react-native-tcp @react-native-community/google-signin react-native-google-drive-api-wrapper node-libs-react-native
+npm install --save @photon-sdk/photon-lib react-native-randombytes react-native-keychain @photon-sdk/react-native-icloudstore @react-native-async-storage/async-storage @photon-sdk/react-native-tcp @react-native-google-signin/google-signin @robinbobin/react-native-google-drive-api-wrapper node-libs-react-native
 ```
 
 ### Update cocoapods
@@ -252,8 +252,8 @@ import { MultisigHDWallet, WalletStore } from '@photon-sdk/photon-lib';
 
 const path = "m/48'/0'/0'/2'";
 const key1_mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-const key2_fp = '168DD603';
-const key2_zpub = 'Zpub75mAE8EjyxSzoyPmGnd5E6MyD7ALGNndruWv52xpzimZQKukwvEfXTHqmH8nbbc6ccP5t2aM3mws3pKYSnKpKMMytdbNEZFUxKzztYFM8Pn';
+const key2_fp = '05C0D4E1';
+const key2_zpub = 'Zpub755JaEN81qADr1Hq22Q6AbiRutDnCMdWghxUrpxkPB5JhdcAzWzQGMiSS58oxEjTqZkxBJ1q6TwvQ1EkiNEsrD18aeVnuJgEDjg1S3ETtd6';
 
 const wallet = new MultisigHDWallet();
 wallet.addCosigner(key1_mnemonic);

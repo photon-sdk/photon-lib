@@ -1,4 +1,4 @@
-import bip39 from 'bip39';
+import * as bip39 from 'bip39';
 import b58 from 'bs58check';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -31,7 +31,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
   _getWIFByIndex(internal, index) {
     if (!this.secret) return false;
     const mnemonic = this.secret;
-    const seed = bip39.mnemonicToSeed(mnemonic);
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
     const root = bitcoin.bip32.fromSeed(seed);
     const path = `m/49'/0'/0'/${internal ? 1 : 0}/${index}`;
     const child = root.derivePath(path);
@@ -79,7 +79,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     }
     // first, getting xpub
     const mnemonic = this.secret;
-    const seed = bip39.mnemonicToSeed(mnemonic);
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
     const root = HDNode.fromSeed(seed);
 
     const path = "m/49'/0'/0'";
