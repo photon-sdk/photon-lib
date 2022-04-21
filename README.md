@@ -7,6 +7,7 @@ A high level library for building bitcoin wallets with react native.
 Provide an easy-to-use high level api for the following:
 
 * hd wallets (bech32 and p2sh)
+* multisig support
 * an electrum light client
 * secure enclave backed key storage on iOS and Android (where available)
 * encrypted key backup on iCloud/GDrive + 2FA (see [photon-keyserver](https://github.com/photon-sdk/photon-keyserver))
