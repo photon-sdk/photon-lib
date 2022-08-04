@@ -117,11 +117,12 @@ export class AbstractHDWallet extends LegacyWallet {
     // retrieve next n-1 addresses too
     const nextFreeIndex = parseFloat(this._getDerivationPathByAddress(nextFreeAddress).slice(-1));
 
-    // sanity check - this address must match just found freeAddress
-    if (this._address !== this._getExternalAddressByIndex(nextFreeIndex)) {
-      // TODO - properly handle error
-      throw new Error('Derivation path error - DANGEROUS');
-    }
+    // unnecessary and causes false flags, removing for now
+    // // sanity check - this address must match just found freeAddress
+    // if (this._address !== this._getExternalAddressByIndex(nextFreeIndex)) {
+    //   // TODO - properly handle error
+    //   throw new Error('Derivation path error - DANGEROUS');
+    // }
 
     let c;
     const nextFreeAddresses = [];
