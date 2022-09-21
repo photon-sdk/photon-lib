@@ -3,6 +3,9 @@ import b58 from 'bs58check';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as HDNode from 'bip32';
+import { ECPairFactory } from 'ecpair';
+const ecc = require('tiny-secp256k1');
+const ECPair = ECPairFactory(ecc);
 
 /**
  * HD Wallet (BIP39).
@@ -17,7 +20,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     return true;
   }
 
-  allowSendMax(): boolean {
+  allowSendMax() {
     return true;
   }
 
@@ -36,7 +39,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     const path = `m/49'/0'/0'/${internal ? 1 : 0}/${index}`;
     const child = root.derivePath(path);
 
-    return bitcoin.ECPair.fromPrivateKey(child.privateKey).toWIF();
+    return ECPair.fromPrivateKey(child.privateKey).toWIF();
   }
 
   _getExternalAddressByIndex(index) {

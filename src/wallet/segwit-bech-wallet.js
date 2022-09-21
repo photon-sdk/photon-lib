@@ -1,5 +1,8 @@
 import { LegacyWallet } from './legacy-wallet';
 import * as bitcoin from 'bitcoinjs-lib';
+import { ECPairFactory } from 'ecpair';
+const ecc = require('tiny-secp256k1');
+const ECPair = ECPairFactory(ecc);
 
 export class SegwitBech32Wallet extends LegacyWallet {
   static type = 'segwitBech32';
@@ -9,7 +12,7 @@ export class SegwitBech32Wallet extends LegacyWallet {
     if (this._address) return this._address;
     let address;
     try {
-      const keyPair = bitcoin.ECPair.fromWIF(this.secret);
+      const keyPair = ECPair.fromWIF(this.secret);
       if (!keyPair.compressed) {
         console.warn('only compressed public keys are good for segwit');
         return false;
@@ -76,7 +79,7 @@ export class SegwitBech32Wallet extends LegacyWallet {
     inputs.forEach(input => {
       if (!skipSigning) {
         // skiping signing related stuff
-        keyPair = bitcoin.ECPair.fromWIF(this.secret); // secret is WIF
+        keyPair = ECPair.fromWIF(this.secret); // secret is WIF
       }
       values[c] = input.value;
       c++;
