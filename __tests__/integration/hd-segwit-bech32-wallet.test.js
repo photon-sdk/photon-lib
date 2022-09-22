@@ -49,6 +49,9 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     assert.strictEqual(hd.getNextFreeAddressIndex(), 2);
     assert.strictEqual(hd.next_free_change_address_index, 2);
 
+    // fetch multiple addresses starting with first free address index
+    assert.strictEqual(await hd.getNextAddressesAsync(5)[2].address, hd._getExternalAddressByIndex(3));
+
     // now fetch txs
     await hd.fetchTransactions();
     assert.ok(hd._lastTxFetch > 0);
