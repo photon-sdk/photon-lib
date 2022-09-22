@@ -1,3 +1,5 @@
+import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoinMessage from 'bitcoinjs-message';
 import { LegacyWallet } from './legacy-wallet';
 import * as bip39 from 'bip39';
 import * as BlueElectrum from '../BlueElectrum';
@@ -148,6 +150,36 @@ export class AbstractHDWallet extends LegacyWallet {
    */
   getAddress() {
     return this._address;
+  }
+
+  /**
+   * Signs text message using address private key and returns signature
+   *
+   * @param message {string}
+   * @param address {string}
+   * @returns {string} base64 encoded signature
+   */
+  signMessage(message, address, useSegwit = true) {
+    const wif = this._getWifForAddress(address);
+    if (wif === null) throw new Error('Invalid address');
+    const keyPair = bitcoin.ECPair.fromWIF(wif);
+    const privateKey = keyPair.privateKey;
+    const options = this.segwitType && useSegwit ? { segwitType: this.segwitType } : undefined;
+    const signature = bitcoinMessage.sign(message, privateKey, keyPair.compressed, options);
+    return signature.toString('base64');
+  }
+  
+  /**
+   * Verifies text message signature by address
+   *
+   * @param message {string}
+   * @param address {string}
+   * @param signature {string}
+   * @returns {boolean} base64 encoded signature
+   */
+  verifyMessage(message, address, signature) {
+    // null, true so it can verify Electrum signatures without errors
+    return bitcoinMessage.verify(message, address, signature, null, true);
   }
 
   _getExternalWIFByIndex(index) {

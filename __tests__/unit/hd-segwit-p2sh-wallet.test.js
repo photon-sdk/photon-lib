@@ -131,3 +131,21 @@ it('can fullfill user generated entropy if less than 32 bytes provided', async (
 
   assert.ok(secret.split(' ').length === 12 || secret.split(' ').length === 24);
 });
+
+it('signs and verifies messages', async () => {
+  const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+  const hd = new HDSegwitP2SHWallet();
+  hd.setSecret(mnemonic);
+  assert.strictEqual(hd._getExternalAddressByIndex(0), '37VucYSaXLCAsxYyAPfbSi9eh4iEcbShgf');
+  assert.strictEqual(
+    hd.signMessage('running bitcoin', hd._getExternalAddressByIndex(0), true),
+    'H/+rN386XGg2gcekDIzMk1XtvN5iZnAhxfk+Usnlsl55CxGAF/Ci78VRl1ZkG+y6yjbm73JEHUIWq64FsHPbBG4=',
+  );
+  assert.ok(
+    hd.verifyMessage(
+      'running bitcoin',
+      hd._getExternalAddressByIndex(0),
+      'H/+rN386XGg2gcekDIzMk1XtvN5iZnAhxfk+Usnlsl55CxGAF/Ci78VRl1ZkG+y6yjbm73JEHUIWq64FsHPbBG4=',
+    ),
+  );
+});
