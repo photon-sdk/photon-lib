@@ -7,7 +7,7 @@ import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import RNiCloudStorage from '@photon-sdk/react-native-icloudstore';
 import * as GDriveCloudStorage from './GDriveCloudStorage';
-import { isPhone, isEmail, isId, isBuffer } from './verify';
+import { isPhone, isEmail, isId, isBuffer, isTimestamp } from './verify';
 
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : GDriveCloudStorage;
 
@@ -35,11 +35,11 @@ export async function putChannels({ keyId, ciphertext, timestamp }) {
   await _lockChannels();
   await _checkDeviceId();
   const channels = await _fetchChannels(keyId);
-  if (channels && channels.timestamp > timestamp) {
+  if (channels && channels.time.getTime() > timestamp) {
     throw new Error('Newer channel backup already present');
   }
   await Store.setItem(KEY_ID_CHANNELS, keyId);
-  await Store.setItem(shortKeyId(keyId), stringifyChannels({ keyId, ciphertext, timestamp }));
+  await Store.setItem(shortKeyId(keyId), stringify({ keyId, ciphertext, timestamp }));
   _unlockChannels();
 }
 
@@ -51,6 +51,12 @@ export async function getChannels() {
   return channels;
 }
 
+export async function allowOtherDevice() {
+  await _lockChannels();
+  await Store.removeItem(DEVICE_ID);
+  _unlockChannels();
+}
+
 async function _fetchChannels(customKeyId) {
   const keyId = await Store.getItem(KEY_ID_CHANNELS);
   if (!keyId) {
@@ -60,7 +66,7 @@ async function _fetchChannels(customKeyId) {
     throw new Error('Another key backup already present');
   }
   const channels = await Store.getItem(shortKeyId(keyId));
-  return channels ? parseChannels(channels) : null;
+  return channels ? parse(channels) : null;
 }
 
 let _channelMutex = false;
@@ -68,7 +74,7 @@ let _channelMutex = false;
 async function _lockChannels() {
   // eslint-disable-next-line no-unmodified-loop-condition
   while (_channelMutex) {
-    await nap(100);
+    await nap();
   }
   _channelMutex = true;
 }
@@ -88,12 +94,6 @@ async function _checkDeviceId() {
   }
 }
 
-export async function allowOtherDevice() {
-  await _lockChannels();
-  await Store.removeItem(DEVICE_ID);
-  _unlockChannels();
-}
-
 //
 // Encrypted key storage
 //
@@ -106,7 +106,7 @@ export async function putKey({ keyId, ciphertext }) {
     throw new Error('Backup already present');
   }
   await Store.setItem(KEY_ID, keyId);
-  await Store.setItem(shortKeyId(keyId), stringifyKey({ keyId, ciphertext }));
+  await Store.setItem(shortKeyId(keyId), stringify({ keyId, ciphertext }));
 }
 
 export async function getKey() {
@@ -115,7 +115,7 @@ export async function getKey() {
     return null;
   }
   const key = await Store.getItem(shortKeyId(keyId));
-  return key ? parseKey(key) : null;
+  return key ? parse(key) : null;
 }
 
 export async function removeKeyId({ keyId }) {
@@ -173,19 +173,23 @@ function shortKeyId(keyId) {
   return `${VERSION}_${shortId}`;
 }
 
-function stringifyKey({ keyId, ciphertext }) {
+function stringify({ keyId, ciphertext, timestamp }) {
   return JSON.stringify({
     keyId,
     ciphertext: ciphertext.toString('base64'),
-    time: new Date().toISOString(),
+    time: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
   });
 }
 
-function parseKey(item) {
+function parse(item) {
   const { keyId, ciphertext, time } = JSON.parse(item);
   return {
     keyId,
     ciphertext: Buffer.from(ciphertext, 'base64'),
     time: new Date(time),
   };
+}
+
+function nap(ms = 100) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
