@@ -221,4 +221,34 @@ describe('Verify unit test', () => {
       expect(verify.isBuffer(undefined)).toBe(false);
     });
   });
+
+  describe('isTimestamp', () => {
+    it('returns true for a valid timestamp', () => {
+      expect(verify.isTimestamp(1666354543406)).toBe(true);
+    });
+
+    it('returns false for a invalid timestamp', () => {
+      expect(verify.isTimestamp(1521071999999)).toBe(false);
+    });
+
+    it('returns false for a too large timestamp', () => {
+      expect(verify.isTimestamp(16663545434060000000)).toBe(false);
+    });
+
+    it('returns false for a negative timestamp', () => {
+      expect(verify.isTimestamp(-42)).toBe(false);
+    });
+
+    it('returns false for string', () => {
+      expect(verify.isTimestamp('1666354543406')).toBe(false);
+    });
+
+    it('returns false for null', () => {
+      expect(verify.isTimestamp(null)).toBe(false);
+    });
+
+    it('returns false for undefined', () => {
+      expect(verify.isTimestamp(undefined)).toBe(false);
+    });
+  });
 });

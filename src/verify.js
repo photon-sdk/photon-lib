@@ -35,3 +35,7 @@ export function isString(o) {
 export function isBuffer(o) {
   return Buffer.isBuffer(o);
 }
+
+export function isTimestamp(o) {
+  return Number.isInteger(o) && o <= Date.now() && o > Date.parse('15 Mar 2018 00:00:00 GMT');
+}
