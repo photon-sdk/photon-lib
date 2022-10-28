@@ -62,3 +62,9 @@ jest.mock('@react-native-google-signin/google-signin', () => {
     },
   };
 });
+
+jest.mock('react-native-device-info', () => {
+  return {
+    getUniqueId: jest.fn(() => 'myDeviceId'),
+  };
+});
