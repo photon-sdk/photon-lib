@@ -50,14 +50,7 @@ export async function checkForExistingBackup() {
  * @return {Promise<undefined>}
  */
 export async function createBackup({ data, pin }) {
-  if (!isObject(data)) {
-    throw new Error('Invalid args');
-  }
-  setPin({ pin });
-  const keyId = await KeyServer.createKey({ pin });
-  const encryptionKey = await KeyServer.fetchKey({ keyId });
-  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
-  const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
+  const { keyId, ciphertext } = await _prepareBackup({ data, pin });
   await CloudStore.putKey({ keyId, ciphertext });
 }
 
@@ -68,10 +61,62 @@ export async function createBackup({ data, pin }) {
  * @return {Promise<Object>}  The decrypted backup payload
  */
 export async function restoreBackup({ pin }) {
+  const { keyId, encryptionKey } = await _prepareRestore({ pin });
+  const backup = await CloudStore.getKey();
+  return _decryptRestored({ keyId, backup, encryptionKey });
+}
+
+/**
+ *
+ * Create an encrypted backup in cloud storage. The backup is encrypted using a
+ * random 256 bit encryption key that is stored on the photon-keyserver. A user
+ * chosen PIN is used to authentication download of the encryption key. This
+ * method is similar to 'createBackup' but adds some additional locking guarantees
+ * to prevent two devices from using the same channel state simultaniously.
+ * @param  {Object} data       A serializable object to be backed up
+ * @param  {string} pin        A user chosen pin to authenticate to the keyserver
+ * @param  {Number} timestamp  A timestamp for the data
+ * @return {Promise<undefined>}
+ */
+export async function createChannelBackup({ data, pin, timestamp }) {
+  const { keyId, ciphertext } = await _prepareBackup({ data, pin });
+  await CloudStore.putChannels({ keyId, ciphertext, timestamp });
+}
+
+/**
+ * Restore an encrypted backup from cloud storage. The encryption key is fetched from
+ * the photon-keyserver by authenticating via a user chosen PIN. This method is similar
+ * to 'restoreBackup' but adds some additional locking guarantees to prevent two devices
+ * from using the same channel state simultaniously.
+ * @param  {string} pin       A user chosen pin to authenticate to the keyserver
+ * @return {Promise<Object>}  The decrypted backup payload
+ */
+export async function restoreChannelBackup({ pin }) {
+  const { keyId, encryptionKey } = await _prepareRestore({ pin });
+  const backup = await CloudStore.getChannels();
+  return _decryptRestored({ keyId, backup, encryptionKey });
+}
+
+async function _prepareBackup({ data, pin }) {
+  if (!isObject(data)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const keyId = await KeyServer.createKey({ pin });
+  const encryptionKey = await KeyServer.fetchKey({ keyId });
+  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
+  const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
+  return { keyId, ciphertext };
+}
+
+async function _prepareRestore({ pin }) {
   setPin({ pin });
   const keyId = await fetchKeyId();
   const encryptionKey = await KeyServer.fetchKey({ keyId });
-  const backup = await CloudStore.getKey();
+  return { keyId, encryptionKey };
+}
+
+async function _decryptRestored({ keyId, backup, encryptionKey }) {
   if (!backup || backup.keyId !== keyId) {
     return null;
   }
