@@ -12,7 +12,8 @@ import { isPhone, isEmail, isId, isCode, isPin, isObject } from './verify';
 /**
  * Initialize the key backup module by specifying the key server which is
  * used to store the encryption key to the cloud backup.
- * @param  {string} keyServerURI  The base url of the key server
+ * @param  {string} keyServerURI          The base url of the key server
+ * @param  {Function} onOtherDeviceLogin  Event to handle stopping of the local LDK node when another device has signaled they are using the backed up channel state
  * @return {undefined}
  */
 export function init({ keyServerURI, onOtherDeviceLogin }) {
