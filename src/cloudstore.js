@@ -3,7 +3,7 @@
  * store is used. Storage on Android relies on system backups to GDrive.
  */
 
-import { Platform } from 'react-native';
+import { Platform, NativeEventEmitter } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import RNiCloudStorage from '@photon-sdk/react-native-icloudstore';
 import * as GDriveCloudStorage from './GDriveCloudStorage';
@@ -17,6 +17,15 @@ const PHONE = `${VERSION}_photon_phone`;
 const EMAIL = `${VERSION}_photon_email`;
 const DEVICE_ID = `${VERSION}_photon_device_id`;
 const KEY_ID_CHANNELS = `${VERSION}_photon_key_id_channels`;
+
+export function init({ onOtherDeviceLogin }) {
+  const eventEmitter = new NativeEventEmitter(RNiCloudStorage);
+  eventEmitter.addListener('iCloudStoreDidChangeRemotely', ({ changedKeys }) => {
+    if (changedKeys !== null && changedKeys.includes(DEVICE_ID)) {
+      onOtherDeviceLogin();
+    }
+  });
+}
 
 export async function authenticate(options) {
   if (Store.authenticate) {

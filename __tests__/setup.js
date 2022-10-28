@@ -68,3 +68,5 @@ jest.mock('react-native-device-info', () => {
     getUniqueId: jest.fn(() => 'myDeviceId'),
   };
 });
+
+jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter');

@@ -15,8 +15,9 @@ import { isPhone, isEmail, isId, isCode, isPin, isObject } from './verify';
  * @param  {string} keyServerURI  The base url of the key server
  * @return {undefined}
  */
-export function init({ keyServerURI }) {
+export function init({ keyServerURI, onOtherDeviceLogin }) {
   KeyServer.init({ baseURI: keyServerURI });
+  CloudStore.init({ onOtherDeviceLogin });
 }
 
 /**
