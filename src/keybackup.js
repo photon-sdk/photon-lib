@@ -52,7 +52,7 @@ export async function checkForExistingBackup() {
  * @return {Promise<undefined>}
  */
 export async function createBackup({ data, pin }) {
-  const { keyId, ciphertext } = await _prepareBackup({ data, pin });
+  const { keyId, ciphertext } = await _encryptBackup({ data, pin });
   await CloudStore.putKey({ keyId, ciphertext });
 }
 
@@ -63,7 +63,7 @@ export async function createBackup({ data, pin }) {
  * @return {Promise<Object>}  The decrypted backup payload
  */
 export async function restoreBackup({ pin }) {
-  const { keyId, encryptionKey } = await _prepareRestore({ pin });
+  const { keyId, encryptionKey } = await _fetchKey({ pin });
   const backup = await CloudStore.getKey();
   return _decryptRestored({ keyId, backup, encryptionKey });
 }
@@ -81,7 +81,7 @@ export async function restoreBackup({ pin }) {
  * @return {Promise<undefined>}
  */
 export async function createChannelBackup({ data, pin, timestamp }) {
-  const { keyId, ciphertext } = await _prepareBackup({ data, pin });
+  const { keyId, ciphertext } = await _encryptBackup({ data, pin });
   await CloudStore.putChannels({ keyId, ciphertext, timestamp });
 }
 
@@ -94,12 +94,12 @@ export async function createChannelBackup({ data, pin, timestamp }) {
  * @return {Promise<Object>}  The decrypted backup payload
  */
 export async function restoreChannelBackup({ pin }) {
-  const { keyId, encryptionKey } = await _prepareRestore({ pin });
+  const { keyId, encryptionKey } = await _fetchKey({ pin });
   const backup = await CloudStore.getChannels();
   return _decryptRestored({ keyId, backup, encryptionKey });
 }
 
-async function _prepareBackup({ data, pin }) {
+async function _encryptBackup({ data, pin }) {
   if (!isObject(data)) {
     throw new Error('Invalid args');
   }
@@ -111,7 +111,7 @@ async function _prepareBackup({ data, pin }) {
   return { keyId, ciphertext };
 }
 
-async function _prepareRestore({ pin }) {
+async function _fetchKey({ pin }) {
   setPin({ pin });
   const keyId = await fetchKeyId();
   const encryptionKey = await KeyServer.fetchKey({ keyId });
