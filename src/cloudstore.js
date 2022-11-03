@@ -7,7 +7,7 @@ import { Platform, NativeEventEmitter } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import RNiCloudStorage from '@photon-sdk/react-native-icloudstore';
 import * as GDriveCloudStorage from './GDriveCloudStorage';
-import { isPhone, isEmail, isId, isBuffer, isTimestamp } from './verify';
+import { isPhone, isEmail, isId, isBuffer } from './verify';
 
 const Store = Platform.OS === 'ios' ? RNiCloudStorage : GDriveCloudStorage;
 
@@ -16,7 +16,8 @@ const KEY_ID = `${VERSION}_photon_key_id`;
 const PHONE = `${VERSION}_photon_phone`;
 const EMAIL = `${VERSION}_photon_email`;
 const DEVICE_ID = `${VERSION}_photon_device_id`;
-const KEY_ID_CHANNELS = `${VERSION}_photon_key_id_channels`;
+const CHANNEL_SEQ_NUM = `${VERSION}_photon_channel_seq_num`;
+const CHANNEL_PREFIX = `${VERSION}_photon_channel_`;
 
 export function init({ onOtherDeviceLogin }) {
   const eventEmitter = new NativeEventEmitter(RNiCloudStorage);
@@ -37,18 +38,14 @@ export async function authenticate(options) {
 // Encrypted lightning channel storage
 //
 
-export async function putChannels({ keyId, ciphertext, timestamp }) {
-  if (!isId(keyId) || !isBuffer(ciphertext) || !isTimestamp(timestamp)) {
+export async function putChannels({ keyId, ciphertext }) {
+  if (!isId(keyId) || !isBuffer(ciphertext)) {
     throw new Error('Invalid args');
   }
   await _lockChannels();
   await _checkDeviceId();
-  const channels = await _fetchChannels(keyId);
-  if (channels && channels.time.getTime() > timestamp) {
-    throw new Error('Newer channel backup already present');
-  }
-  await Store.setItem(KEY_ID_CHANNELS, keyId);
-  await Store.setItem(shortKeyId(keyId), stringify({ keyId, ciphertext, timestamp }));
+  const seqNum = await _incrementChannelSequenceNumber();
+  await Store.setItem(CHANNEL_PREFIX + seqNum, stringify({ keyId, ciphertext }));
   _unlockChannels();
 }
 
@@ -66,15 +63,20 @@ export async function allowOtherDevice() {
   _unlockChannels();
 }
 
+async function _fetchChannelSequenceNumber() {
+  const seqNum = await Store.getItem(CHANNEL_SEQ_NUM);
+  return seqNum ? parseInt(seqNum) : 0;
+}
+
+async function _incrementChannelSequenceNumber() {
+  const seqNum = _fetchChannelSequenceNumber() + 1;
+  await Store.setItem(CHANNEL_SEQ_NUM, seqNum.toString());
+  return seqNum;
+}
+
 async function _fetchChannels(customKeyId) {
-  const keyId = await Store.getItem(KEY_ID_CHANNELS);
-  if (!keyId) {
-    return null;
-  }
-  if (customKeyId && customKeyId !== keyId) {
-    throw new Error('Another key backup already present');
-  }
-  const channels = await Store.getItem(shortKeyId(keyId));
+  const seqNum = await _fetchChannelSequenceNumber();
+  const channels = await Store.getItem(CHANNEL_PREFIX + seqNum);
   return channels ? parse(channels) : null;
 }
 
@@ -182,11 +184,11 @@ function shortKeyId(keyId) {
   return `${VERSION}_${shortId}`;
 }
 
-function stringify({ keyId, ciphertext, timestamp }) {
+function stringify({ keyId, ciphertext }) {
   return JSON.stringify({
     keyId,
     ciphertext: ciphertext.toString('base64'),
-    time: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
+    time: new Date().toISOString(),
   });
 }
 
