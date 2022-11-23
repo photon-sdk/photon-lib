@@ -69,7 +69,7 @@ async function _fetchChannelSequenceNumber() {
 }
 
 async function _incrementChannelSequenceNumber() {
-  const seqNum = _fetchChannelSequenceNumber() + 1;
+  const seqNum = (await _fetchChannelSequenceNumber()) + 1;
   await Store.setItem(CHANNEL_SEQ_NUM, seqNum.toString());
   return seqNum;
 }
@@ -98,6 +98,7 @@ async function _checkDeviceId() {
   const deviceId = await DeviceInfo.getUniqueId();
   const storedId = await Store.getItem(DEVICE_ID);
   if (storedId && storedId !== deviceId) {
+    _unlockChannels();
     throw new Error('Another device is storing channel state');
   }
   if (!storedId) {
