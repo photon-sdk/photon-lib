@@ -69,6 +69,15 @@ export async function restoreBackup({ pin }) {
 }
 
 /**
+ * Check for an existing backup in cloud storage.
+ * @return {Promise<boolean>}  If a backup exists
+ */
+export async function checkForChannelBackup() {
+  const backup = await CloudStore.getChannels();
+  return !!backup;
+}
+
+/**
  *
  * Create an encrypted backup in cloud storage. The backup is encrypted using a
  * random 256 bit encryption key that is stored on the photon-keyserver. A user
@@ -77,12 +86,11 @@ export async function restoreBackup({ pin }) {
  * to prevent two devices from using the same channel state simultaniously.
  * @param  {Object} data       A serializable object to be backed up
  * @param  {string} pin        A user chosen pin to authenticate to the keyserver
- * @param  {Number} timestamp  A timestamp for the data
  * @return {Promise<undefined>}
  */
-export async function createChannelBackup({ data, pin, timestamp }) {
+export async function createChannelBackup({ data, pin }) {
   const { keyId, ciphertext } = await _encryptBackup({ data, pin });
-  await CloudStore.putChannels({ keyId, ciphertext, timestamp });
+  await CloudStore.putChannels({ keyId, ciphertext });
 }
 
 /**
