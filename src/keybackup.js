@@ -52,7 +52,14 @@ export async function checkForExistingBackup() {
  * @return {Promise<undefined>}
  */
 export async function createBackup({ data, pin }) {
-  const { keyId, ciphertext } = await _encryptBackup({ data, pin });
+  if (!isObject(data)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const keyId = await KeyServer.createKey({ pin });
+  const encryptionKey = await KeyServer.fetchKey({ keyId });
+  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
+  const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
   await CloudStore.putKey({ keyId, ciphertext });
 }
 
@@ -89,7 +96,13 @@ export async function checkForChannelBackup() {
  * @return {Promise<undefined>}
  */
 export async function createChannelBackup({ data, pin }) {
-  const { keyId, ciphertext } = await _encryptBackup({ data, pin });
+  if (!isObject(data)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const { keyId, encryptionKey } = await _fetchKey({ pin });
+  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
+  const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
   await CloudStore.putChannels({ keyId, ciphertext });
 }
 
@@ -105,18 +118,6 @@ export async function restoreChannelBackup({ pin }) {
   const { keyId, encryptionKey } = await _fetchKey({ pin });
   const backup = await CloudStore.getChannels();
   return _decryptRestored({ keyId, backup, encryptionKey });
-}
-
-async function _encryptBackup({ data, pin }) {
-  if (!isObject(data)) {
-    throw new Error('Invalid args');
-  }
-  setPin({ pin });
-  const keyId = await KeyServer.createKey({ pin });
-  const encryptionKey = await KeyServer.fetchKey({ keyId });
-  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
-  const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
-  return { keyId, ciphertext };
 }
 
 async function _fetchKey({ pin }) {
