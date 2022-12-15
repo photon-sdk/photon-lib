@@ -88,9 +88,9 @@ export async function checkForChannelBackup() {
  *
  * Create an encrypted backup in cloud storage. The backup is encrypted using a
  * random 256 bit encryption key that is stored on the photon-keyserver. A user
- * chosen PIN is used to authentication download of the encryption key. This
+ * chosen PIN is used to authenticate the download of the encryption key. This
  * method is similar to 'createBackup' but adds some additional locking guarantees
- * to prevent two devices from using the same channel state simultaniously.
+ * to prevent two devices from using the same channel state simultaneously.
  * @param  {Object} data       A serializable object to be backed up
  * @param  {string} pin        A user chosen pin to authenticate to the keyserver
  * @return {Promise<undefined>}
@@ -110,7 +110,7 @@ export async function createChannelBackup({ data, pin }) {
  * Restore an encrypted backup from cloud storage. The encryption key is fetched from
  * the photon-keyserver by authenticating via a user chosen PIN. This method is similar
  * to 'restoreBackup' but adds some additional locking guarantees to prevent two devices
- * from using the same channel state simultaniously.
+ * from using the same channel state simultaneously.
  * @param  {string} pin       A user chosen pin to authenticate to the keyserver
  * @return {Promise<Object>}  The decrypted backup payload
  */

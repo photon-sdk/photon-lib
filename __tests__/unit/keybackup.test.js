@@ -112,7 +112,7 @@ describe('KeyBackup unit test', () => {
       await expect(KeyBackup.createChannelBackup({ data: { foo: 'bar' }, pin })).rejects.toThrow(/No key id/);
     });
 
-    it('should encrpt and store object', async () => {
+    it('should encrypt and store object', async () => {
       await KeyBackup.createBackup({ data: { foo: 'bar' }, pin });
       await KeyBackup.createChannelBackup({ data: { foo: 'bar' }, pin });
       expect(await KeyBackup.checkForChannelBackup()).toBe(true);

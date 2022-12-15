@@ -50,7 +50,7 @@ describe('CloudStore unit test', () => {
   });
 
   describe('getChannels', () => {
-    it('should get to most recent channels', async () => {
+    it('should get the most recent channels', async () => {
       await CloudStore.putChannels({ keyId, ciphertext });
       await CloudStore.putChannels({ keyId, ciphertext: Buffer.from('channel_2') });
       const channels = await CloudStore.getChannels();
