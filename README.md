@@ -113,6 +113,36 @@ store.wallets.push(wallet);
 await store.saveToDisk();                              // store securely in device keychain
 ```
 
+### Lightning Channel State Backup
+
+Now let's do an encrypted backup of a user's lightning channel state to their iCloud account. The app must do an encrypted backup of the wallet private key first using the `KeyBackup.createBackup()` api (see above). Then the same encryption `Key ID` will be used for channel state as for the wallet private key. **N.B. This api is still in beta. Please [read here](https://github.com/photon-sdk/photon-lib/pull/38#issue-1427400291) for how race conditions are mitigated.**
+
+```js
+import { KeyBackup } from '@photon-sdk/photon-lib';
+
+const data = { ldkBackup };                           // backup payload (any attributes possible)
+const pin = '1234';                                   // PIN for auth to key server
+await KeyBackup.createChannelBackup({ data, pin });   // create encrypted cloud backup
+```
+
+### Lightning Channel State Restore
+
+Now let's restore the user's lightning channel state on their new device. This will download their encrypted channel state from iCloud and decrypt it using the encryption key from the key server. The `KeyBackup.restoreBackup()` api must be called first to restore the wallet private key to the device (see above).
+
+```js
+import { KeyBackup, WalletStore } from '@photon-sdk/photon-lib';
+
+const exists = await KeyBackup.checkForChannelBackup();
+if (!exists) return;
+
+const pin = '1234';                                           // PIN for auth to key server
+const data = await KeyBackup.restoreChannelBackup({ pin });   // fetch and decrypt user's data
+
+const store = new WalletStore();
+const ldkBackupJson = JSON.stringify(data.ldkBackup);
+await walletStore.setItem(LDK_WALLET, ldkBackupJson);         // store securely in device keychain
+```
+
 ### Change the PIN
 
 Users can change the authentication PIN simply by calling the following api. A PIN must be at least 4 digits, but can also be a complex passphrase up to 256 chars in length.
