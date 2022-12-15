@@ -7,12 +7,65 @@ describe('CloudStore unit test', () => {
   const email = 'jon.smith@example.com';
   const ciphertext = Buffer.from('encrypted stuff');
 
-  beforeEach(() => {
-    mockAsyncStorage.clear();
+  beforeEach(async () => {
+    await mockAsyncStorage.clear();
     mockAsyncStorage.getAllKeys.mockClear();
     mockAsyncStorage.getItem.mockClear();
     mockAsyncStorage.setItem.mockClear();
     mockAsyncStorage.removeItem.mockClear();
+  });
+
+  describe('putChannels', () => {
+    it('fail on invalid args', async () => {
+      await expect(CloudStore.putChannels({ keyId })).rejects.toThrow(/Invalid/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(0);
+    });
+
+    it('fail on invalid device id', async () => {
+      await mockAsyncStorage.setItem('1_photon_device_id', 'other-device');
+      await expect(CloudStore.putChannels({ keyId, ciphertext })).rejects.toThrow(/Another device/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(1);
+    });
+
+    it('store item', async () => {
+      await CloudStore.putChannels({ keyId, ciphertext });
+      expect(mockAsyncStorage.setItem.mock.calls[0][0]).toBe('1_photon_device_id');
+      expect(mockAsyncStorage.setItem.mock.calls[0][1]).toBe('myDeviceId');
+      expect(mockAsyncStorage.setItem.mock.calls[1][0]).toBe('1_photon_channel_seq_num');
+      expect(mockAsyncStorage.setItem.mock.calls[1][1]).toBe('1');
+      expect(mockAsyncStorage.setItem.mock.calls[2][0]).toBe('1_photon_channel_1');
+      expect(mockAsyncStorage.setItem.mock.calls[2][1]).toMatch(/^{"keyId":.*"}$/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(3);
+    });
+
+    it('should not store same sequence number twice', async () => {
+      await CloudStore.putChannels({ keyId, ciphertext });
+      await CloudStore.putChannels({ keyId, ciphertext: Buffer.from('channel_2') });
+      expect(mockAsyncStorage.setItem.mock.calls[3][0]).toBe('1_photon_channel_seq_num');
+      expect(mockAsyncStorage.setItem.mock.calls[3][1]).toBe('2');
+      expect(mockAsyncStorage.setItem.mock.calls[4][0]).toBe('1_photon_channel_2');
+      expect(mockAsyncStorage.setItem.mock.calls[4][1]).toMatch(/^{"keyId":.*"}$/);
+      expect(mockAsyncStorage.setItem.mock.calls.length).toBe(5);
+    });
+  });
+
+  describe('getChannels', () => {
+    it('should get the most recent channels', async () => {
+      await CloudStore.putChannels({ keyId, ciphertext });
+      await CloudStore.putChannels({ keyId, ciphertext: Buffer.from('channel_2') });
+      const channels = await CloudStore.getChannels();
+      expect(channels.ciphertext.toString()).toBe('channel_2');
+    });
+  });
+
+  describe('allowOtherDevice', () => {
+    it('should allow other device', async () => {
+      await mockAsyncStorage.setItem('1_photon_device_id', 'other-device');
+      await CloudStore.allowOtherDevice();
+      expect(await mockAsyncStorage.getItem('1_photon_device_id')).toBe(null);
+      await CloudStore.putChannels({ keyId, ciphertext });
+      expect(await mockAsyncStorage.getItem('1_photon_device_id')).toBe('myDeviceId');
+    });
   });
 
   describe('putKey', () => {

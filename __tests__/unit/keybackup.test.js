@@ -95,6 +95,49 @@ describe('KeyBackup unit test', () => {
     });
   });
 
+  describe('createChannelBackup', () => {
+    beforeEach(async () => {
+      expect(await KeyBackup.checkForChannelBackup()).toBe(false);
+    });
+
+    it('should fail on invalid data', async () => {
+      await expect(KeyBackup.createChannelBackup({ data: '', pin })).rejects.toThrow(/Invalid/);
+    });
+
+    it('should fail on invalid pin', async () => {
+      await expect(KeyBackup.createChannelBackup({ data: {}, pin: '' })).rejects.toThrow(/Invalid/);
+    });
+
+    it('should fail if no key backup exists yet', async () => {
+      await expect(KeyBackup.createChannelBackup({ data: { foo: 'bar' }, pin })).rejects.toThrow(/No key id/);
+    });
+
+    it('should encrypt and store object', async () => {
+      await KeyBackup.createBackup({ data: { foo: 'bar' }, pin });
+      await KeyBackup.createChannelBackup({ data: { foo: 'bar' }, pin });
+      expect(await KeyBackup.checkForChannelBackup()).toBe(true);
+    });
+  });
+
+  describe('restoreChannelBackup', () => {
+    beforeEach(async () => {
+      await KeyBackup.createBackup({ data: { foo: 'bar' }, pin });
+      await KeyBackup.createChannelBackup({ data: { foo: 'bar' }, pin });
+      expect(await KeyBackup.checkForChannelBackup()).toBe(true);
+    });
+
+    it('should download and decrypt backup', async () => {
+      const backup = await KeyBackup.restoreChannelBackup({ pin });
+      expect(backup.foo).toBe('bar');
+    });
+
+    it('should return null if no backup found', async () => {
+      mockCloudStorage.clear();
+      expect(await KeyBackup.checkForChannelBackup()).toBe(false);
+      await expect(KeyBackup.restoreChannelBackup({ pin })).rejects.toThrow(/No key id/);
+    });
+  });
+
   describe('changePin', () => {
     beforeEach(async () => {
       await KeyBackup.createBackup({ data: {}, pin });

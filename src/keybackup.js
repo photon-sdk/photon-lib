@@ -12,11 +12,13 @@ import { isPhone, isEmail, isId, isCode, isPin, isObject } from './verify';
 /**
  * Initialize the key backup module by specifying the key server which is
  * used to store the encryption key to the cloud backup.
- * @param  {string} keyServerURI  The base url of the key server
+ * @param  {string} keyServerURI          The base url of the key server
+ * @param  {Function} onOtherDeviceLogin  Event to handle stopping of the local LDK node when another device has signaled they are using the backed up channel state
  * @return {undefined}
  */
-export function init({ keyServerURI }) {
+export function init({ keyServerURI, onOtherDeviceLogin }) {
   KeyServer.init({ baseURI: keyServerURI });
+  CloudStore.init({ onOtherDeviceLogin });
 }
 
 /**
@@ -68,10 +70,64 @@ export async function createBackup({ data, pin }) {
  * @return {Promise<Object>}  The decrypted backup payload
  */
 export async function restoreBackup({ pin }) {
+  const { keyId, encryptionKey } = await _fetchKey({ pin });
+  const backup = await CloudStore.getKey();
+  return _decryptRestored({ keyId, backup, encryptionKey });
+}
+
+/**
+ * Check for an existing backup in cloud storage.
+ * @return {Promise<boolean>}  If a backup exists
+ */
+export async function checkForChannelBackup() {
+  const backup = await CloudStore.getChannels();
+  return !!backup;
+}
+
+/**
+ *
+ * Create an encrypted backup in cloud storage. The backup is encrypted using a
+ * random 256 bit encryption key that is stored on the photon-keyserver. A user
+ * chosen PIN is used to authenticate the download of the encryption key. This
+ * method is similar to 'createBackup' but adds some additional locking guarantees
+ * to prevent two devices from using the same channel state simultaneously.
+ * @param  {Object} data       A serializable object to be backed up
+ * @param  {string} pin        A user chosen pin to authenticate to the keyserver
+ * @return {Promise<undefined>}
+ */
+export async function createChannelBackup({ data, pin }) {
+  if (!isObject(data)) {
+    throw new Error('Invalid args');
+  }
+  setPin({ pin });
+  const { keyId, encryptionKey } = await _fetchKey({ pin });
+  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
+  const ciphertext = await chacha.encrypt(plaintext, encryptionKey);
+  await CloudStore.putChannels({ keyId, ciphertext });
+}
+
+/**
+ * Restore an encrypted backup from cloud storage. The encryption key is fetched from
+ * the photon-keyserver by authenticating via a user chosen PIN. This method is similar
+ * to 'restoreBackup' but adds some additional locking guarantees to prevent two devices
+ * from using the same channel state simultaneously.
+ * @param  {string} pin       A user chosen pin to authenticate to the keyserver
+ * @return {Promise<Object>}  The decrypted backup payload
+ */
+export async function restoreChannelBackup({ pin }) {
+  const { keyId, encryptionKey } = await _fetchKey({ pin });
+  const backup = await CloudStore.getChannels();
+  return _decryptRestored({ keyId, backup, encryptionKey });
+}
+
+async function _fetchKey({ pin }) {
   setPin({ pin });
   const keyId = await fetchKeyId();
   const encryptionKey = await KeyServer.fetchKey({ keyId });
-  const backup = await CloudStore.getKey();
+  return { keyId, encryptionKey };
+}
+
+async function _decryptRestored({ keyId, backup, encryptionKey }) {
   if (!backup || backup.keyId !== keyId) {
     return null;
   }
