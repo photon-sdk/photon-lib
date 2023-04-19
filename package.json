@@ -7,8 +7,18 @@
     "type": "git",
     "url": "git+https://github.com/photon-sdk/photon-lib.git"
   },
-  "type": "module",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "src/",
+    "dist/"
+  ],
   "scripts": {
     "build": "npm run build:clean -s && npm run build:dist -s",
     "build:clean": "rm -rf dist && mkdir dist",
