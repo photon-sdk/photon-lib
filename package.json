@@ -10,8 +10,12 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
+    "build": "npm run build:clean -s && npm run build:dist -s",
+    "build:clean": "rm -rf dist && mkdir dist",
+    "build:dist": "babel ./src -d ./dist -s",
+    "prepare": "npm run build",
     "test": "npm run test:lint && npm run test:unit && npm run test:unit:android && npm run test:integration",
-    "test:lint": "eslint .",
+    "test:lint": "eslint ./src",
     "test:unit": "jest __tests__/unit/*",
     "test:unit:android": "jest --config jest.android.json __tests__/unit/.*\\.android\\..*",
     "test:integration": "jest __tests__/integration/*"
