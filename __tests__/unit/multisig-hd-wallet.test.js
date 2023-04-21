@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { MultisigHDWallet, MultisigCosigner } from '../../';
+import { MultisigHDWallet, MultisigCosigner } from '../../src';
 import { decodeUR } from 'bc-ur/dist';
 import Base43 from '../../src/wallet/base43';
 const bitcoin = require('bitcoinjs-lib');
