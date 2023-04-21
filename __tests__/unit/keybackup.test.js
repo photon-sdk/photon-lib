@@ -1,4 +1,4 @@
-import { KeyBackup } from '../../';
+import { KeyBackup } from '../../src';
 import * as _CloudStore from '../../src/cloudstore';
 import { _api as mockKeyserverApi } from '../../src/keyserver';
 import mockCloudStorage from '@react-native-async-storage/async-storage';
