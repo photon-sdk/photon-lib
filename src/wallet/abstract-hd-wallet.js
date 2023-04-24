@@ -168,7 +168,7 @@ export class AbstractHDWallet extends LegacyWallet {
     const signature = bitcoinMessage.sign(message, privateKey, keyPair.compressed, options);
     return signature.toString('base64');
   }
-  
+
   /**
    * Verifies text message signature by address
    *
