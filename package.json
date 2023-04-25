@@ -47,8 +47,8 @@
     "react-native-randombytes": "^3.5.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.4",
-    "@babel/runtime": "^7.10.4",
+    "@babel/core": "^7.21.4",
+    "@babel/runtime": "^7.21.0",
     "@photon-sdk/react-native-icloudstore": "^1.0.0",
     "@react-native-async-storage/async-storage": "^1.15.15",
     "@react-native-community/eslint-config": "^2.0.0",
@@ -68,7 +68,7 @@
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-standard": "^4.0.2",
     "jest": "^26.1.0",
-    "metro-react-native-babel-preset": "^0.63.0",
+    "metro-react-native-babel-preset": "^0.76.3",
     "react": "16.11.0",
     "react-native": "0.62.2",
     "react-native-device-info": "^10.3.0",
