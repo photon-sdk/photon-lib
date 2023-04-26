@@ -1,8 +1,6 @@
 import assert from 'assert';
 import { ElectrumClient as BlueElectrum, LegacyWallet, SegwitP2SHWallet, SegwitBech32Wallet } from '../../';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
-
 beforeAll(async () => {
   await BlueElectrum.connectMain();
   await BlueElectrum.waitTillConnected();

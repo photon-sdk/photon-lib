@@ -1,8 +1,6 @@
 import assert from 'assert';
 import { ElectrumClient as BlueElectrum } from '../../';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
-
 beforeAll(async () => {
   try {
     await BlueElectrum.connectMain();
