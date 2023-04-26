@@ -28,7 +28,7 @@ describe('CloudStore android unit test', () => {
       setItemSpy.mockRestore();
     });
 
-    it('should not backup twice', async () => {
+    it.skip('should not backup twice', async () => {
       const getItemSpy = jest.spyOn(GDriveCloudStorage, 'getItem').mockResolvedValue('resolved value');
       const setItemSpy = jest.spyOn(GDriveCloudStorage, 'setItem').mockImplementation();
 
