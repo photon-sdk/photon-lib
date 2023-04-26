@@ -47,6 +47,7 @@
     "react-native-randombytes": "^3.5.3"
   },
   "devDependencies": {
+    "@babel/cli": "^7.21.0",
     "@babel/core": "^7.21.4",
     "@babel/runtime": "^7.21.0",
     "@photon-sdk/react-native-icloudstore": "^1.0.0",
