@@ -137,7 +137,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       xpub = super._zpubToXpub(key);
       HDNode.fromBase58(xpub);
       return true;
-    } catch (_) { }
+    } catch (_) {}
 
     return false;
   }
@@ -455,7 +455,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       } else {
         if (coordinationSetup) {
           const xpub = this.convertXpubToMultisignatureXpub(
-            MultisigHDWallet.seedToXpub(this._cosigners[index], this._cosignersCustomPaths[index] || this._derivationPath)
+            MultisigHDWallet.seedToXpub(this._cosigners[index], this._cosignersCustomPaths[index] || this._derivationPath),
           );
           const fingerprint = MultisigHDWallet.seedToFingerprint(this._cosigners[index]);
           ret += fingerprint + ': ' + xpub + '\n';
@@ -482,7 +482,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     let json;
     try {
       json = JSON.parse(secret);
-    } catch (_) { }
+    } catch (_) {}
     if (json && json.xfp && json.p2wsh_deriv && json.p2wsh) {
       this.addCosigner(json.p2wsh, json.xfp); // technically we dont need deriv (json.p2wsh_deriv), since cosigner is already an xpub
       return;
@@ -933,7 +933,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     try {
       root.derivePath(path);
       return true;
-    } catch (_) { }
+    } catch (_) {}
     return false;
   }
 
@@ -947,7 +947,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     const txhexes = await BlueElectrum.multiGetTransactionByTxid(
       this.getUtxo(true).map(x => x.txid),
       50,
-      false
+      false,
     );
 
     const newUtxos = [];
@@ -1027,7 +1027,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
           const hdRoot = bitcoin.bip32.fromSeed(seed);
           try {
             psbt.signInputHD(cc, hdRoot);
-          } catch (_) { } // protects agains duplicate cosignings
+          } catch (_) {} // protects agains duplicate cosignings
 
           if (!psbt.inputHasHDKey(cc, hdRoot)) {
             // failed signing as HD. probably bitcoinjs-lib could not match provided hdRoot's
@@ -1052,7 +1052,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
                 const keyPair = bitcoin.ECPair.fromPrivateKey(child.privateKey);
                 try {
                   psbt.signInput(cc, keyPair);
-                } catch (_) { }
+                } catch (_) {}
               }
             }
           }

@@ -8,8 +8,6 @@ import {
   SegwitBech32Wallet,
 } from '../../';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
-
 beforeAll(async () => {
   await BlueElectrum.connectMain();
   await BlueElectrum.waitTillConnected();

@@ -1,8 +1,5 @@
-/* global it, describe, jasmine, afterAll, beforeAll */
 import assert from 'assert';
 import { ElectrumClient as BlueElectrum, MultisigHDWallet } from '../../';
-
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 300 * 1000;
 
 beforeAll(async () => {
   await BlueElectrum.connectMain();

@@ -2,8 +2,6 @@ import * as bitcoin from 'bitcoinjs-lib';
 import assert from 'assert';
 import { ElectrumClient as BlueElectrum, HDSegwitP2SHWallet } from '../../';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 300 * 1000;
-
 beforeAll(async () => {
   try {
     await BlueElectrum.connectMain();

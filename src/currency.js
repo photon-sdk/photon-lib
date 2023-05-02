@@ -36,7 +36,7 @@ export async function updateExchangeRate() {
 
   try {
     preferredFiatCurrency = JSON.parse(await AsyncStorage.getItem(PREFERRED_CURRENCY));
-  } catch (_) { }
+  } catch (_) {}
   preferredFiatCurrency = preferredFiatCurrency || FiatUnit.USD;
 
   let json;
